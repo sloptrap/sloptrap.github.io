@@ -3,80 +3,124 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Leaderboard — SlopTrap Sandboxed WASM Rules</title>
+  <title>Leaderboard — SlopTrap WASM Rules</title>
+  <link rel="stylesheet" href="../assets/gravity-uikit.css" />
   <link rel="stylesheet" href="../assets/style.css" />
 </head>
-<body>
-  <nav class="site-nav">
-    <div class="nav-inner">
-      <a class="brand-link" href="../">
-        <span class="badge-brand">SLOPTRAP</span>
-        <span class="brand-title">Forensic Engine &amp; Rules</span>
-      </a>
-      <div class="nav-links">
-        <a href="../">Overview</a>
-        <a href="../docs/">Documentation</a>
-        <a href="../rules/">WASM Rules &amp; .strule</a>
-        <a class="active" href="./">Leaderboard</a>
-        <a href="https://github.com/sloptrap/sloptrap" target="_blank" rel="noopener">GitHub ↗</a>
+<body class="g-root g-root_theme_dark">
+  <script>
+    if (localStorage.getItem('st-gravity-theme') === 'light') {
+      document.body.className = 'g-root g-root_theme_light';
+    }
+  </script>
+
+  <header class="g-app-header">
+    <div class="g-app-header__inner">
+      <div style="display:flex;align-items:center;gap:20px;height:100%;">
+        <a class="g-brand" href="../">
+          <span class="g-brand__mark">
+            <svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2.5 4.5h11M4.5 8h7M6.5 11.5h3"/></svg>
+          </span>
+          <span>SlopTrap</span>
+          <span class="g-label g-label_theme_utility mono">wasm-v1</span>
+        </a>
+        <nav class="g-nav" aria-label="Primary">
+          <a class="g-nav__item" href="../">Overview</a>
+          <a class="g-nav__item" href="../docs/">Documentation</a>
+          <a class="g-nav__item" href="../rules/">WASM Spec</a>
+          <a class="g-nav__item g-nav__item_active" href="./">Leaderboard</a>
+        </nav>
+      </div>
+      <div class="g-header-actions">
+        <button id="theme-toggle" class="g-btn g-btn_view_flat g-btn_icon" type="button" aria-label="Toggle theme"></button>
+        <a class="g-btn g-btn_view_outlined g-btn_size_s" href="https://github.com/sloptrap/sloptrap" target="_blank" rel="noopener">
+          GitHub
+          <svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 11L11 5M6 5h5v5"/></svg>
+        </a>
       </div>
     </div>
-  </nav>
+  </header>
 
-  <main class="container">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;border-bottom:1px solid var(--border);padding-bottom:1.4rem;margin-bottom:1.5rem;">
+  <main class="g-container">
+    <div class="page-header">
       <div>
-        <h1 style="margin:0;color:var(--heading);font-size:1.95rem;">WASM Detection Rule Leaderboard</h1>
-        <p style="color:var(--muted);margin:0.45rem 0 0;max-width:760px;">
-          Ed25519-signed, encrypted WebAssembly rule bundles (<code>.strule</code>) ranked by holdout accuracy, low execution overhead, rolling 14-day <strong>Anonymous rule rankings</strong> active installs, GitHub Release downloads, and community 👍 likes. Feed: <a href="./leaderboard.json"><code>leaderboard.json</code></a>.
+        <h1 class="page-title">WASM Rule Leaderboard</h1>
+        <p class="page-desc">
+          Signed, manifest-authenticated <code>.strule</code> WebAssembly bundles ranked by holdout accuracy, execution overhead, opt-in <strong>Anonymous rule rankings</strong> installs (<span id="window-desc">rolling 30-day active window</span> + all-time unique installs), GitHub Release downloads, and Issue upvotes.
         </p>
       </div>
-      <div class="meta-chips" id="meta-chips"></div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="g-btn g-btn_view_outlined g-btn_size_s" type="button" id="copy-feed-btn">Copy feed URL</button>
+        <a class="g-btn g-btn_view_normal g-btn_size_s mono" href="./leaderboard.json">leaderboard.json</a>
+      </div>
     </div>
 
-    <div class="controls">
-      <input id="rule-filter" class="search-input" type="search" placeholder="Filter by rule name, input, or author…" />
-      <span style="color: var(--muted); font-size: 0.85rem; margin-left: 0.35rem;">Sort:</span>
-      <button class="sort-btn active" type="button" data-sort="rank">Composite Rank</button>
-      <button class="sort-btn" type="button" data-sort="installs">Active Installs</button>
-      <button class="sort-btn" type="button" data-sort="likes">Most Liked 👍</button>
-      <button class="sort-btn" type="button" data-sort="downloads">Downloads ⬇</button>
-      <button class="sort-btn" type="button" data-sort="f1">Accuracy (F1)</button>
-      <button class="sort-btn" type="button" data-sort="overhead">Lowest Overhead</button>
-      <button class="sort-btn" type="button" id="copy-feed-btn" style="margin-left:auto;">Copy Feed URL</button>
+    <div class="stat-strip">
+      <div class="stat-cell">
+        <div class="stat-cell__label">Verified Rules</div>
+        <div class="stat-cell__value" id="stat-rules">—</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-cell__label" id="stat-active-label">Active Window</div>
+        <div class="stat-cell__value" id="stat-window">30 days</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-cell__label">Holdout Corpus</div>
+        <div class="stat-cell__value" id="stat-corpus">—</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-cell__label">Evaluation Epoch</div>
+        <div class="stat-cell__value mono" id="stat-epoch">—</div>
+      </div>
     </div>
 
-    <div class="table-wrap">
-      <table>
+    <div class="toolbar">
+      <input id="rule-filter" class="g-input" type="search" placeholder="Filter by rule ID, name, input, or author…" />
+      <div class="g-segmented" role="group" aria-label="Sort rules">
+        <button class="g-segmented__btn sort-btn active" type="button" data-sort="rank">Composite</button>
+        <button class="g-segmented__btn sort-btn" type="button" data-sort="active" id="sort-active-btn">Active (30d)</button>
+        <button class="g-segmented__btn sort-btn" type="button" data-sort="alltime">All-Time</button>
+        <button class="g-segmented__btn sort-btn" type="button" data-sort="likes">Upvotes</button>
+        <button class="g-segmented__btn sort-btn" type="button" data-sort="downloads">Downloads</button>
+        <button class="g-segmented__btn sort-btn" type="button" data-sort="f1">F1</button>
+        <button class="g-segmented__btn sort-btn" type="button" data-sort="overhead">Overhead</button>
+      </div>
+    </div>
+
+    <div class="g-table-wrap">
+      <table class="g-table">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Rule Bundle &amp; Declared Inputs</th>
-            <th>Author &amp; Ed25519 Key</th>
-            <th>Band &amp; Coarse Metrics</th>
-            <th>Adoption &amp; Likes</th>
-            <th>Overhead</th>
-            <th>Bundle</th>
+            <th style="width:44px;">#</th>
+            <th>Rule &amp; Declared Inputs</th>
+            <th>Author / Key</th>
+            <th>Holdout Metrics</th>
+            <th class="num" id="th-active">Active (30d)</th>
+            <th class="num">All-Time</th>
+            <th class="num">Downloads</th>
+            <th class="num">Upvotes</th>
+            <th class="num">Overhead</th>
+            <th class="num">Bundle</th>
           </tr>
         </thead>
         <tbody id="rows">
-          <tr><td colspan="7" style="color: var(--muted);">Loading <code>leaderboard.json</code>…</td></tr>
+          <tr><td colspan="10" style="color:var(--g-color-text-secondary);">Loading <code>leaderboard.json</code>…</td></tr>
         </tbody>
       </table>
     </div>
 
-    <div class="callout" style="margin-top: 1.75rem;">
-      <strong>Accuracy-Gated Ranking &amp; Anti-Oracle Protections:</strong> Holdout F1 acts as a hard quality gate (<code>F1 &le; 0.50</code> receives zero popularity boost so botted downloads or likes cannot promote weak rules). Active install counts reflect unique clients over a rolling 14-day window via opt-in <em>Anonymous rule rankings</em>, downloads come from GitHub Release <code>.strule</code> assets, and 👍 likes come from per-rule GitHub Issues (one vote per GitHub account).
+    <div class="g-alert" style="margin-top:18px;">
+      <strong>Accuracy-gated ranking &amp; security auditing:</strong> Holdout F1 acts as a multiplicative gate (<code>F1 &le; 0.50</code> receives zero popularity weight so botted installs or downloads cannot promote permissive rules). Every <code>.strule</code> bundle is verified in CI against Ed25519 signatures, AES-256-GCM manifest AAD, zero WASM imports/custom sections, fuel-metered sandbox execution, and clean-human anti-poisoning checks.
     </div>
   </main>
 
-  <footer class="site-footer">
-    <div class="footer-inner">
-      <div><strong>SlopTrap</strong> — Sandboxed WASM Rule Leaderboard</div>
-      <div>
-        <a href="../">Overview</a> ·
-        <a href="../docs/">Docs</a> ·
-        <a href="../rules/">WASM Spec</a> ·
+  <footer class="g-footer">
+    <div class="g-footer__inner">
+      <div>SlopTrap — Sandboxed WASM Rule Leaderboard</div>
+      <div class="g-footer__links">
+        <a href="../">Overview</a>
+        <a href="../docs/">Documentation</a>
+        <a href="../rules/">WASM Spec</a>
         <a href="./leaderboard.json">leaderboard.json</a>
       </div>
     </div>
@@ -87,22 +131,31 @@
     let docData = null;
     let currentSort = 'rank';
     let filterQuery = '';
+    let activeWindowDays = 30;
 
     function esc(s) {
       return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
     }
 
+    function bandTheme(b) {
+      if (b === 'S') return 'positive';
+      if (b === 'A') return 'info';
+      if (b === 'B') return 'warning';
+      return 'normal';
+    }
+
     function overheadColor(oh) {
-      if (oh <= 3) return '#22c55e';
-      if (oh <= 6) return '#f59e0b';
-      return '#f43f5e';
+      if (oh <= 3) return 'var(--g-color-text-positive)';
+      if (oh <= 6) return 'var(--g-color-text-warning)';
+      return 'var(--g-color-text-danger)';
     }
 
     function computeComposite(e) {
       const f1 = Number(e.coarse_f1 || 0);
       const rep = Number(e.author_reputation || 75);
       const oh = Math.max(1, Math.min(10, Number(e.overhead || 5)));
-      const inst = Number(e.active_installs || 0);
+      const act = Number(e.active_installs || 0);
+      const allT = Math.max(Number(e.all_time_installs || 0), act);
       const stars = Number(e.stars || 0);
       const likes = Number(e.likes || 0);
       const dv = Number(e.downloads_version || 0);
@@ -110,7 +163,7 @@
       const qGate = Math.max(0, Math.min(1, (f1 - 0.50) / 0.50));
       const eff = (11 - oh) / 10.0;
       const repN = Math.max(0, Math.min(1, rep / 100.0));
-      const popRaw = 1.60 * Math.log1p(inst) + 1.35 * Math.log1p(likes + stars * 0.75) + 0.55 * Math.log1p(dv * 0.70 + dt * 0.30);
+      const popRaw = 1.40 * Math.log1p(act) + 0.45 * Math.log1p(allT) + 1.35 * Math.log1p(likes + stars * 0.75) + 0.55 * Math.log1p(dv * 0.70 + dt * 0.30);
       const popB = Math.tanh(popRaw / 6.5);
       return Math.round(1000 * (0.62 * f1 + 0.10 * eff + 0.08 * repN + 0.20 * qGate * popB)) / 10;
     }
@@ -119,6 +172,18 @@
       if (!u) return '#';
       if (u.startsWith('http://') || u.startsWith('https://')) return u;
       return './' + u.replace(/^\.\//, '');
+    }
+
+    function syncWindowLabels(days) {
+      activeWindowDays = days;
+      const wDesc = document.getElementById('window-desc');
+      if (wDesc) wDesc.textContent = `rolling ${days}-day active window`;
+      const stWin = document.getElementById('stat-window');
+      if (stWin) stWin.textContent = `${days} days`;
+      const thAct = document.getElementById('th-active');
+      if (thAct) thAct.textContent = `Active (${days}d)`;
+      const sortBtn = document.getElementById('sort-active-btn');
+      if (sortBtn) sortBtn.textContent = `Active (${days}d)`;
     }
 
     function render() {
@@ -130,7 +195,8 @@
         return hay.includes(q);
       });
 
-      if (currentSort === 'installs') list.sort((a, b) => (b.active_installs || 0) - (a.active_installs || 0) || b.composite_score - a.composite_score);
+      if (currentSort === 'active') list.sort((a, b) => (b.active_installs || 0) - (a.active_installs || 0) || b.composite_score - a.composite_score);
+      else if (currentSort === 'alltime') list.sort((a, b) => (b.all_time_installs || 0) - (a.all_time_installs || 0) || b.composite_score - a.composite_score);
       else if (currentSort === 'likes') list.sort((a, b) => (b.likes || 0) - (a.likes || 0) || b.composite_score - a.composite_score);
       else if (currentSort === 'downloads') list.sort((a, b) => (b.downloads_total || 0) - (a.downloads_total || 0) || b.composite_score - a.composite_score);
       else if (currentSort === 'f1') list.sort((a, b) => b.coarse_f1 - a.coarse_f1 || a.overhead - b.overhead);
@@ -139,56 +205,59 @@
 
       const tbody = document.getElementById('rows');
       if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="color:var(--muted);">No matching rule bundles.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="color:var(--g-color-text-secondary);">No matching rules.</td></tr>';
         return;
       }
+
       tbody.innerHTML = list.map((e, idx) => {
         const pubShort = (e.author_public_key || '').slice(0, 12);
         const shaShort = (e.bundle_sha256 || '').slice(0, 10);
-        const inputs = (e.inputs || []).map(i => `<span class="input-tag">${esc(i)}</span>`).join('');
+        const inputs = (e.inputs || []).map(i => `<span class="g-label g-label_theme_normal mono">${esc(i)}</span>`).join('');
         const ohPct = Math.min(100, Math.max(10, e.overhead * 10));
-        const likeBtn = e.issue_url
-          ? `<a class="dl-btn" href="${esc(e.issue_url)}" target="_blank" rel="noopener" title="React with 👍 on GitHub Issue #${e.issue_number || ''} to upvote">👍 Like (${e.likes || 0})</a>`
-          : `<span class="mono">👍 ${e.likes || 0}</span>`;
+        const allTime = Math.max(Number(e.all_time_installs || 0), Number(e.active_installs || 0));
+        const upvoteCell = e.issue_url
+          ? `<a class="g-btn g-btn_view_outlined g-btn_size_s tabular" href="${esc(e.issue_url)}" target="_blank" rel="noopener" title="Upvote on GitHub Issue #${e.issue_number || ''}">
+               <svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5.5 7.5V14H3a1 1 0 0 1-1-1V8.5a1 1 0 0 1 1-1h2.5Zm0 0 2.6-4.7A1.4 1.4 0 0 1 10.6 4v2.5h2.6a1.3 1.3 0 0 1 1.3 1.5l-.8 4.8a1.3 1.3 0 0 1-1.3 1.2H5.5"/></svg>
+               ${e.likes || 0}
+             </a>`
+          : `<span class="mono">${e.likes || 0}</span>`;
+
         return `
           <tr>
-            <td class="mono"><strong>#${e.rank || (idx + 1)}</strong></td>
+            <td class="mono" style="color:var(--g-color-text-secondary);">${e.rank || (idx + 1)}</td>
             <td>
-              <div class="rule-title">${esc(e.name)} <span class="mono" style="color:var(--muted);font-weight:400;">v${esc(e.version)}</span></div>
+              <div class="rule-name">${esc(e.name)} <span class="mono" style="color:var(--g-color-text-hint);font-weight:400;">v${esc(e.version)}</span></div>
               <div class="rule-desc">${esc(e.description)}</div>
-              <div class="inputs-row">${inputs}</div>
+              <div class="tag-row">${inputs}</div>
             </td>
             <td>
-              <div><strong>${esc(e.author)}</strong></div>
-              <div class="mono" style="color:var(--muted);" title="${esc(e.author_public_key)}">ed25519:${esc(pubShort)}…</div>
-              <div style="font-size:0.8rem;color:var(--muted);">Rep: ${Number(e.author_reputation || 0).toFixed(0)}/100</div>
+              <div class="mono" style="font-weight:500;">${esc(e.author)}</div>
+              <div class="mono" style="font-size:11px;color:var(--g-color-text-hint);margin-top:2px;" title="${esc(e.author_public_key)}">${esc(pubShort)}…</div>
+              <div style="font-size:11px;color:var(--g-color-text-secondary);margin-top:2px;">Rep ${Number(e.author_reputation || 0).toFixed(0)}/100</div>
             </td>
             <td>
-              <span class="band band-${esc(e.band)}">Band ${esc(e.band)}</span>
-              <div class="mono" style="margin-top:0.35rem;">
-                F1 <strong>${Number(e.coarse_f1).toFixed(2)}</strong> · P ${Number(e.coarse_precision).toFixed(2)} · R ${Number(e.coarse_recall).toFixed(2)}
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span class="g-label g-label_theme_${bandTheme(e.band)}">Band ${esc(e.band)}</span>
+                <span class="mono" style="font-weight:600;">F1 ${Number(e.coarse_f1).toFixed(2)}</span>
               </div>
-              <div class="mono" style="font-size:0.76rem;color:var(--muted);">Score: ${Number(e.composite_score || 0).toFixed(1)}</div>
-            </td>
-            <td>
-              <div class="mono" style="margin-bottom:0.3rem;" title="Unique active installs in last 14 days (Anonymous rule rankings)">
-                Active: <strong>${e.active_installs || 0}</strong>
+              <div class="mono" style="font-size:11px;color:var(--g-color-text-secondary);margin-top:4px;">
+                P ${Number(e.coarse_precision).toFixed(2)} · R ${Number(e.coarse_recall).toFixed(2)} · Score ${Number(e.composite_score || 0).toFixed(1)}
               </div>
-              <div class="mono" style="font-size:0.78rem;color:var(--muted);margin-bottom:0.4rem;" title="GitHub Release .strule downloads">
-                ⬇ Downloads: <strong>${e.downloads_total || 0}</strong>
-              </div>
-              ${likeBtn}
             </td>
-            <td>
-              <div class="mono"><strong>${e.overhead}</strong> / 10</div>
-              <div class="oh-bar"><div class="oh-fill" style="width:${ohPct}%;background:${overheadColor(e.overhead)};"></div></div>
+            <td class="num mono" title="Unique installs active in last ${activeWindowDays} days"><strong>${e.active_installs || 0}</strong></td>
+            <td class="num mono" title="Cumulative unique installs">${allTime}</td>
+            <td class="num mono" title="GitHub Release .strule downloads">${e.downloads_total || 0}</td>
+            <td class="num">${upvoteCell}</td>
+            <td class="num">
+              <div class="mono">${e.overhead}/10</div>
+              <div class="meter"><div class="meter__fill" style="width:${ohPct}%;background:${overheadColor(e.overhead)};"></div></div>
             </td>
-            <td>
-              <div style="margin-bottom:0.4rem;">
-                <a href="${esc(e.repo_url)}" target="_blank" rel="noopener">Repo ★ ${e.stars || 0}</a>
+            <td class="num">
+              <div style="display:flex;gap:6px;justify-content:flex-end;">
+                <a class="g-btn g-btn_view_action g-btn_size_s mono" href="${esc(resolveHref(e.bundle_url))}">.strule</a>
+                <a class="g-btn g-btn_view_flat g-btn_size_s" href="${esc(e.repo_url)}" target="_blank" rel="noopener" title="Source repository">Repo</a>
               </div>
-              <a class="dl-btn" href="${esc(resolveHref(e.bundle_url))}">Download .strule</a>
-              <div class="mono" style="font-size:0.72rem;color:var(--muted);margin-top:0.3rem;" title="${esc(e.bundle_sha256)}">sha256:${esc(shaShort)}…</div>
+              <div class="mono" style="font-size:11px;color:var(--g-color-text-hint);margin-top:4px;" title="${esc(e.bundle_sha256)}">sha256:${esc(shaShort)}</div>
             </td>
           </tr>
         `;
@@ -201,10 +270,18 @@
 
       await Promise.allSettled([
         fetch(`${ep}/api/v1/rules/stats`).then(r => r.ok ? r.json() : null).then(st => {
-          if (!st || !st.active_installs) return;
+          if (!st) return;
+          if (Number(st.window_days) > 0) {
+            syncWindowLabels(Number(st.window_days));
+          }
           for (const e of data.entries || []) {
-            if (st.active_installs[e.rule_id] !== undefined) {
+            if (st.active_installs && st.active_installs[e.rule_id] !== undefined) {
               e.active_installs = Number(st.active_installs[e.rule_id]);
+            }
+            if (st.all_time_installs && st.all_time_installs[e.rule_id] !== undefined) {
+              e.all_time_installs = Math.max(Number(st.all_time_installs[e.rule_id]), Number(e.active_installs || 0));
+            } else {
+              e.all_time_installs = Math.max(Number(e.all_time_installs || 0), Number(e.active_installs || 0));
             }
           }
         }),
@@ -248,18 +325,33 @@
         }),
       ]);
 
-      for (const e of data.entries || []) {
-        e.composite_score = computeComposite(e);
-      }
-      const sorted = [...(data.entries || [])].sort((a, b) => b.composite_score - a.composite_score || (b.active_installs || 0) - (a.active_installs || 0) || a.overhead - b.overhead);
-      sorted.forEach((e, i) => { e.rank = i + 1; });
-      data.entries = sorted;
-      render();
+      const entries = data.entries || [];
+      entries.forEach(e => { e.composite_score = computeComposite(e); });
+      entries.sort((a, b) => b.composite_score - a.composite_score || (b.active_installs || 0) - (a.active_installs || 0) || a.overhead - b.overhead);
+      entries.forEach((e, i) => { e.rank = i + 1; });
     }
 
-    document.querySelectorAll('.sort-btn[data-sort]').forEach(btn => {
+    fetch('./leaderboard.json')
+      .then(r => r.json())
+      .then(async data => {
+        docData = data;
+        if (Number(data.active_window_days) > 0) {
+          syncWindowLabels(Number(data.active_window_days));
+        }
+        document.getElementById('stat-rules').textContent = String((data.entries || []).length);
+        document.getElementById('stat-corpus').textContent = `${data.corpus_count || 0} holdout`;
+        document.getElementById('stat-epoch').textContent = data.epoch_id || '—';
+        render();
+        await overlayLiveMetrics(docData);
+        render();
+      })
+      .catch(err => {
+        document.getElementById('rows').innerHTML = `<tr><td colspan="10" style="color:var(--g-color-text-danger);">Failed to load leaderboard.json: ${esc(err)}</td></tr>`;
+      });
+
+    document.querySelectorAll('.sort-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.sort-btn[data-sort]').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentSort = btn.dataset.sort;
         render();
@@ -267,33 +359,19 @@
     });
 
     document.getElementById('rule-filter').addEventListener('input', ev => {
-      filterQuery = ev.target.value;
+      filterQuery = ev.target.value || '';
       render();
     });
 
     document.getElementById('copy-feed-btn').addEventListener('click', ev => {
-      const url = new URL('./leaderboard.json', window.location.href).href;
-      navigator.clipboard.writeText(url).then(() => {
-        ev.target.textContent = 'Copied URL!';
-        setTimeout(() => { ev.target.textContent = 'Copy Feed URL'; }, 1600);
+      const feedUrl = new URL('./leaderboard.json', window.location.href).href;
+      navigator.clipboard.writeText(feedUrl).then(() => {
+        const b = ev.currentTarget;
+        const prev = b.textContent;
+        b.textContent = 'Copied URL';
+        setTimeout(() => { b.textContent = prev; }, 1400);
       });
     });
-
-    fetch('./leaderboard.json')
-      .then(r => r.json())
-      .then(data => {
-        docData = data;
-        document.getElementById('meta-chips').innerHTML = `
-          <span class="chip">Epoch: <strong>${esc(data.epoch_id)}</strong></span>
-          <span class="chip">Holdout Corpus: <strong>${data.corpus_count}</strong> channels</span>
-          <span class="chip">Verified Bundles: <strong>${(data.entries || []).length}</strong></span>
-        `;
-        render();
-        overlayLiveMetrics(data);
-      })
-      .catch(err => {
-        document.getElementById('rows').innerHTML = `<tr><td colspan="7" style="color:var(--crimson);">Failed to load leaderboard.json: ${esc(err)}</td></tr>`;
-      });
   </script>
 </body>
 </html>

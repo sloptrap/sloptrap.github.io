@@ -3,56 +3,75 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>WASM Rules &amp; .strule Spec — SlopTrap</title>
+  <title>WASM Spec &amp; .strule — SlopTrap</title>
+  <link rel="stylesheet" href="../assets/gravity-uikit.css" />
   <link rel="stylesheet" href="../assets/style.css" />
 </head>
-<body>
-  <nav class="site-nav">
-    <div class="nav-inner">
-      <a class="brand-link" href="../">
-        <span class="badge-brand">SLOPTRAP</span>
-        <span class="brand-title">Forensic Engine &amp; Rules</span>
-      </a>
-      <div class="nav-links">
-        <a href="../">Overview</a>
-        <a href="../docs/">Documentation</a>
-        <a class="active" href="./">WASM Rules &amp; .strule</a>
-        <a href="../leaderboard/">Leaderboard</a>
-        <a href="https://github.com/sloptrap/sloptrap" target="_blank" rel="noopener">GitHub ↗</a>
+<body class="g-root g-root_theme_dark">
+  <script>
+    if (localStorage.getItem('st-gravity-theme') === 'light') {
+      document.body.className = 'g-root g-root_theme_light';
+    }
+  </script>
+
+  <header class="g-app-header">
+    <div class="g-app-header__inner">
+      <div style="display:flex;align-items:center;gap:20px;height:100%;">
+        <a class="g-brand" href="../">
+          <span class="g-brand__mark">
+            <svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2.5 4.5h11M4.5 8h7M6.5 11.5h3"/></svg>
+          </span>
+          <span>SlopTrap</span>
+          <span class="g-label g-label_theme_utility mono">wasm-v1</span>
+        </a>
+        <nav class="g-nav" aria-label="Primary">
+          <a class="g-nav__item" href="../">Overview</a>
+          <a class="g-nav__item" href="../docs/">Documentation</a>
+          <a class="g-nav__item g-nav__item_active" href="./">WASM Spec</a>
+          <a class="g-nav__item" href="../leaderboard/">Leaderboard</a>
+        </nav>
+      </div>
+      <div class="g-header-actions">
+        <button id="theme-toggle" class="g-btn g-btn_view_flat g-btn_icon" type="button" aria-label="Toggle theme"></button>
+        <a class="g-btn g-btn_view_outlined g-btn_size_s" href="https://github.com/sloptrap/sloptrap" target="_blank" rel="noopener">
+          GitHub
+          <svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 11L11 5M6 5h5v5"/></svg>
+        </a>
       </div>
     </div>
-  </nav>
+  </header>
 
-  <div class="container">
-    <div class="docs-layout">
-      <aside class="docs-toc">
-        <h4>Specification</h4>
+  <main class="g-container">
+    <div class="docs-grid">
+      <aside class="docs-aside">
+        <div class="docs-aside__title">Specification</div>
         <ul>
-          <li><a href="#overview">1. Architecture Overview</a></li>
+          <li><a href="#overview">1. Architecture</a></li>
           <li><a href="#fingerprint">2. ChannelFingerprint v1</a></li>
           <li><a href="#wasm-abi">3. Guest WASM ABI</a></li>
-          <li><a href="#strule-crypto">4. .strule Container &amp; Crypto</a></li>
-          <li><a href="#cli-tooling">5. CLI Build &amp; Verify</a></li>
-          <li><a href="#leaderboard-design">6. Anti-Oracle Leaderboard</a></li>
+          <li><a href="#strule-crypto">4. Container &amp; Crypto</a></li>
+          <li><a href="#security-audit">5. Security Audit &amp; CI</a></li>
+          <li><a href="#cli-tooling">6. CLI Commands</a></li>
+          <li><a href="#leaderboard-design">7. Ranking &amp; Telemetry</a></li>
         </ul>
       </aside>
 
-      <article class="docs-content">
-        <h1>Sandboxed WASM Rules &amp; <code>.strule</code> Specification</h1>
-        <p style="color: var(--muted); font-size: 1.05rem;">
-          SlopTrap decouples its open-source feature extraction and sandbox runtime from pluggable, cryptographically signed, obfuscated WebAssembly detection rules (<code>.strule</code>) that execute deterministically across platforms.
+      <article class="docs-article">
+        <h1>WASM Rule Engine &amp; <code>.strule</code> Specification</h1>
+        <p style="margin-top:0;">
+          SlopTrap separates open-source feature extraction and sandboxed execution from signed, encrypted WebAssembly 1.0 rule bundles (<code>.strule</code>) that run identically across servers, desktop CLIs, browser extensions, and embedded runtimes.
         </p>
 
-        <h2 id="overview">1. Architecture Overview</h2>
+        <h2 id="overview" style="border-top:0;padding-top:0;margin-top:20px;">1. Architecture overview</h2>
         <ul>
-          <li><strong>Open-Source Host, Opaque Rule Logic:</strong> The host runtime (<code>wazero</code> interpreter mode in Go, or any compliant WebAssembly 1.0 interpreter) is 100% open-source and deterministic, while rule authors distribute compiled, control-flow-flattened WebAssembly bytecode inside encrypted <code>.strule</code> containers.</li>
-          <li><strong>Zero Host Capabilities:</strong> Any WASM module containing an Import section (<code>secId == 2</code>, WASI, clocks, sockets, or filesystem imports) is rejected at compile time. Modules are capped at <strong>32 memory pages (2 MiB)</strong> and strict execution timeouts / instruction fuel budgets.</li>
-          <li><strong>Input-Driven Cost Optimization:</strong> Each rule manifest declares only the input categories it needs (<code>metadata</code>, <code>upload_cadence</code>, <code>transcript</code>, <code>thumbnails</code>, <code>audio_video_stats</code>) and receives a <code>1..10</code> overhead score so low-power client devices can pick fast <code>2/10</code> rules while servers run deep <code>8/10</code> ensembles.</li>
+          <li><strong>Zero host imports:</strong> Any WASM binary declaring an Import section (<code>secId == 2</code>, WASI, clocks, network, or filesystem calls), Custom section (<code>secId == 0</code>), or implicit Start section (<code>secId == 8</code>) is rejected before execution.</li>
+          <li><strong>Strict memory &amp; CPU bounds:</strong> Linear memory must declare an explicit maximum ceiling of at most <strong>32 pages (2 MiB)</strong>, and evaluations execute under hard per-call deadlines / instruction fuel caps.</li>
+          <li><strong>Declared input cost:</strong> Each manifest lists only required feature groups (<code>metadata</code>, <code>upload_cadence</code>, <code>transcript</code>, <code>thumbnails</code>, <code>audio_video_stats</code>) and an <code>overhead</code> rating (<code>1..10</code>) so lightweight clients can run <code>2/10</code> metadata rules while servers run full <code>8/10</code> ensembles.</li>
         </ul>
 
-        <h2 id="fingerprint">2. Standardized <code>ChannelFingerprint</code> v1 Schema</h2>
+        <h2 id="fingerprint">2. <code>ChannelFingerprint</code> v1 input schema</h2>
         <p>
-          Before invoking active WASM rules, SlopTrap extracts a neutral JSON document passed into guest linear memory as UTF-8 bytes:
+          Host extractors serialize a normalized UTF-8 JSON document into guest linear memory prior to calling <code>st_evaluate</code>:
         </p>
         <pre><code>{
   "schema_version": 1,
@@ -109,24 +128,21 @@
 
         <h2 id="wasm-abi">3. Guest WebAssembly ABI (<code>wasm-v1</code>)</h2>
         <p>
-          Any language targeting standalone WebAssembly 1.0 MVP (Rust <code>wasm32-unknown-unknown</code>, C/Clang, Zig, TinyGo, AssemblyScript, or SlopTrap's built-in <code>RuleSpec</code> compiler) can produce a valid rule module by exporting:
+          Modules compiled from Rust (<code>wasm32-unknown-unknown</code>), C/Clang, Zig, TinyGo, AssemblyScript, or SlopTrap's built-in <code>RuleSpec</code> compiler may export only whitelisted symbols:
         </p>
         <ul>
-          <li><code>memory</code> — Linear memory (1–16 initial pages, max ≤ 32 pages).</li>
-          <li><code>st_alloc(size: i32) -&gt; i32</code> <em>(optional)</em> — Returns byte offset where the host writes the UTF-8 <code>ChannelFingerprint</code> JSON (defaults to scratch offset <code>16384</code> if omitted).</li>
+          <li><code>memory</code> — Bounded linear memory (max &le; 32 pages).</li>
+          <li><code>st_alloc(size: i32) -&gt; i32</code> <em>(optional)</em> — Returns byte offset for the input JSON slice (defaults to scratch offset <code>4096</code> / <code>16384</code> if omitted).</li>
           <li>
-            <code>st_evaluate(ptr: i32, len: i32) -&gt; i64</code> <em>(required)</em> — Evaluates the fingerprint at <code>memory[ptr .. ptr+len]</code> and returns a packed 64-bit integer:
+            <code>st_evaluate(ptr: i32, len: i32) -&gt; i64</code> <em>(required)</em> — Evaluates <code>memory[ptr .. ptr+len]</code> and returns a packed 64-bit integer:
             <ul>
-              <li><strong>Compact return (<code>upper 32 bits == 0</code>):</strong> Lower 32 bits hold the integer slop score clamped to <code>0..100</code> (confidence defaults to <code>1.0</code>).</li>
-              <li><strong>Structured JSON return (<code>upper 32 bits &gt; 0</code>):</strong> <code>(outPtr &lt;&lt; 32) | outLen</code> pointing to UTF-8 JSON <code>{"score": 88, "confidence": 0.92, "reason": "..."}</code> in linear memory.</li>
+              <li><strong>Compact return (<code>upper 32 bits == 0</code>):</strong> Lower 32 bits carry the integer score <code>0..100</code> (confidence <code>1.0</code>).</li>
+              <li><strong>JSON slice return (<code>upper 32 bits &gt; 0</code>):</strong> <code>(outPtr &lt;&lt; 32) | outLen</code> referencing UTF-8 JSON <code>{"score": 88, "confidence": 0.92, "reason": "..."}</code>.</li>
             </ul>
           </li>
         </ul>
 
-        <h2 id="strule-crypto">4. <code>.strule</code> Container &amp; Cryptographic Verification</h2>
-        <p>
-          A <code>.strule</code> file is a portable JSON envelope binding a canonical manifest, an HKDF-AES-256-GCM encrypted WASM payload, and an Ed25519 author signature:
-        </p>
+        <h2 id="strule-crypto">4. <code>.strule</code> envelope &amp; cryptography</h2>
         <pre><code>{
   "format": "sloptrap-bundle-v1",
   "manifest": {
@@ -140,57 +156,61 @@
     "interpreter": "wasm-v1",
     "inputs": ["metadata", "upload_cadence", "audio_video_stats"],
     "default_weight": 1.25,
-    "overhead": 3,
+    "overhead": 5,
     "encryption": "aes-256-gcm-hkdf"
   },
   "payload_b64": "&lt;12-byte GCM nonce || AES-256-GCM ciphertext || 16-byte tag&gt;",
   "signature_b64": "&lt;64-byte Ed25519 signature&gt;"
 }</code></pre>
         <ul>
-          <li><strong>Language-Neutral Canonical Manifest AAD:</strong> Compliant runtimes serialize a deterministic newline-delimited canonical byte string used as AES-GCM Additional Authenticated Data (AAD) — tampering with <em>any</em> manifest field (such as lowering <code>overhead</code> or swapping <code>author_public_key</code>) immediately fails authenticated decryption.</li>
-          <li><strong>RFC 5869 HKDF-SHA256 Key Derivation:</strong> Derives the 256-bit AES key from the scoring environment seed using salt <code>sloptrap-hkdf-salt-v1</code> and info <code>sloptrap-bundle-v1|&lt;rule_id&gt;|&lt;author_pub_hex&gt;|&lt;version&gt;</code>.</li>
-          <li><strong>Ed25519 Author Provenance:</strong> Verified over <code>SHA-256("sloptrap-sig-v1:" || canonicalManifest || 0x00 || rawWasmBytes)</code>.</li>
+          <li><strong>Canonical Manifest AAD:</strong> Newline-delimited canonical manifest bytes serve as AES-256-GCM Additional Authenticated Data (AAD); modifying <code>overhead</code>, <code>inputs</code>, or <code>author_public_key</code> causes decryption failure.</li>
+          <li><strong>RFC 5869 HKDF-SHA256:</strong> Derives the 256-bit key using salt <code>sloptrap-hkdf-salt-v1</code> and info <code>sloptrap-bundle-v1|&lt;rule_id&gt;|&lt;author_pub_hex&gt;|&lt;version&gt;</code>.</li>
+          <li><strong>Ed25519 Signature:</strong> Verified over <code>SHA-256("sloptrap-sig-v1:" || canonicalManifest || 0x00 || rawWasmBytes)</code>.</li>
         </ul>
 
-        <h2 id="cli-tooling">5. CLI Keygen, Build &amp; Verification</h2>
+        <h2 id="security-audit">5. Automated malicious-content audit &amp; GitHub Action</h2>
+        <p>
+          Every pull request or push modifying <code>.strule</code> bundles or <code>leaderboard.json</code> runs <code>validate-rules.yml</code> (and locally via <code>./sloptrap rules audit</code>), enforcing four defense layers:
+        </p>
+        <ol>
+          <li><strong>Integrity &amp; authenticity:</strong> Enforces &le; 256 KiB bundle / &le; 192 KiB WASM ceilings, SHA-256 parity with <code>leaderboard.json</code>, AES-GCM manifest AAD authentication, and Ed25519 signature verification.</li>
+          <li><strong>Binary section firewall:</strong> Parses raw WebAssembly 1.0 sections and rejects Custom sections (<code>id 0</code>, blocking steganographic/smuggled payloads), Import sections (<code>id 2</code>, blocking host/WASI access), Start sections (<code>id 8</code>), unbounded or &gt; 32-page memory, and non-whitelisted exports.</li>
+          <li><strong>Fuel-metered sandbox fuzzing:</strong> Executes probe and malformed JSON payloads under strict instruction fuel / timeout caps to catch infinite-loop CPU bombs and out-of-bounds memory traps, and verifies bit-identical determinism across repeated runs.</li>
+          <li><strong>Anti-poisoning behavioral guard:</strong> Rejects rules that blanket-flag clean human creator profiles (<code>humanScore &ge; 50</code>) or fail to separate multi-signal slop from clean profiles (<code>slopScore &le; humanScore + 15</code>).</li>
+        </ol>
+
+        <h2 id="cli-tooling">6. CLI build, audit &amp; sync commands</h2>
         <pre><code># 1. Generate an Ed25519 author keypair
 ./sloptrap rules keygen
 
-# 2. Compile reference specs (with state-machine control-flow flattening),
-#    sign &amp; encrypt .strule bundles, evaluate on holdout corpus, and write leaderboard.json
+# 2. Compile reference specs, sign &amp; encrypt .strule bundles, and write leaderboard.json
 ./sloptrap rules build-defaults --out ../sloptrap-site --priv &lt;author-private-key-hex&gt;
 
-# 3. Sync live active installs, GitHub Release downloads &amp; Issue 👍 likes
+# 3. Run full cryptographic, WASM section, CPU-bomb &amp; anti-poisoning security audit
+./sloptrap rules audit ../sloptrap-site/bundles
+
+# 4. Sync active/all-time installs, GitHub Release downloads &amp; Issue upvotes
 ./sloptrap rules sync --out ../sloptrap-site
 
-# 4. Check for bundle updates (pass --anon-rule-rankings=false to disable anonymous heartbeat)
-./sloptrap rules check-updates
+# 5. Check for bundle updates (--anon-rule-rankings=false disables telemetry)
+./sloptrap rules check-updates</code></pre>
 
-# 5. Upvote a rule on the leaderboard via gh CLI
-./sloptrap rules like necro-hijack-guard
-
-# 6. Verify Ed25519 signature &amp; decrypt payload of any .strule bundle
-./sloptrap rules verify ../sloptrap-site/bundles/necro-hijack-guard.strule</code></pre>
-
-        <h2 id="leaderboard-design">6. Anti-Oracle Leaderboard &amp; Anonymous Rule Rankings</h2>
+        <h2 id="leaderboard-design">7. Anti-oracle ranking &amp; Anonymous rule rankings</h2>
         <ul>
-          <li><strong>Private Holdout Corpus:</strong> Only truncated SHA-256 channel commitments appear publicly in <code>leaderboard.json</code>; raw channel handles and IDs remain private.</li>
-          <li><strong>Holdout Perturbation &amp; Rate Limiting:</strong> Periodic holdout subset rotation (<code>perturbSeed</code>) and per-author Ed25519 submission rate limits (<code>leaderboard.RateLimiter</code>) prevent iterative threshold probing.</li>
-          <li><strong>Coarse Banding &amp; Accuracy Quality Gate:</strong> Published Precision, Recall, and F1 are rounded to <code>0.05</code> increments alongside coarse letter bands (<code>S</code> &ge; 0.90, <code>A</code> &ge; 0.78, <code>B</code> &ge; 0.60, <code>C</code> &lt; 0.60). Holdout F1 acts as a multiplicative gate (<code>F1 &le; 0.50</code> receives zero popularity boost) so botted downloads or likes cannot elevate permissive rules.</li>
-          <li><strong>Anonymous Rule Rankings (Active Installs):</strong> Clients with <em>Anonymous rule rankings</em> enabled send a random local 128-bit <code>install_token</code> (never tied to a YouTube account or device serial) and their enabled rule IDs during periodic update checks (<code>POST /api/v1/rules/check-updates</code>), maintaining a rolling 14-day active-install count with per-subnet daily Sybil caps. Disabling <em>Anonymous rule rankings</em> switches update checks to plain static <code>leaderboard.json</code> fetches.</li>
-          <li><strong>GitHub Release Downloads &amp; Issue 👍 Likes:</strong> Distributable <code>.strule</code> assets are published on GitHub Releases for native download counting, and each rule has a dedicated <code>leaderboard-rule</code> GitHub Issue where users react with 👍 (one vote per GitHub account).</li>
+          <li><strong>Private holdout &amp; coarse bands:</strong> Only truncated SHA-256 commitments appear in <code>leaderboard.json</code>, and Precision/Recall/F1 are published in <code>0.05</code> steps with letter bands (<code>S</code>, <code>A</code>, <code>B</code>, <code>C</code>). Holdout F1 gates popularity weight (<code>F1 &le; 0.50</code> receives zero popularity multiplier).</li>
+          <li><strong>Anonymous rule rankings (Active &amp; All-Time installs):</strong> Clients with opt-in <em>Anonymous rule rankings</em> enabled send a random local 128-bit <code>install_token</code> and active rule IDs during update checks (<code>POST /api/v1/rules/check-updates</code>). The Cloudflare Worker + D1 backend records both cumulative <code>all_time_installs</code> and rolling <code>active_installs</code> over a configurable window (default <code>ACTIVE_WINDOW_DAYS = 30</code>) with per-subnet daily Sybil budgets, and exposes <code>window_days</code> dynamically via <code>GET /api/v1/rules/stats</code>.</li>
         </ul>
       </article>
     </div>
-  </div>
+  </main>
 
-  <footer class="site-footer">
-    <div class="footer-inner">
-      <div><strong>SlopTrap WASM Rule Specification</strong></div>
-      <div>
-        <a href="../">Overview</a> ·
-        <a href="../docs/">Docs</a> ·
-        <a href="../leaderboard/">Leaderboard</a> ·
+  <footer class="g-footer">
+    <div class="g-footer__inner">
+      <div>SlopTrap WASM Rule Specification</div>
+      <div class="g-footer__links">
+        <a href="../">Overview</a>
+        <a href="../docs/">Documentation</a>
+        <a href="../leaderboard/">Leaderboard</a>
         <a href="../leaderboard.json">leaderboard.json</a>
       </div>
     </div>

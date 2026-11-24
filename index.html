@@ -3,184 +3,232 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SlopTrap — YouTube AI Slop Forensics, Sandboxed WASM Rules &amp; API Server</title>
+  <title>SlopTrap — YouTube Forensics, WASM Rules &amp; Verification API</title>
+  <link rel="stylesheet" href="./assets/gravity-uikit.css" />
   <link rel="stylesheet" href="./assets/style.css" />
 </head>
-<body>
-  <nav class="site-nav">
-    <div class="nav-inner">
-      <a class="brand-link" href="./">
-        <span class="badge-brand">SLOPTRAP</span>
-        <span class="brand-title">Forensic Engine &amp; Rules</span>
-      </a>
-      <div class="nav-links">
-        <a class="active" href="./">Overview</a>
-        <a href="./docs/">Documentation</a>
-        <a href="./rules/">WASM Rules &amp; .strule</a>
-        <a href="./leaderboard/">Leaderboard</a>
-        <a href="https://github.com/sloptrap/sloptrap" target="_blank" rel="noopener">GitHub ↗</a>
+<body class="g-root g-root_theme_dark">
+  <script>
+    if (localStorage.getItem('st-gravity-theme') === 'light') {
+      document.body.className = 'g-root g-root_theme_light';
+    }
+  </script>
+
+  <header class="g-app-header">
+    <div class="g-app-header__inner">
+      <div style="display:flex;align-items:center;gap:20px;height:100%;">
+        <a class="g-brand" href="./">
+          <span class="g-brand__mark">
+            <svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2.5 4.5h11M4.5 8h7M6.5 11.5h3"/></svg>
+          </span>
+          <span>SlopTrap</span>
+          <span class="g-label g-label_theme_utility mono">wasm-v1</span>
+        </a>
+        <nav class="g-nav" aria-label="Primary">
+          <a class="g-nav__item g-nav__item_active" href="./">Overview</a>
+          <a class="g-nav__item" href="./docs/">Documentation</a>
+          <a class="g-nav__item" href="./rules/">WASM Spec</a>
+          <a class="g-nav__item" href="./leaderboard/">Leaderboard</a>
+        </nav>
+      </div>
+      <div class="g-header-actions">
+        <button id="theme-toggle" class="g-btn g-btn_view_flat g-btn_icon" type="button" aria-label="Toggle theme"></button>
+        <a class="g-btn g-btn_view_outlined g-btn_size_s" href="https://github.com/sloptrap/sloptrap" target="_blank" rel="noopener">
+          GitHub
+          <svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 11L11 5M6 5h5v5"/></svg>
+        </a>
       </div>
     </div>
-  </nav>
+  </header>
 
-  <main class="container">
-    <section class="hero">
+  <main class="g-container">
+    <section class="overview-split">
       <div>
-        <h1>Catch AI Slop Farms Before They Pollute Your Feed.</h1>
-        <p class="lead">
-          <strong>SlopTrap</strong> combines a 6-signal YouTube forensic detector, an interactive terminal UI, an autonomous mass-crawler, cryptographically signed <code>.strule</code> WebAssembly rule bundles, and a live HTTP verification API with automatic <strong>AiSList</strong> reporting.
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <span class="g-label g-label_theme_info">Go 1.24 + wazero</span>
+          <span class="g-label g-label_theme_normal">Ed25519 + AES-256-GCM</span>
+          <span class="g-label g-label_theme_positive">AiSList Compatible</span>
+        </div>
+        <h1>YouTube channel forensics and sandboxed WASM filtering</h1>
+        <p class="overview-lead">
+          SlopTrap inspects upload history, account dormancy pivots, word-timed <code>json3</code> transcripts, and acoustic telemetry, then evaluates channels through deterministic <code>.strule</code> WebAssembly bundles in an interactive TUI or headless HTTP daemon.
         </p>
-        <div class="cta-row">
-          <a class="btn btn-primary" href="./docs/">Read the Documentation</a>
-          <a class="btn btn-secondary" href="./leaderboard/">Browse WASM Leaderboard</a>
-          <a class="btn btn-secondary" href="./rules/">Author a .strule Bundle</a>
+        <div class="btn-row">
+          <a class="g-btn g-btn_view_action g-btn_size_l" href="./docs/">Documentation</a>
+          <a class="g-btn g-btn_view_outlined g-btn_size_l" href="./leaderboard/">Rule Leaderboard</a>
+          <a class="g-btn g-btn_view_normal g-btn_size_l" href="./rules/">.strule Specification</a>
         </div>
       </div>
 
       <div>
-        <pre><code># Build SlopTrap
+        <pre style="margin:0;"><code># Build standalone binary (no CGO required)
 git clone git@github.com:sloptrap/sloptrap.git
 cd sloptrap
 go build -o sloptrap ./cmd/sloptrap
 
-# Launch interactive TUI + HTTP API server
+# Interactive TUI + local HTTP verification API
 ./sloptrap --listen 0.0.0.0:8787
 
-# Or run 24/7 headless crawler + API server
+# Headless crawler + AiSList auto-reporter
 ./sloptrap --serve 0.0.0.0:8787 \
   --auto-crawl --auto-report --report-as=anonymous</code></pre>
       </div>
     </section>
 
-    <h2 class="section-title">Interactive Forensic TUI</h2>
-    <p class="section-sub">
-      Inspect channel upload histories, dormancy hijacks, word-timed <code>json3</code> LLM script structures, synthetic TTS prosody, and live sandboxed WASM rule evaluations — with full keyboard, arrow-key, and mouse navigation.
-    </p>
-
-    <div class="shot-tabs">
-      <button class="shot-tab active" type="button"
-        data-src="./assets/screenshots/tui-overview.png"
-        data-caption="1:Overview — Multi-signal forensic score bars, AiSList sibling stem alerts, and smoking-gun evidence.">
-        1: Overview
-      </button>
-      <button class="shot-tab" type="button"
-        data-src="./assets/screenshots/tui-timeline.png"
-        data-caption="2:Timeline — Aged-account dormancy gap detection comparing Oldest vs. Latest channel uploads.">
-        2: Timeline &amp; Dormancy
-      </button>
-      <button class="shot-tab" type="button"
-        data-src="./assets/screenshots/tui-script-voice.png"
-        data-caption="3:Script &amp; Voice — LLM antithesis/hook excerpts, WPM pacing CV, and 45s ffmpeg EBU R128 dead-air probe.">
-        3: Script &amp; Voice Lab
-      </button>
-      <button class="shot-tab" type="button"
-        data-src="./assets/screenshots/tui-wasm-rules.png"
-        data-caption="5:WASM Rules — Verified .strule bundles executing deterministically in microsecond sandboxes.">
-        5: WASM Rules (.strule)
-      </button>
-      <button class="shot-tab" type="button"
-        data-src="./assets/screenshots/tui-discovery.png"
-        data-caption="Topic Discovery Hunter ([d]) — Curated slop-niche presets and custom YouTube search harvesting.">
-        Topic Hunter [d]
-      </button>
+    <div class="section-bar">
+      <div>
+        <h2 class="section-title">Terminal workspace</h2>
+        <p class="section-sub">Keyboard and mouse navigation across channel queues, dormancy timelines, transcript prosody, and WASM rule traces.</p>
+      </div>
     </div>
 
-    <div class="shot-frame">
+    <div class="preview-panel">
+      <div class="preview-panel__toolbar">
+        <div class="g-segmented" role="tablist" aria-label="TUI Views">
+          <button class="g-segmented__btn shot-tab active" type="button"
+            data-src="./assets/screenshots/tui-overview.png"
+            data-caption="1:Overview — Per-signal score breakdown, AiSList sibling stem cross-checks, and corroborating evidence.">
+            1: Overview
+          </button>
+          <button class="g-segmented__btn shot-tab" type="button"
+            data-src="./assets/screenshots/tui-timeline.png"
+            data-caption="2:Timeline — Aged-account dormancy gap comparison between Oldest and Latest channel uploads.">
+            2: Timeline
+          </button>
+          <button class="g-segmented__btn shot-tab" type="button"
+            data-src="./assets/screenshots/tui-script-voice.png"
+            data-caption="3:Script &amp; Voice — Contrastive LLM phrasing, WPM pacing CV, and 45s ffmpeg EBU R128 dead-air probe.">
+            3: Script &amp; Voice
+          </button>
+          <button class="g-segmented__btn shot-tab" type="button"
+            data-src="./assets/screenshots/tui-wasm-rules.png"
+            data-caption="5:WASM Rules — Signed .strule bundles executing inside zero-import WebAssembly sandboxes.">
+            5: WASM Rules
+          </button>
+          <button class="g-segmented__btn shot-tab" type="button"
+            data-src="./assets/screenshots/tui-discovery.png"
+            data-caption="Discovery [d] — Topic presets and YouTube search queue harvesting.">
+            Discovery [d]
+          </button>
+        </div>
+        <span class="mono" style="color:var(--g-color-text-hint);font-size:12px;">Bubble Tea TUI</span>
+      </div>
       <img id="tui-showcase-img" src="./assets/screenshots/tui-overview.png" alt="SlopTrap TUI Overview" />
+      <div id="tui-showcase-caption" class="preview-panel__caption">
+        1:Overview — Per-signal score breakdown, AiSList sibling stem cross-checks, and corroborating evidence.
+      </div>
     </div>
-    <p id="tui-showcase-caption" style="color: var(--muted); font-size: 0.88rem; margin-top: 0.65rem;">
-      1:Overview — Multi-signal forensic score bars, AiSList sibling stem alerts, and smoking-gun evidence.
-    </p>
 
-    <h2 class="section-title">Six Built-In Forensic Signals</h2>
-    <p class="section-sub">
-      Single-signal guardrails prevent false positives on prolific human educators while corroborating synergies catch hijacked accounts and automated content mills.
-    </p>
+    <div class="section-bar">
+      <div>
+        <h2 class="section-title">Forensic signal extractors</h2>
+        <p class="section-sub">Single-signal caps prevent false positives on prolific human creators; multi-signal corroboration isolates automated farms.</p>
+      </div>
+    </div>
 
     <div class="grid-3">
-      <div class="card">
-        <span class="signal-num">SIGNAL 01 · 34 PTS</span>
-        <h3>Aged-Account Dormancy Pivot</h3>
-        <p>Compares the channel's <code>Oldest</code> upload tab against <code>Latest</code> uploads and total catalog count to pinpoint 3–17 year dormant accounts bought and flooded with recent videos.</p>
+      <div class="g-card">
+        <div class="signal-head">
+          <h3>Aged-account dormancy pivot</h3>
+          <span class="g-label g-label_theme_warning mono">max 34</span>
+        </div>
+        <p>Compares the channel's <code>Oldest</code> upload tab against <code>Latest</code> uploads and total catalog count to detect dormant accounts acquired and repurposed for mass uploads.</p>
       </div>
-      <div class="card">
-        <span class="signal-num">SIGNAL 02 · 24 PTS</span>
-        <h3>Factory Upload Velocity</h3>
-        <p>Flags inhuman daily/weekly video output (e.g., 300+ minutes of long-form essays per week), cron publish-hour lock, and cookie-cutter duration clustering.</p>
+      <div class="g-card">
+        <div class="signal-head">
+          <h3>Upload velocity &amp; cadence</h3>
+          <span class="g-label g-label_theme_normal mono">max 24</span>
+        </div>
+        <p>Measures weekly long-form output minutes, cron publish-hour standard deviation, and duration clustering across recent uploads.</p>
       </div>
-      <div class="card">
-        <span class="signal-num">SIGNAL 03 · 20 PTS</span>
-        <h3>Origin vs. Modern Era Shift</h3>
-        <p>Detects channels whose earliest uploads are silent vertical phone clips or raw camera filenames (<code>IMG_0421.MOV</code>) while recent uploads are uniform 1080p narrated essays.</p>
+      <div class="g-card">
+        <div class="signal-head">
+          <h3>Origin vs. modern era shift</h3>
+          <span class="g-label g-label_theme_normal mono">max 20</span>
+        </div>
+        <p>Contrasts early silent vertical phone clips or camera filenames (<code>IMG_0421.MOV</code>) against uniform widescreen HD narrated essays.</p>
       </div>
-      <div class="card">
-        <span class="signal-num">SIGNAL 04 · 24 PTS</span>
-        <h3>LLM Script Fingerprinting</h3>
-        <p>Inspects <code>json3</code> captions for contrastive negation (<em>"not merely X, it is Y"</em>), tricolons, slop hooks, written-prose uncontracted verb ratios, and omniscient pronoun absence.</p>
+      <div class="g-card">
+        <div class="signal-head">
+          <h3>LLM script structure</h3>
+          <span class="g-label g-label_theme_normal mono">max 24</span>
+        </div>
+        <p>Parses <code>json3</code> captions for contrastive negation, tricolons, written-prose uncontracted verb ratios, and first-person pronoun absence.</p>
       </div>
-      <div class="card">
-        <span class="signal-num">SIGNAL 05 · 18 PTS</span>
-        <h3>Synthetic TTS &amp; Acoustics</h3>
-        <p>Measures word-timestamp WPM lock across uploads, flat 20-second pacing CV, uniform sentence pauses, and optional <code>ffmpeg</code> <code>-65dBFS</code> digital dead-air floors.</p>
+      <div class="g-card">
+        <div class="signal-head">
+          <h3>TTS prosody &amp; acoustics</h3>
+          <span class="g-label g-label_theme_normal mono">max 18</span>
+        </div>
+        <p>Computes cross-video WPM variance, 20-second pacing CV, sentence pause regularity, and optional <code>ffmpeg</code> <code>-65dBFS</code> dead-air floors.</p>
       </div>
-      <div class="card">
-        <span class="signal-num">SIGNAL 06 · 18 PTS</span>
-        <h3>Clone Stems &amp; Disclosures</h3>
-        <p>Cross-checks 70,000+ <strong>AiSList</strong> entries for sibling handle stems (<code>@BaseName-x8z</code>), auto-generated bot suffixes, synthetic media flags, and title skeleton reuse.</p>
-      </div>
-    </div>
-
-    <h2 class="section-title">Unified Ecosystem: TUI, Autonomous Crawler, WASM Rules &amp; API</h2>
-    <div class="grid-2" style="margin-top: 1rem;">
-      <div class="card">
-        <h3>Real-Time HTTP Verification &amp; List Export Server</h3>
-        <p>
-          Run <code>sloptrap --serve</code> or <code>--listen</code> to expose batched channel/video checks (<code>POST /api/v1/check</code>), whitelist management, and dynamically updated <strong>AiSList</strong>-formatted blocklists and warnlists for media clients and browser/network tools.
-        </p>
-      </div>
-      <div class="card">
-        <h3>Sandboxed, Obfuscated <code>.strule</code> Bundles</h3>
-        <p>
-          Detection rules compile to zero-import WebAssembly 1.0 with state-machine control-flow flattening, Ed25519 author signatures, and HKDF-AES-256-GCM payload encryption — making filter logic resilient against reverse-engineering while keeping runtimes 100% open-source.
-        </p>
+      <div class="g-card">
+        <div class="signal-head">
+          <h3>Handle stems &amp; disclosures</h3>
+          <span class="g-label g-label_theme_normal mono">max 18</span>
+        </div>
+        <p>Matches 70,000+ AiSList entries for sibling handle stems (<code>@BaseName-x8z</code>), auto-generated suffixes, synthetic media flags, and title templates.</p>
       </div>
     </div>
 
-    <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 1rem; margin-top: 2.75rem;">
+    <div class="section-bar">
       <div>
-        <h2 class="section-title" style="margin: 0;">Top Leaderboard WASM Rules</h2>
-        <p class="section-sub" style="margin: 0.3rem 0 1rem;">Live feed from <a href="./leaderboard.json"><code>leaderboard.json</code></a> — installable directly into SlopTrap and compatible WASM runtimes.</p>
+        <h2 class="section-title">Runtime &amp; security architecture</h2>
       </div>
-      <a class="btn btn-secondary" href="./leaderboard/">Open Full Leaderboard →</a>
     </div>
 
-    <div class="table-wrap">
-      <table>
+    <div class="grid-2">
+      <div class="g-card g-card_filled">
+        <h3>HTTP verification &amp; list server</h3>
+        <p>
+          <code>--serve</code> and <code>--listen</code> expose batched channel/video lookups (<code>POST /api/v1/check</code>), local SQLite caching, whitelist endpoints, and live AiSList-compatible blocklist and warnlist feeds for media clients and browser extensions.
+        </p>
+      </div>
+      <div class="g-card g-card_filled">
+        <h3>Audited zero-import <code>.strule</code> bundles</h3>
+        <p>
+          Rules compile to WebAssembly 1.0 with Ed25519 author signatures and HKDF-AES-256-GCM manifest-authenticated encryption. CI security audits reject WASM host imports, custom sections, unbounded memory, CPU loops, and feed-poisoning rules.
+        </p>
+      </div>
+    </div>
+
+    <div class="section-bar">
+      <div>
+        <h2 class="section-title">Ranked <code>.strule</code> bundles</h2>
+        <p class="section-sub">Live feed from <a href="./leaderboard.json"><code>leaderboard.json</code></a> and opt-in <em>Anonymous rule rankings</em>.</p>
+      </div>
+      <a class="g-btn g-btn_view_outlined g-btn_size_s" href="./leaderboard/">Full leaderboard</a>
+    </div>
+
+    <div class="g-table-wrap">
+      <table class="g-table">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Rule Bundle</th>
+            <th style="width:48px;">#</th>
+            <th>Rule</th>
             <th>Author</th>
-            <th>Band &amp; Coarse F1</th>
-            <th>Adoption &amp; Likes</th>
-            <th>Overhead</th>
-            <th>Bundle</th>
+            <th>Band / F1</th>
+            <th class="num" id="home-active-col">Active (30d)</th>
+            <th class="num">All-Time</th>
+            <th class="num">Upvotes</th>
+            <th class="num">Overhead</th>
+            <th class="num">Artifact</th>
           </tr>
         </thead>
         <tbody id="home-lb-rows">
-          <tr><td colspan="7" style="color: var(--muted);">Loading <code>leaderboard.json</code>…</td></tr>
+          <tr><td colspan="9" style="color:var(--g-color-text-secondary);">Loading <code>leaderboard.json</code>…</td></tr>
         </tbody>
       </table>
     </div>
   </main>
 
-  <footer class="site-footer">
-    <div class="footer-inner">
-      <div><strong>SlopTrap</strong> — Open-source AI slop detection, WASM rule runtime, and verification server.</div>
-      <div>
-        <a href="./docs/">Docs</a> ·
-        <a href="./rules/">WASM Spec</a> ·
-        <a href="./leaderboard/">Leaderboard</a> ·
+  <footer class="g-footer">
+    <div class="g-footer__inner">
+      <div>SlopTrap — Open-source YouTube forensics &amp; sandboxed WebAssembly rule engine</div>
+      <div class="g-footer__links">
+        <a href="./docs/">Documentation</a>
+        <a href="./rules/">WASM Spec</a>
+        <a href="./leaderboard/">Leaderboard</a>
         <a href="./leaderboard.json">leaderboard.json</a>
       </div>
     </div>
@@ -191,38 +239,63 @@ go build -o sloptrap ./cmd/sloptrap
     function esc(s) {
       return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
+    function bandTheme(b) {
+      if (b === 'S') return 'positive';
+      if (b === 'A') return 'info';
+      if (b === 'B') return 'warning';
+      return 'normal';
+    }
     fetch('./leaderboard.json')
       .then(r => r.json())
       .then(async data => {
+        let winDays = Number(data.active_window_days || 30);
         try {
           const ep = (data.rankings_endpoint || 'https://sloptrap-rankings.assimilat.workers.dev').replace(/\/$/, '');
           const st = await fetch(`${ep}/api/v1/rules/stats`).then(r => r.ok ? r.json() : null);
-          if (st && st.active_installs) {
+          if (st) {
+            if (Number(st.window_days) > 0) winDays = Number(st.window_days);
             for (const e of data.entries || []) {
-              if (st.active_installs[e.rule_id] !== undefined) e.active_installs = Number(st.active_installs[e.rule_id]);
+              if (st.active_installs && st.active_installs[e.rule_id] !== undefined) {
+                e.active_installs = Number(st.active_installs[e.rule_id]);
+              }
+              if (st.all_time_installs && st.all_time_installs[e.rule_id] !== undefined) {
+                e.all_time_installs = Math.max(Number(st.all_time_installs[e.rule_id]), Number(e.active_installs || 0));
+              } else {
+                e.all_time_installs = Math.max(Number(e.all_time_installs || 0), Number(e.active_installs || 0));
+              }
             }
           }
         } catch (_) {}
+        const col = document.getElementById('home-active-col');
+        if (col) col.textContent = `Active (${winDays}d)`;
+
         const rows = (data.entries || []).slice(0, 5).map(e => {
           const dlHref = (e.bundle_url || '').startsWith('http') ? e.bundle_url : ('./' + e.bundle_url);
+          const allTime = Math.max(Number(e.all_time_installs || 0), Number(e.active_installs || 0));
           return `
-          <tr>
-            <td class="mono"><strong>#${e.rank}</strong></td>
-            <td>
-              <div class="rule-title">${esc(e.name)} <span class="mono" style="color:var(--muted);font-weight:400;">v${esc(e.version)}</span></div>
-              <div class="rule-desc">${esc(e.description)}</div>
-            </td>
-            <td class="mono">${esc(e.author)}</td>
-            <td><span class="band band-${esc(e.band)}">Band ${esc(e.band)}</span> <span class="mono" style="margin-left:0.4rem;">F1 ${Number(e.coarse_f1).toFixed(2)}</span></td>
-            <td class="mono">${e.active_installs || 0} active · 👍 ${e.likes || 0} · ⬇ ${e.downloads_total || 0}</td>
-            <td class="mono">${e.overhead} / 10</td>
-            <td><a class="dl-btn" href="${esc(dlHref)}">.strule</a></td>
-          </tr>
-        `}).join('');
-        document.getElementById('home-lb-rows').innerHTML = rows || '<tr><td colspan="7">No entries</td></tr>';
+            <tr>
+              <td class="mono" style="color:var(--g-color-text-secondary);">${e.rank}</td>
+              <td>
+                <div class="rule-name">${esc(e.name)} <span class="mono" style="color:var(--g-color-text-hint);font-weight:400;">v${esc(e.version)}</span></div>
+                <div class="rule-desc">${esc(e.description)}</div>
+              </td>
+              <td class="mono">${esc(e.author)}</td>
+              <td>
+                <span class="g-label g-label_theme_${bandTheme(e.band)}">Band ${esc(e.band)}</span>
+                <span class="mono" style="margin-left:6px;">${Number(e.coarse_f1).toFixed(2)}</span>
+              </td>
+              <td class="num mono">${e.active_installs || 0}</td>
+              <td class="num mono">${allTime}</td>
+              <td class="num mono">${e.likes || 0}</td>
+              <td class="num mono">${e.overhead}/10</td>
+              <td class="num"><a class="g-btn g-btn_view_outlined g-btn_size_s mono" href="${esc(dlHref)}">.strule</a></td>
+            </tr>
+          `;
+        }).join('');
+        document.getElementById('home-lb-rows').innerHTML = rows || '<tr><td colspan="9">No entries</td></tr>';
       })
       .catch(() => {
-        document.getElementById('home-lb-rows').innerHTML = '<tr><td colspan="7" style="color:var(--crimson);">Unable to load leaderboard.json</td></tr>';
+        document.getElementById('home-lb-rows').innerHTML = '<tr><td colspan="9" style="color:var(--g-color-text-danger);">Failed to load leaderboard.json</td></tr>';
       });
   </script>
 </body>

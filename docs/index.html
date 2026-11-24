@@ -4,206 +4,224 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Documentation — SlopTrap</title>
+  <link rel="stylesheet" href="../assets/gravity-uikit.css" />
   <link rel="stylesheet" href="../assets/style.css" />
 </head>
-<body>
-  <nav class="site-nav">
-    <div class="nav-inner">
-      <a class="brand-link" href="../">
-        <span class="badge-brand">SLOPTRAP</span>
-        <span class="brand-title">Forensic Engine &amp; Rules</span>
-      </a>
-      <div class="nav-links">
-        <a href="../">Overview</a>
-        <a class="active" href="./">Documentation</a>
-        <a href="../rules/">WASM Rules &amp; .strule</a>
-        <a href="../leaderboard/">Leaderboard</a>
-        <a href="https://github.com/sloptrap/sloptrap" target="_blank" rel="noopener">GitHub ↗</a>
+<body class="g-root g-root_theme_dark">
+  <script>
+    if (localStorage.getItem('st-gravity-theme') === 'light') {
+      document.body.className = 'g-root g-root_theme_light';
+    }
+  </script>
+
+  <header class="g-app-header">
+    <div class="g-app-header__inner">
+      <div style="display:flex;align-items:center;gap:20px;height:100%;">
+        <a class="g-brand" href="../">
+          <span class="g-brand__mark">
+            <svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2.5 4.5h11M4.5 8h7M6.5 11.5h3"/></svg>
+          </span>
+          <span>SlopTrap</span>
+          <span class="g-label g-label_theme_utility mono">wasm-v1</span>
+        </a>
+        <nav class="g-nav" aria-label="Primary">
+          <a class="g-nav__item" href="../">Overview</a>
+          <a class="g-nav__item g-nav__item_active" href="./">Documentation</a>
+          <a class="g-nav__item" href="../rules/">WASM Spec</a>
+          <a class="g-nav__item" href="../leaderboard/">Leaderboard</a>
+        </nav>
+      </div>
+      <div class="g-header-actions">
+        <button id="theme-toggle" class="g-btn g-btn_view_flat g-btn_icon" type="button" aria-label="Toggle theme"></button>
+        <a class="g-btn g-btn_view_outlined g-btn_size_s" href="https://github.com/sloptrap/sloptrap" target="_blank" rel="noopener">
+          GitHub
+          <svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 11L11 5M6 5h5v5"/></svg>
+        </a>
       </div>
     </div>
-  </nav>
+  </header>
 
-  <div class="container">
-    <div class="docs-layout">
-      <aside class="docs-toc">
-        <h4>On This Page</h4>
+  <main class="g-container">
+    <div class="docs-grid">
+      <aside class="docs-aside">
+        <div class="docs-aside__title">Contents</div>
         <ul>
-          <li><a href="#installation">1. Installation &amp; Setup</a></li>
-          <li><a href="#tui">2. Interactive TUI Guide</a></li>
-          <li><a href="#cli-crawler">3. CLI &amp; Autonomous Crawler</a></li>
-          <li><a href="#aislist-reporting">4. AiSList Auto-Reporting</a></li>
+          <li><a href="#installation">1. Installation</a></li>
+          <li><a href="#tui">2. Terminal UI</a></li>
+          <li><a href="#cli-crawler">3. Headless CLI &amp; Crawler</a></li>
+          <li><a href="#aislist-reporting">4. AiSList Reporting</a></li>
           <li><a href="#http-api">5. HTTP Server API</a></li>
         </ul>
       </aside>
 
-      <article class="docs-content">
+      <article class="docs-article">
         <h1>SlopTrap Documentation</h1>
-        <p style="color: var(--muted); font-size: 1.05rem;">
-          Complete guide to installing, running, and integrating <strong>SlopTrap</strong> across the interactive terminal TUI, autonomous mass-crawler, WASM rule engine, and HTTP verification daemon.
+        <p style="margin-top:0;">
+          Reference for building, running, and integrating <strong>SlopTrap</strong> across the interactive terminal workspace, autonomous crawler, WebAssembly rule engine, and HTTP verification server.
         </p>
 
-        <h2 id="installation">1. Installation &amp; Prerequisites</h2>
+        <h2 id="installation" style="border-top:0;padding-top:0;margin-top:20px;">1. Installation &amp; prerequisites</h2>
         <ul>
-          <li><strong>Go 1.24+</strong> (pure-Go SQLite via <code>modernc.org/sqlite</code> and pure-Go WASM interpreter via <code>wazero</code> — no CGO required).</li>
+          <li><strong>Go 1.24+</strong> — Uses pure-Go SQLite (<code>modernc.org/sqlite</code>) and pure-Go WebAssembly interpretation (<code>wazero</code>); no CGO toolchain required.</li>
           <li><strong>Optional — <code>ffmpeg</code></strong>: Enables 45-second EBU R128 loudness range (<code>LRA</code>) and <code>-65dBFS</code> digital dead-air acoustic TTS probing (<kbd>a</kbd> in TUI or <code>--audio</code> on CLI).</li>
-          <li><strong>Optional — <code>mpv</code> &amp; <code>gh</code></strong>: Instant playback of newest/oldest channel uploads (<kbd>o</kbd> / <kbd>O</kbd>) and formatted GitHub issue submission to <code>Override92/AiSList</code>.</li>
-          <li><strong>Optional — Local <code>AiSList</code> Checkout</strong>: Auto-detected at <code>./AiSList</code> or <code>../AiSList</code> (or passed via <code>--aislist /path/to/AiSList</code>) for instant cross-checking and stem-sibling matching against 70,000+ community entries.</li>
+          <li><strong>Optional — <code>mpv</code> &amp; <code>gh</code></strong>: Direct playback of newest/oldest channel uploads (<kbd>o</kbd> / <kbd>O</kbd>) and formatted GitHub issue submission to <code>Override92/AiSList</code>.</li>
+          <li><strong>Optional — Local <code>AiSList</code> checkout</strong>: Auto-detected at <code>./AiSList</code> or <code>../AiSList</code> (or specified via <code>--aislist /path/to/AiSList</code>) for offline stem-sibling matching against 70,000+ community entries.</li>
         </ul>
 
         <pre><code>git clone git@github.com:sloptrap/sloptrap.git
 cd sloptrap
 go build -o sloptrap ./cmd/sloptrap
 
-# Verify binary &amp; flags
+# Inspect CLI flags
 ./sloptrap -h</code></pre>
 
-        <div class="callout">
-          <strong>Local Data Paths:</strong> Scanned channel reports and review/whitelist states are stored automatically in <code>~/.local/share/sloptrap/sloptrap.db</code> (override with <code>--db</code>). Local WASM rule bundles are loaded from <code>~/.local/share/sloptrap/rules/*.strule</code> (as well as <code>../sloptrap-site/bundles</code> when present).
+        <div class="g-alert">
+          <strong>Local storage paths:</strong> Scanned channel reports and review/whitelist states are stored in <code>~/.local/share/sloptrap/sloptrap.db</code> (override with <code>--db</code>). Local WASM rule bundles load from <code>~/.local/share/sloptrap/rules/*.strule</code>.
         </div>
 
-        <h2 id="tui">2. Interactive TUI Guide</h2>
+        <h2 id="tui">2. Terminal UI guide</h2>
         <p>
-          Running <code>./sloptrap</code> with no flags launches the interactive Bubble Tea workspace. Pass <code>--listen 0.0.0.0:8787</code> to run the live HTTP API server alongside the TUI and inspect incoming client scans in real time.
+          Running <code>./sloptrap</code> with no flags launches the interactive Bubble Tea interface. Pass <code>--listen 0.0.0.0:8787</code> to serve the HTTP verification API concurrently and inspect incoming client scans in real time.
         </p>
-        <pre><code># Launch TUI standalone
+        <pre><code># Launch standalone TUI
 ./sloptrap
 
 # Launch TUI + HTTP API server on port 8787 + initial targets
 ./sloptrap --listen 0.0.0.0:8787 "@UntoldTruths-x8z,@3blue1brown"</code></pre>
 
-        <h3>Keyboard &amp; Mouse Controls</h3>
-        <div class="table-wrap">
-          <table>
+        <h3>Keyboard &amp; mouse bindings</h3>
+        <div class="g-table-wrap">
+          <table class="g-table">
             <thead>
               <tr>
-                <th>Key / Action</th>
-                <th>Behavior</th>
+                <th style="width:210px;">Input</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td><kbd>↑</kbd> / <kbd>↓</kbd>, <kbd>j</kbd> / <kbd>k</kbd></td>
-                <td>Navigate channel queue (or scroll Forensic Inspector when right pane is focused).</td>
+                <td>Move selection in Channel Queue or scroll Forensic Inspector when right pane is focused.</td>
               </tr>
               <tr>
                 <td><kbd>←</kbd> / <kbd>→</kbd>, <kbd>Tab</kbd></td>
-                <td>Move smoothly between Channel Queue and Inspector tabs (<kbd>Shift+←</kbd> / <kbd>Shift+→</kbd> or <kbd>[</kbd> / <kbd>]</kbd> cycle tabs directly).</td>
+                <td>Switch focus between Channel Queue and Inspector tabs (<kbd>[</kbd> / <kbd>]</kbd> cycle tabs directly).</td>
               </tr>
               <tr>
-                <td><strong>Mouse</strong></td>
-                <td>Click any channel row, inspector tab (<code>1:Overview</code>..<code>5:WASM Rules</code>), or the filter header; scroll wheel scrolls either pane independently.</td>
+                <td>Mouse</td>
+                <td>Click channel rows, inspector tabs (<code>1:Overview</code>..<code>5:WASM Rules</code>), or filter controls; scroll wheel operates independently per pane.</td>
               </tr>
               <tr>
                 <td><kbd>1</kbd> .. <kbd>5</kbd></td>
-                <td>Jump to Inspector tab: <code>1:Overview</code>, <code>2:Timeline</code>, <code>3:Script &amp; Voice</code>, <code>4:Report</code>, <code>5:WASM Rules</code>.</td>
+                <td>Select Inspector tab: <code>1:Overview</code>, <code>2:Timeline</code>, <code>3:Script &amp; Voice</code>, <code>4:Report</code>, <code>5:WASM Rules</code>.</td>
               </tr>
               <tr>
                 <td><kbd>s</kbd></td>
-                <td>Scan a YouTube <code>@handle</code>, channel URL, video URL (auto-resolves parent channel), or space/comma-separated batch.</td>
+                <td>Scan a YouTube <code>@handle</code>, channel URL, video URL (resolves parent channel), or comma/space-delimited batch.</td>
               </tr>
               <tr>
                 <td><kbd>d</kbd></td>
-                <td>Open <strong>Topic &amp; Niche Discovery Hunter</strong> (pick curated slop presets with <kbd>↑</kbd>/<kbd>↓</kbd> or run a custom YouTube search).</td>
+                <td>Open Topic Discovery queue builder (curated presets or custom YouTube search).</td>
               </tr>
               <tr>
                 <td><kbd>C</kbd></td>
-                <td>Toggle <strong>Autonomous Continuous Crawl</strong> — cycles through 24+ slop niches and snowballs Watch-Next related channels whenever high-confidence slop is caught.</td>
+                <td>Toggle Autonomous Continuous Crawl across target niches and Watch-Next related channels.</td>
               </tr>
               <tr>
                 <td><kbd>i</kbd></td>
-                <td>Configure <strong>AiSList Auto-Reporting &amp; Submission Identity</strong> (<em>Anonymous</em>, <em>Client Account Callback</em>, or <em>Custom Username</em>).</td>
+                <td>Configure AiSList submission identity (<em>Anonymous</em>, <em>Client Account Callback</em>, or <em>Custom Username</em>).</td>
               </tr>
               <tr>
                 <td><kbd>a</kbd> / <kbd>r</kbd></td>
-                <td>Run 45-second <code>ffmpeg</code> acoustic TTS probe (<kbd>a</kbd>) or re-scan selected channel (<kbd>r</kbd>).</td>
+                <td>Run 45-second <code>ffmpeg</code> acoustic probe (<kbd>a</kbd>) or re-scan active channel (<kbd>r</kbd>).</td>
               </tr>
               <tr>
                 <td><kbd>o</kbd> / <kbd>O</kbd></td>
-                <td>Play <strong>newest</strong> (<kbd>o</kbd>) or <strong>oldest</strong> (<kbd>O</kbd>) upload in <code>mpv</code> to compare channel eras and voices.</td>
+                <td>Play newest (<kbd>o</kbd>) or oldest (<kbd>O</kbd>) upload in <code>mpv</code>.</td>
               </tr>
               <tr>
                 <td><kbd>R</kbd> / <kbd>c</kbd></td>
-                <td>Report channel to AiSList via <code>api.aisloplist.com</code> or <code>gh issue create</code> (<kbd>R</kbd>), or copy Markdown report to clipboard (<kbd>c</kbd>).</td>
+                <td>Submit channel to AiSList (<kbd>R</kbd>) or copy Markdown report to clipboard (<kbd>c</kbd>).</td>
               </tr>
               <tr>
                 <td><kbd>w</kbd> / <kbd>f</kbd> / <kbd>e</kbd> / <kbd>A</kbd></td>
-                <td>Toggle local Safe/Whitelist (<kbd>w</kbd>), cycle queue filter (<kbd>f</kbd>), export lists (<kbd>e</kbd>), or toggle <strong>Anonymous rule rankings</strong> (<kbd>A</kbd>).</td>
+                <td>Toggle local whitelist (<kbd>w</kbd>), cycle queue filter (<kbd>f</kbd>), export lists (<kbd>e</kbd>), or toggle <strong>Anonymous rule rankings</strong> (<kbd>A</kbd>).</td>
               </tr>
               <tr>
                 <td><kbd>?</kbd> / <kbd>h</kbd> / <kbd>q</kbd></td>
-                <td>Open/close Help overlay (<kbd>?</kbd> or <kbd>h</kbd>) or quit (<kbd>q</kbd>).</td>
+                <td>Toggle help overlay (<kbd>?</kbd> or <kbd>h</kbd>) or quit (<kbd>q</kbd>).</td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <h2 id="cli-crawler">3. Headless CLI &amp; Autonomous Crawler Modes</h2>
-        <pre><code># Headless forensic scan (human-readable report on stdout)
+        <h2 id="cli-crawler">3. Headless CLI &amp; crawler modes</h2>
+        <pre><code># Headless forensic scan (text report on stdout)
 ./sloptrap --headless --scan "@bygonephilosophy,@veritasium"
 
-# Headless scan with 45s ffmpeg audio analysis + full JSON output
+# Headless scan with 45s ffmpeg audio analysis + structured JSON output
 ./sloptrap --headless --audio --json --scan "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
-# Mass-crawl 500 unlisted channels across slop niches and export AiSList-format lists
+# Crawl 500 unlisted channels and export AiSList-compatible text lists
 ./sloptrap --crawl 500 --export ./exports
 
-# Export existing SQLite database detections without scanning
+# Export existing SQLite detections without network scanning
 ./sloptrap --export ./exports</code></pre>
 
-        <h2 id="aislist-reporting">4. AiSList Auto-Reporting &amp; Submission Identity</h2>
+        <h2 id="aislist-reporting">4. AiSList reporting &amp; submission identity</h2>
         <p>
-          Every newly blocked high-confidence slop channel not yet listed in AiSList can be automatically reported to <code>POST https://api.aisloplist.com</code> with configurable identity options:
+          High-confidence detections not yet present in AiSList can be submitted automatically to <code>POST https://api.aisloplist.com</code> under three identity modes:
         </p>
         <ul>
-          <li><strong>Anonymous (<code>--report-as=anonymous</code>)</strong> — Submits <code>"username": "Anonymous"</code> with zero account association.</li>
-          <li><strong>Custom Username (<code>--report-as=custom --username=...</code>)</strong> — Credits reports to an explicit username or handle.</li>
-          <li><strong>Client Account Callback (<code>--report-as=youtube</code>)</strong> — Queries a connected media client's <code>GET /api/v1/account</code> callback endpoint to resolve the active signed-in YouTube account name dynamically at report time (falling back safely to <code>Anonymous</code> if signed out or unreachable).</li>
+          <li><strong>Anonymous (<code>--report-as=anonymous</code>)</strong> — Sends <code>"username": "Anonymous"</code> with no account identifier.</li>
+          <li><strong>Custom Username (<code>--report-as=custom --username=...</code>)</strong> — Credits reports to an explicit handle.</li>
+          <li><strong>Client Account Callback (<code>--report-as=youtube</code>)</strong> — Queries a connected media client's <code>GET /api/v1/account</code> callback endpoint at report time, falling back to <code>Anonymous</code> if unavailable.</li>
         </ul>
 
-        <h2 id="http-api">5. HTTP Server API Reference (<code>--serve</code> / <code>--listen</code>)</h2>
-        <div class="table-wrap">
-          <table>
+        <h2 id="http-api">5. HTTP server API reference (<code>--serve</code> / <code>--listen</code>)</h2>
+        <div class="g-table-wrap">
+          <table class="g-table">
             <thead>
               <tr>
-                <th>Method &amp; Path</th>
+                <th style="width:260px;">Endpoint</th>
                 <th>Description</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td><code>GET /api/v1/health</code></td>
-                <td>Returns JSON health status, local SQLite scan/block/warn/whitelist counts, and loaded AiSList counts.</td>
+                <td>Returns service status, SQLite scan/block/warn/whitelist counts, and loaded AiSList counts.</td>
               </tr>
               <tr>
                 <td><code>POST /api/v1/check</code></td>
-                <td>Batched channel/video verification. Checks AiSList + SQLite cache immediately and launches singleflight-deduplicated live scans when <code>scan_unknown: true</code>.</td>
+                <td>Batched channel/video verification. Returns cached AiSList + SQLite verdicts immediately and queues singleflight live scans when <code>scan_unknown: true</code>.</td>
               </tr>
               <tr>
                 <td><code>POST /api/v1/whitelist</code></td>
-                <td>Marks or unmarks a channel as <code>whitelisted</code> in SQLite.</td>
+                <td>Marks or unmarks a channel as whitelisted in SQLite.</td>
               </tr>
               <tr>
                 <td><code>GET /lists/blocklist.txt</code><br/><code>GET /lists/warnlist.txt</code></td>
-                <td>Exports dynamically updated AiSList-formatted plain-text channel lists.</td>
+                <td>Plain-text AiSList-compatible channel lists generated from SQLite verdicts.</td>
               </tr>
               <tr>
                 <td><code>GET /lists/leaderboard.json</code><br/><code>GET /lists/bundles/&lt;id&gt;.strule</code></td>
-                <td>Local LAN mirror of leaderboard metadata and signed <code>.strule</code> WASM bundles.</td>
+                <td>Local LAN mirror of leaderboard metadata and signed <code>.strule</code> WebAssembly bundles.</td>
               </tr>
             </tbody>
           </table>
         </div>
       </article>
     </div>
-  </div>
+  </main>
 
-  <footer class="site-footer">
-    <div class="footer-inner">
-      <div><strong>SlopTrap Documentation</strong></div>
-      <div>
-        <a href="../">Overview</a> ·
-        <a href="../rules/">WASM Spec</a> ·
-        <a href="../leaderboard/">Leaderboard</a> ·
+  <footer class="g-footer">
+    <div class="g-footer__inner">
+      <div>SlopTrap Documentation</div>
+      <div class="g-footer__links">
+        <a href="../">Overview</a>
+        <a href="../rules/">WASM Spec</a>
+        <a href="../leaderboard/">Leaderboard</a>
         <a href="../leaderboard.json">leaderboard.json</a>
       </div>
     </div>

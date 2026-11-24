@@ -1,0 +1,41 @@
+name: Audit .strule Bundles
+
+on:
+  pull_request:
+    paths:
+      - "bundles/**"
+      - "leaderboard/**"
+      - "leaderboard.json"
+      - "scripts/audit_bundles.py"
+      - ".github/workflows/validate-rules.yml"
+  push:
+    branches: [main]
+    paths:
+      - "bundles/**"
+      - "leaderboard/**"
+      - "leaderboard.json"
+      - "scripts/audit_bundles.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit-wasm-rules:
+    name: Cryptographic, WASM Capability & Sandbox Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Ed25519/AES-GCM & Wasmtime sandbox dependencies
+        run: pip install --disable-pip-version-check cryptography wasmtime
+
+      - name: Run malicious-content & capability audit on all .strule bundles
+        run: python3 scripts/audit_bundles.py --require-wasmtime

@@ -27,8 +27,8 @@
     <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;border-bottom:1px solid var(--border);padding-bottom:1.4rem;margin-bottom:1.5rem;">
       <div>
         <h1 style="margin:0;color:var(--heading);font-size:1.95rem;">WASM Detection Rule Leaderboard</h1>
-        <p style="color:var(--muted);margin:0.45rem 0 0;max-width:740px;">
-          Ed25519-signed, encrypted WebAssembly rule bundles (<code>.strule</code>) evaluated against a private holdout corpus with anti-oracle coarse banding. Pull this feed into <strong>SlopTrap</strong> or compatible clients via <a href="./leaderboard.json"><code>leaderboard.json</code></a>.
+        <p style="color:var(--muted);margin:0.45rem 0 0;max-width:760px;">
+          Ed25519-signed, encrypted WebAssembly rule bundles (<code>.strule</code>) ranked by holdout accuracy, low execution overhead, rolling 14-day <strong>Anonymous rule rankings</strong> active installs, GitHub Release downloads, and community 👍 likes. Feed: <a href="./leaderboard.json"><code>leaderboard.json</code></a>.
         </p>
       </div>
       <div class="meta-chips" id="meta-chips"></div>
@@ -36,11 +36,13 @@
 
     <div class="controls">
       <input id="rule-filter" class="search-input" type="search" placeholder="Filter by rule name, input, or author…" />
-      <span style="color: var(--muted); font-size: 0.85rem; margin-left: 0.35rem;">Sort by:</span>
+      <span style="color: var(--muted); font-size: 0.85rem; margin-left: 0.35rem;">Sort:</span>
       <button class="sort-btn active" type="button" data-sort="rank">Composite Rank</button>
-      <button class="sort-btn" type="button" data-sort="f1">Accuracy (Coarse F1)</button>
-      <button class="sort-btn" type="button" data-sort="overhead">Lowest Overhead (1–10)</button>
-      <button class="sort-btn" type="button" data-sort="stars">GitHub Stars ★</button>
+      <button class="sort-btn" type="button" data-sort="installs">Active Installs</button>
+      <button class="sort-btn" type="button" data-sort="likes">Most Liked 👍</button>
+      <button class="sort-btn" type="button" data-sort="downloads">Downloads ⬇</button>
+      <button class="sort-btn" type="button" data-sort="f1">Accuracy (F1)</button>
+      <button class="sort-btn" type="button" data-sort="overhead">Lowest Overhead</button>
       <button class="sort-btn" type="button" id="copy-feed-btn" style="margin-left:auto;">Copy Feed URL</button>
     </div>
 
@@ -52,18 +54,19 @@
             <th>Rule Bundle &amp; Declared Inputs</th>
             <th>Author &amp; Ed25519 Key</th>
             <th>Band &amp; Coarse Metrics</th>
-            <th>Overhead (1–10)</th>
-            <th>Repo &amp; .strule</th>
+            <th>Adoption &amp; Likes</th>
+            <th>Overhead</th>
+            <th>Bundle</th>
           </tr>
         </thead>
         <tbody id="rows">
-          <tr><td colspan="6" style="color: var(--muted);">Loading <code>leaderboard.json</code>…</td></tr>
+          <tr><td colspan="7" style="color: var(--muted);">Loading <code>leaderboard.json</code>…</td></tr>
         </tbody>
       </table>
     </div>
 
     <div class="callout" style="margin-top: 1.75rem;">
-      <strong>Anti-Oracle Protections:</strong> Raw evaluation channel IDs are never published (only truncated SHA-256 commitments appear in <code>leaderboard.json</code>), submissions are rate-limited per author Ed25519 public key, holdout slices rotate under deterministic perturbation seeds, and Precision / Recall / F1 are quantized to <code>0.05</code> increments alongside letter bands (<code>S</code>, <code>A</code>, <code>B</code>, <code>C</code>) so slop farm operators cannot hill-climb thresholds against the benchmark.
+      <strong>Accuracy-Gated Ranking &amp; Anti-Oracle Protections:</strong> Holdout F1 acts as a hard quality gate (<code>F1 &le; 0.50</code> receives zero popularity boost so botted downloads or likes cannot promote weak rules). Active install counts reflect unique clients over a rolling 14-day window via opt-in <em>Anonymous rule rankings</em>, downloads come from GitHub Release <code>.strule</code> assets, and 👍 likes come from per-rule GitHub Issues (one vote per GitHub account).
     </div>
   </main>
 
@@ -95,6 +98,29 @@
       return '#f43f5e';
     }
 
+    function computeComposite(e) {
+      const f1 = Number(e.coarse_f1 || 0);
+      const rep = Number(e.author_reputation || 75);
+      const oh = Math.max(1, Math.min(10, Number(e.overhead || 5)));
+      const inst = Number(e.active_installs || 0);
+      const stars = Number(e.stars || 0);
+      const likes = Number(e.likes || 0);
+      const dv = Number(e.downloads_version || 0);
+      const dt = Number(e.downloads_total || 0);
+      const qGate = Math.max(0, Math.min(1, (f1 - 0.50) / 0.50));
+      const eff = (11 - oh) / 10.0;
+      const repN = Math.max(0, Math.min(1, rep / 100.0));
+      const popRaw = 1.60 * Math.log1p(inst) + 1.35 * Math.log1p(likes + stars * 0.75) + 0.55 * Math.log1p(dv * 0.70 + dt * 0.30);
+      const popB = Math.tanh(popRaw / 6.5);
+      return Math.round(1000 * (0.62 * f1 + 0.10 * eff + 0.08 * repN + 0.20 * qGate * popB)) / 10;
+    }
+
+    function resolveHref(u) {
+      if (!u) return '#';
+      if (u.startsWith('http://') || u.startsWith('https://')) return u;
+      return './' + u.replace(/^\.\//, '');
+    }
+
     function render() {
       if (!docData || !Array.isArray(docData.entries)) return;
       const q = filterQuery.trim().toLowerCase();
@@ -104,24 +130,29 @@
         return hay.includes(q);
       });
 
-      if (currentSort === 'f1') list.sort((a, b) => b.coarse_f1 - a.coarse_f1 || a.overhead - b.overhead);
+      if (currentSort === 'installs') list.sort((a, b) => (b.active_installs || 0) - (a.active_installs || 0) || b.composite_score - a.composite_score);
+      else if (currentSort === 'likes') list.sort((a, b) => (b.likes || 0) - (a.likes || 0) || b.composite_score - a.composite_score);
+      else if (currentSort === 'downloads') list.sort((a, b) => (b.downloads_total || 0) - (a.downloads_total || 0) || b.composite_score - a.composite_score);
+      else if (currentSort === 'f1') list.sort((a, b) => b.coarse_f1 - a.coarse_f1 || a.overhead - b.overhead);
       else if (currentSort === 'overhead') list.sort((a, b) => a.overhead - b.overhead || b.coarse_f1 - a.coarse_f1);
-      else if (currentSort === 'stars') list.sort((a, b) => b.stars - a.stars || a.rank - b.rank);
-      else list.sort((a, b) => a.rank - b.rank);
+      else list.sort((a, b) => b.composite_score - a.composite_score || (b.active_installs || 0) - (a.active_installs || 0) || a.overhead - b.overhead);
 
       const tbody = document.getElementById('rows');
       if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);">No matching rule bundles.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="color:var(--muted);">No matching rule bundles.</td></tr>';
         return;
       }
-      tbody.innerHTML = list.map(e => {
-        const pubShort = (e.author_public_key || '').slice(0, 14);
-        const shaShort = (e.bundle_sha256 || '').slice(0, 12);
+      tbody.innerHTML = list.map((e, idx) => {
+        const pubShort = (e.author_public_key || '').slice(0, 12);
+        const shaShort = (e.bundle_sha256 || '').slice(0, 10);
         const inputs = (e.inputs || []).map(i => `<span class="input-tag">${esc(i)}</span>`).join('');
         const ohPct = Math.min(100, Math.max(10, e.overhead * 10));
+        const likeBtn = e.issue_url
+          ? `<a class="dl-btn" href="${esc(e.issue_url)}" target="_blank" rel="noopener" title="React with 👍 on GitHub Issue #${e.issue_number || ''} to upvote">👍 Like (${e.likes || 0})</a>`
+          : `<span class="mono">👍 ${e.likes || 0}</span>`;
         return `
           <tr>
-            <td class="mono"><strong>#${e.rank}</strong></td>
+            <td class="mono"><strong>#${e.rank || (idx + 1)}</strong></td>
             <td>
               <div class="rule-title">${esc(e.name)} <span class="mono" style="color:var(--muted);font-weight:400;">v${esc(e.version)}</span></div>
               <div class="rule-desc">${esc(e.description)}</div>
@@ -137,7 +168,16 @@
               <div class="mono" style="margin-top:0.35rem;">
                 F1 <strong>${Number(e.coarse_f1).toFixed(2)}</strong> · P ${Number(e.coarse_precision).toFixed(2)} · R ${Number(e.coarse_recall).toFixed(2)}
               </div>
-              <div class="mono" style="font-size:0.76rem;color:var(--muted);">Composite: ${Number(e.composite_score || 0).toFixed(1)}</div>
+              <div class="mono" style="font-size:0.76rem;color:var(--muted);">Score: ${Number(e.composite_score || 0).toFixed(1)}</div>
+            </td>
+            <td>
+              <div class="mono" style="margin-bottom:0.3rem;" title="Unique active installs in last 14 days (Anonymous rule rankings)">
+                Active: <strong>${e.active_installs || 0}</strong>
+              </div>
+              <div class="mono" style="font-size:0.78rem;color:var(--muted);margin-bottom:0.4rem;" title="GitHub Release .strule downloads">
+                ⬇ Downloads: <strong>${e.downloads_total || 0}</strong>
+              </div>
+              ${likeBtn}
             </td>
             <td>
               <div class="mono"><strong>${e.overhead}</strong> / 10</div>
@@ -145,14 +185,76 @@
             </td>
             <td>
               <div style="margin-bottom:0.4rem;">
-                <a href="${esc(e.repo_url)}" target="_blank" rel="noopener">GitHub ★ ${e.stars || 0}</a>
+                <a href="${esc(e.repo_url)}" target="_blank" rel="noopener">Repo ★ ${e.stars || 0}</a>
               </div>
-              <a class="dl-btn" href="./${esc(e.bundle_url)}" download>Download .strule</a>
+              <a class="dl-btn" href="${esc(resolveHref(e.bundle_url))}">Download .strule</a>
               <div class="mono" style="font-size:0.72rem;color:var(--muted);margin-top:0.3rem;" title="${esc(e.bundle_sha256)}">sha256:${esc(shaShort)}…</div>
             </td>
           </tr>
         `;
       }).join('');
+    }
+
+    async function overlayLiveMetrics(data) {
+      const ep = (data.rankings_endpoint || 'https://sloptrap-rankings.assimilat.workers.dev').replace(/\/$/, '');
+      const repo = data.registry_repo || 'sloptrap/sloptrap.github.io';
+
+      await Promise.allSettled([
+        fetch(`${ep}/api/v1/rules/stats`).then(r => r.ok ? r.json() : null).then(st => {
+          if (!st || !st.active_installs) return;
+          for (const e of data.entries || []) {
+            if (st.active_installs[e.rule_id] !== undefined) {
+              e.active_installs = Number(st.active_installs[e.rule_id]);
+            }
+          }
+        }),
+        fetch(`https://api.github.com/repos/${repo}/releases?per_page=100`).then(r => r.ok ? r.json() : null).then(rels => {
+          if (!Array.isArray(rels)) return;
+          const tot = {}, ver = {};
+          for (const rel of rels) {
+            if (rel.draft) continue;
+            const tag = rel.tag_name || '';
+            for (const a of rel.assets || []) {
+              if (!a.name || !a.name.endsWith('.strule')) continue;
+              const rid = a.name.slice(0, -7);
+              tot[rid] = (tot[rid] || 0) + Number(a.download_count || 0);
+              const pref = `rule-${rid}-v`;
+              if (tag.startsWith(pref)) {
+                ver[`${rid}@${tag.slice(pref.length)}`] = Number(a.download_count || 0);
+              }
+            }
+          }
+          for (const e of data.entries || []) {
+            if (tot[e.rule_id] !== undefined) e.downloads_total = tot[e.rule_id];
+            if (ver[`${e.rule_id}@${e.version}`] !== undefined) e.downloads_version = ver[`${e.rule_id}@${e.version}`];
+          }
+        }),
+        fetch(`https://api.github.com/repos/${repo}/issues?labels=leaderboard-rule&state=open&per_page=100`).then(r => r.ok ? r.json() : null).then(issues => {
+          if (!Array.isArray(issues)) return;
+          for (const iss of issues) {
+            if (iss.pull_request) continue;
+            const m = `${iss.title || ''}\n${iss.body || ''}`.match(/\[rule:([^\]]+)\]/);
+            if (!m) continue;
+            const rid = m[1].trim();
+            const likes = Number(iss.reactions?.['+1'] || 0) + Number(iss.reactions?.heart || 0);
+            for (const e of data.entries || []) {
+              if (e.rule_id === rid) {
+                e.likes = likes;
+                e.issue_url = iss.html_url || e.issue_url;
+                e.issue_number = iss.number || e.issue_number;
+              }
+            }
+          }
+        }),
+      ]);
+
+      for (const e of data.entries || []) {
+        e.composite_score = computeComposite(e);
+      }
+      const sorted = [...(data.entries || [])].sort((a, b) => b.composite_score - a.composite_score || (b.active_installs || 0) - (a.active_installs || 0) || a.overhead - b.overhead);
+      sorted.forEach((e, i) => { e.rank = i + 1; });
+      data.entries = sorted;
+      render();
     }
 
     document.querySelectorAll('.sort-btn[data-sort]').forEach(btn => {
@@ -187,9 +289,10 @@
           <span class="chip">Verified Bundles: <strong>${(data.entries || []).length}</strong></span>
         `;
         render();
+        overlayLiveMetrics(data);
       })
       .catch(err => {
-        document.getElementById('rows').innerHTML = `<tr><td colspan="6" style="color:var(--crimson);">Failed to load leaderboard.json: ${esc(err)}</td></tr>`;
+        document.getElementById('rows').innerHTML = `<tr><td colspan="7" style="color:var(--crimson);">Failed to load leaderboard.json: ${esc(err)}</td></tr>`;
       });
   </script>
 </body>

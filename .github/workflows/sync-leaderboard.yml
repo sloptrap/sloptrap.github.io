@@ -1,0 +1,169 @@
+name: Sync SlopTrap Leaderboard Metrics
+
+on:
+  schedule:
+    - cron: "17 */4 * * *"
+  release:
+    types: [published, edited]
+  issues:
+    types: [opened, edited]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sync D1 active_installs, GitHub Release downloads & Issue likes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          python3 - << 'EOF'
+          import json, math, os, urllib.request
+          from datetime import datetime, timezone
+
+          repo = os.environ.get("REPO", "sloptrap/sloptrap.github.io")
+          token = os.environ.get("GITHUB_TOKEN", "")
+
+          with open("leaderboard.json", "r", encoding="utf-8") as f:
+              doc = json.load(f)
+
+          rankings_ep = (doc.get("rankings_endpoint") or "https://sloptrap-rankings.assimilat.workers.dev").rstrip("/")
+
+          def get_json(url, gh=False):
+              headers = {"User-Agent": "SlopTrap-Leaderboard-Sync/1.0"}
+              if gh:
+                  headers["Accept"] = "application/vnd.github+json"
+                  if token:
+                      headers["Authorization"] = f"Bearer {token}"
+              req = urllib.request.Request(url, headers=headers)
+              with urllib.request.urlopen(req, timeout=10) as resp:
+                  return json.loads(resp.read().decode("utf-8"))
+
+          active_installs = {}
+          try:
+              st = get_json(f"{rankings_ep}/api/v1/rules/stats", gh=False)
+              active_installs = st.get("active_installs") or {}
+          except Exception as exc:
+              print("Warning: stats fetch skipped:", exc)
+
+          dl_total, dl_ver, asset_url = {}, {}, {}
+          try:
+              releases = get_json(f"https://api.github.com/repos/{repo}/releases?per_page=100", gh=True)
+              for rel in releases:
+                  if rel.get("draft"):
+                      continue
+                  tag = rel.get("tag_name") or ""
+                  for a in rel.get("assets") or []:
+                      name = a.get("name") or ""
+                      if not name.endswith(".strule"):
+                          continue
+                      rid = name[:-7]
+                      cnt = int(a.get("download_count") or 0)
+                      dl_total[rid] = dl_total.get(rid, 0) + cnt
+                      pref = f"rule-{rid}-v"
+                      if tag.startswith(pref):
+                          ver = tag[len(pref):]
+                          dl_ver[f"{rid}@{ver}"] = dl_ver.get(f"{rid}@{ver}", 0) + cnt
+                          asset_url[f"{rid}@{ver}"] = a.get("browser_download_url") or ""
+          except Exception as exc:
+              print("Warning: releases fetch skipped:", exc)
+
+          likes_map, issue_num, issue_url = {}, {}, {}
+          try:
+              issues = get_json(f"https://api.github.com/repos/{repo}/issues?labels=leaderboard-rule&state=open&per_page=100", gh=True)
+              for iss in issues:
+                  if "pull_request" in iss:
+                      continue
+                  text = f"{iss.get('title', '')}\n{iss.get('body', '')}"
+                  idx = text.find("[rule:")
+                  if idx < 0:
+                      continue
+                  rest = text[idx + 6:]
+                  end = rest.find("]")
+                  if end <= 0:
+                      continue
+                  rid = rest[:end].strip()
+                  rx = iss.get("reactions") or {}
+                  likes = int(rx.get("+1") or 0) + int(rx.get("heart") or 0)
+                  num = int(iss.get("number") or 0)
+                  if num > 0 and (rid not in issue_num or num < issue_num[rid]):
+                      issue_num[rid] = num
+                      issue_url[rid] = iss.get("html_url") or ""
+                      likes_map[rid] = likes
+          except Exception as exc:
+              print("Warning: issues fetch skipped:", exc)
+
+          def compute_composite(f1, rep, oh, inst, stars, likes, dv, dt):
+              oh = max(1, min(10, int(oh)))
+              q_gate = max(0.0, min(1.0, (f1 - 0.50) / 0.50))
+              eff = (11 - oh) / 10.0
+              rep_n = max(0.0, min(1.0, rep / 100.0))
+              votes = likes + stars * 0.75
+              dl_sig = dv * 0.70 + dt * 0.30
+              pop_raw = 1.60 * math.log1p(inst) + 1.35 * math.log1p(votes) + 0.55 * math.log1p(dl_sig)
+              pop_b = math.tanh(pop_raw / 6.5)
+              return round(100.0 * (0.62 * f1 + 0.10 * eff + 0.08 * rep_n + 0.20 * q_gate * pop_b), 1)
+
+          before = json.dumps(doc.get("entries"), sort_keys=True)
+
+          for e in doc.get("entries") or []:
+              rid = e["rule_id"]
+              ver = e["version"]
+              e["active_installs"] = int(active_installs.get(rid, e.get("active_installs", 0)))
+              e["downloads_total"] = int(dl_total.get(rid, e.get("downloads_total", 0)))
+              e["downloads_version"] = int(dl_ver.get(f"{rid}@{ver}", e.get("downloads_version", 0)))
+              if rid in likes_map:
+                  e["likes"] = likes_map[rid]
+              if rid in issue_num:
+                  e["issue_number"] = issue_num[rid]
+                  e["issue_url"] = issue_url[rid]
+              if asset_url.get(f"{rid}@{ver}"):
+                  e["bundle_url"] = asset_url[f"{rid}@{ver}"]
+              e["composite_score"] = compute_composite(
+                  float(e.get("coarse_f1", 0)),
+                  float(e.get("author_reputation", 75)),
+                  int(e.get("overhead", 5)),
+                  e["active_installs"],
+                  int(e.get("stars", 0)),
+                  int(e.get("likes", 0)),
+                  e["downloads_version"],
+                  e["downloads_total"],
+              )
+
+          entries = doc.get("entries") or []
+          entries.sort(key=lambda x: (-x["composite_score"], -x.get("active_installs", 0), x.get("overhead", 5)))
+          for idx, e in enumerate(entries):
+              e["rank"] = idx + 1
+
+          after = json.dumps(entries, sort_keys=True)
+          if before != after:
+              doc["generated_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+              raw_out = json.dumps(doc, indent=2) + "\n"
+              with open("leaderboard.json", "w", encoding="utf-8") as f:
+                  f.write(raw_out)
+              if os.path.isdir("leaderboard"):
+                  with open("leaderboard/leaderboard.json", "w", encoding="utf-8") as f:
+                      f.write(raw_out)
+              print("Updated leaderboard.json metrics!")
+          else:
+              print("No metric changes.")
+          EOF
+
+      - name: Commit updated leaderboard.json if changed
+        run: |
+          if [ -n "$(git status --porcelain leaderboard.json leaderboard/leaderboard.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add leaderboard.json leaderboard/leaderboard.json
+            git commit -m "Sync live leaderboard rule rankings, downloads & likes"
+            git push
+          fi

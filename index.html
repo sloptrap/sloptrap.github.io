@@ -162,12 +162,13 @@ go build -o sloptrap ./cmd/sloptrap
             <th>Rule Bundle</th>
             <th>Author</th>
             <th>Band &amp; Coarse F1</th>
+            <th>Adoption &amp; Likes</th>
             <th>Overhead</th>
             <th>Bundle</th>
           </tr>
         </thead>
         <tbody id="home-lb-rows">
-          <tr><td colspan="6" style="color: var(--muted);">Loading <code>leaderboard.json</code>…</td></tr>
+          <tr><td colspan="7" style="color: var(--muted);">Loading <code>leaderboard.json</code>…</td></tr>
         </tbody>
       </table>
     </div>
@@ -192,8 +193,19 @@ go build -o sloptrap ./cmd/sloptrap
     }
     fetch('./leaderboard.json')
       .then(r => r.json())
-      .then(data => {
-        const rows = (data.entries || []).slice(0, 5).map(e => `
+      .then(async data => {
+        try {
+          const ep = (data.rankings_endpoint || 'https://sloptrap-rankings.assimilat.workers.dev').replace(/\/$/, '');
+          const st = await fetch(`${ep}/api/v1/rules/stats`).then(r => r.ok ? r.json() : null);
+          if (st && st.active_installs) {
+            for (const e of data.entries || []) {
+              if (st.active_installs[e.rule_id] !== undefined) e.active_installs = Number(st.active_installs[e.rule_id]);
+            }
+          }
+        } catch (_) {}
+        const rows = (data.entries || []).slice(0, 5).map(e => {
+          const dlHref = (e.bundle_url || '').startsWith('http') ? e.bundle_url : ('./' + e.bundle_url);
+          return `
           <tr>
             <td class="mono"><strong>#${e.rank}</strong></td>
             <td>
@@ -202,14 +214,15 @@ go build -o sloptrap ./cmd/sloptrap
             </td>
             <td class="mono">${esc(e.author)}</td>
             <td><span class="band band-${esc(e.band)}">Band ${esc(e.band)}</span> <span class="mono" style="margin-left:0.4rem;">F1 ${Number(e.coarse_f1).toFixed(2)}</span></td>
+            <td class="mono">${e.active_installs || 0} active · 👍 ${e.likes || 0} · ⬇ ${e.downloads_total || 0}</td>
             <td class="mono">${e.overhead} / 10</td>
-            <td><a class="dl-btn" href="./${esc(e.bundle_url)}" download>.strule</a></td>
+            <td><a class="dl-btn" href="${esc(dlHref)}">.strule</a></td>
           </tr>
-        `).join('');
-        document.getElementById('home-lb-rows').innerHTML = rows || '<tr><td colspan="6">No entries</td></tr>';
+        `}).join('');
+        document.getElementById('home-lb-rows').innerHTML = rows || '<tr><td colspan="7">No entries</td></tr>';
       })
       .catch(() => {
-        document.getElementById('home-lb-rows').innerHTML = '<tr><td colspan="6" style="color:var(--crimson);">Unable to load leaderboard.json</td></tr>';
+        document.getElementById('home-lb-rows').innerHTML = '<tr><td colspan="7" style="color:var(--crimson);">Unable to load leaderboard.json</td></tr>';
       });
   </script>
 </body>

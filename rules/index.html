@@ -160,14 +160,25 @@
 #    sign &amp; encrypt .strule bundles, evaluate on holdout corpus, and write leaderboard.json
 ./sloptrap rules build-defaults --out ../sloptrap-site --priv &lt;author-private-key-hex&gt;
 
-# 3. Verify Ed25519 signature &amp; decrypt payload of any .strule bundle
+# 3. Sync live active installs, GitHub Release downloads &amp; Issue 👍 likes
+./sloptrap rules sync --out ../sloptrap-site
+
+# 4. Check for bundle updates (pass --anon-rule-rankings=false to disable anonymous heartbeat)
+./sloptrap rules check-updates
+
+# 5. Upvote a rule on the leaderboard via gh CLI
+./sloptrap rules like necro-hijack-guard
+
+# 6. Verify Ed25519 signature &amp; decrypt payload of any .strule bundle
 ./sloptrap rules verify ../sloptrap-site/bundles/necro-hijack-guard.strule</code></pre>
 
-        <h2 id="leaderboard-design">6. Anti-Oracle Leaderboard Design</h2>
+        <h2 id="leaderboard-design">6. Anti-Oracle Leaderboard &amp; Anonymous Rule Rankings</h2>
         <ul>
           <li><strong>Private Holdout Corpus:</strong> Only truncated SHA-256 channel commitments appear publicly in <code>leaderboard.json</code>; raw channel handles and IDs remain private.</li>
           <li><strong>Holdout Perturbation &amp; Rate Limiting:</strong> Periodic holdout subset rotation (<code>perturbSeed</code>) and per-author Ed25519 submission rate limits (<code>leaderboard.RateLimiter</code>) prevent iterative threshold probing.</li>
-          <li><strong>Coarse Banding:</strong> Published Precision, Recall, and F1 are rounded to <code>0.05</code> increments alongside coarse letter bands (<code>S</code> ≥ 0.90, <code>A</code> ≥ 0.78, <code>B</code> ≥ 0.60, <code>C</code> &lt; 0.60), combined with author reputation, low-overhead efficiency bonus, and GitHub ★ star popularity.</li>
+          <li><strong>Coarse Banding &amp; Accuracy Quality Gate:</strong> Published Precision, Recall, and F1 are rounded to <code>0.05</code> increments alongside coarse letter bands (<code>S</code> &ge; 0.90, <code>A</code> &ge; 0.78, <code>B</code> &ge; 0.60, <code>C</code> &lt; 0.60). Holdout F1 acts as a multiplicative gate (<code>F1 &le; 0.50</code> receives zero popularity boost) so botted downloads or likes cannot elevate permissive rules.</li>
+          <li><strong>Anonymous Rule Rankings (Active Installs):</strong> Clients with <em>Anonymous rule rankings</em> enabled send a random local 128-bit <code>install_token</code> (never tied to a YouTube account or device serial) and their enabled rule IDs during periodic update checks (<code>POST /api/v1/rules/check-updates</code>), maintaining a rolling 14-day active-install count with per-subnet daily Sybil caps. Disabling <em>Anonymous rule rankings</em> switches update checks to plain static <code>leaderboard.json</code> fetches.</li>
+          <li><strong>GitHub Release Downloads &amp; Issue 👍 Likes:</strong> Distributable <code>.strule</code> assets are published on GitHub Releases for native download counting, and each rule has a dedicated <code>leaderboard-rule</code> GitHub Issue where users react with 👍 (one vote per GitHub account).</li>
         </ul>
       </article>
     </div>

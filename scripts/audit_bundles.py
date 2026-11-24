@@ -44,7 +44,13 @@ FUEL_BUDGET = 10_000_000
 DEFAULT_SCORING_SEED = "sloptrap-public-scoring-v1:9f84c2e0a1b74d6e8f3c5a2b1d9e0f4a"
 
 RULE_ID_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{1,63}$")
+SITE_ID_RE = re.compile(r"^(?:\*|[a-z0-9][a-z0-9_-]{1,31})$")
 SEMVER_RE = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9.]+)?$")
+COMMIT_SHA_RE = re.compile(r"^[0-9a-fA-F]{40}$")
+OFFICIAL_MAINTAINER_KEYS = {
+    "eb85cbf507e27e2c0f94ad723385db3138af32670ea37ca337f0c1866eae02cc",
+    "33fee5d93b69abffb9d920da59d823a1c88a71119064a794ff6a8258bee2a472",
+}
 ALLOWED_INPUTS = {
     "metadata",
     "upload_cadence",
@@ -243,12 +249,17 @@ def audit_bundle_file(path: Path, scoring_seed: str, require_wasmtime: bool) -> 
     m = bundle.get("manifest") or {}
 
     rule_id = str(m.get("rule_id", ""))
+    target_site = str(m.get("target_site") or "youtube").strip().lower()
     version = str(m.get("version", ""))
     overhead = int(m.get("overhead", 0))
     inputs = m.get("inputs") or []
+    pub_hex = str(m.get("author_public_key", "")).strip().lower()
+    prov = m.get("provenance")
 
     if not RULE_ID_RE.match(rule_id):
         raise ValueError(f"invalid rule_id {rule_id!r}")
+    if not SITE_ID_RE.match(target_site):
+        raise ValueError(f"invalid target_site {target_site!r}")
     if not SEMVER_RE.match(version):
         raise ValueError(f"invalid semver {version!r}")
     if not (1 <= overhead <= 10):
@@ -256,39 +267,75 @@ def audit_bundle_file(path: Path, scoring_seed: str, require_wasmtime: bool) -> 
     if not inputs or any(i not in ALLOWED_INPUTS for i in inputs):
         raise ValueError(f"invalid inputs {inputs!r}")
 
+    if isinstance(prov, dict):
+        tier = prov.get("tier") or "unverified"
+        if tier == "official":
+            if pub_hex not in OFFICIAL_MAINTAINER_KEYS:
+                raise ValueError(f"spoofed official provenance: {pub_hex} is not an official maintainer key")
+        elif tier == "source-attested":
+            srepo = str(prov.get("source_repo", ""))
+            scommit = str(prov.get("source_commit", "")).strip()
+            srun = str(prov.get("build_run_url", ""))
+            if not (
+                srepo.startswith("https://github.com/")
+                and COMMIT_SHA_RE.match(scommit)
+                and srun.startswith("https://github.com/")
+            ):
+                raise ValueError("source-attested provenance requires valid GitHub source_repo, 40-char source_commit, and build_run_url")
+        elif tier == "unverified":
+            if prov.get("verified"):
+                raise ValueError("unverified tier cannot assert verified=true")
+        else:
+            raise ValueError(f"unknown provenance tier {tier!r}")
+
     wasm_bytes = verify_and_unpack(bundle, scoring_seed)
     max_pages, _ = audit_wasm_sections(wasm_bytes)
+    verify_tier = "official" if pub_hex in OFFICIAL_MAINTAINER_KEYS else ((prov or {}).get("tier") or "unverified")
 
     if wasmtime is None:
         if require_wasmtime:
             raise RuntimeError("wasmtime package is required in CI (--require-wasmtime)")
         return (
-            f"PASS (static+crypto) [{path.name}] {rule_id} v{version} | "
-            f"WASM:{len(wasm_bytes)}B Mem<={max_pages}p"
+            f"PASS (static+crypto) [{path.name}] site={target_site} tier={verify_tier} | "
+            f"{rule_id} v{version} | WASM:{len(wasm_bytes)}B Mem<={max_pages}p"
         )
 
     slop_probe = json.dumps(
         {
             "schema_version": 1,
-            "channel": {"has_auto_suffix": True, "stem_siblings": 3, "total_videos": 240},
+            "site": target_site,
+            "channel": {
+                "has_auto_suffix": True,
+                "stem_siblings": 3,
+                "total_videos": 240,
+                "outbound_domain_share": 0.92,
+            },
             "upload_cadence": {
                 "channel_age_days": 5800,
                 "max_dormancy_gap_days": 5400,
                 "pre_pivot_videos": 2,
                 "post_pivot_videos": 238,
                 "post_pivot_share": 0.99,
-                "recent_uploads_per_day": 1.8,
+                "recent_uploads_per_day": 4.2,
                 "output_minutes_per_week": 340,
+                "duration_cv": 0.04,
             },
             "transcript": {
                 "uncontracted_ratio": 0.90,
                 "antithesis_per_1k": 2.6,
-                "slop_hooks_per_1k": 2.1,
+                "slop_hooks_per_1k": 2.4,
+                "keyword_stuffing_ratio": 0.76,
                 "intra_video_wpm_cv": 0.08,
                 "pause_cv": 0.19,
                 "earliest_has_speech": False,
             },
-            "thumbnails": {"title_skeleton_reuse": 0.78, "raw_camera_earliest_title": True},
+            "thumbnails": {
+                "title_skeleton_reuse": 0.78,
+                "raw_camera_earliest_title": True,
+                "synthetic_image_ratio": 0.94,
+                "aspect_uniformity": 0.97,
+                "repost_watermark_ratio": 0.86,
+            },
             "audio_video_stats": {"dead_air_floor": True},
         }
     ).encode("utf-8")
@@ -296,22 +343,35 @@ def audit_bundle_file(path: Path, scoring_seed: str, require_wasmtime: bool) -> 
     human_probe = json.dumps(
         {
             "schema_version": 1,
-            "channel": {"has_auto_suffix": False, "stem_siblings": 0, "total_videos": 260},
+            "site": target_site,
+            "channel": {
+                "has_auto_suffix": False,
+                "stem_siblings": 0,
+                "total_videos": 260,
+                "outbound_domain_share": 0.06,
+            },
             "upload_cadence": {
                 "channel_age_days": 4200,
                 "max_dormancy_gap_days": 60,
                 "recent_uploads_per_day": 0.04,
                 "output_minutes_per_week": 8,
+                "duration_cv": 0.42,
             },
             "transcript": {
                 "uncontracted_ratio": 0.16,
                 "first_person_per_1k": 18.0,
                 "disfluencies_per_1k": 2.8,
+                "keyword_stuffing_ratio": 0.04,
                 "intra_video_wpm_cv": 0.21,
                 "pause_cv": 0.52,
                 "earliest_has_speech": True,
             },
-            "thumbnails": {"title_skeleton_reuse": 0.10},
+            "thumbnails": {
+                "title_skeleton_reuse": 0.10,
+                "synthetic_image_ratio": 0.0,
+                "aspect_uniformity": 0.24,
+                "repost_watermark_ratio": 0.0,
+            },
         }
     ).encode("utf-8")
 
@@ -353,15 +413,22 @@ def main() -> int:
     scoring_seed = os.environ.get("SLOPTRAP_SCORING_SEED", DEFAULT_SCORING_SEED)
     repo_root = Path(__file__).resolve().parent.parent
 
-    lb_path = repo_root / "leaderboard.json"
-    if lb_path.exists():
+    lb_files = [repo_root / "leaderboard.json"] + sorted((repo_root / "leaderboard").glob("*/leaderboard.json"))
+    for lb_path in lb_files:
+        if not lb_path.exists():
+            continue
         lb = json.loads(lb_path.read_text(encoding="utf-8"))
         for entry in lb.get("entries", []):
+            pub_hex = str(entry.get("author_public_key", "")).strip().lower()
+            tier = entry.get("verification_tier") or "unverified"
+            if entry.get("verified") and tier == "official" and pub_hex not in OFFICIAL_MAINTAINER_KEYS:
+                print(f"AUDIT FAIL [{lb_path.relative_to(repo_root)}]: spoofed official entry {entry.get('rule_id')}", file=sys.stderr)
+                return 1
             local_rel = entry.get("local_bundle_path")
             if local_rel:
                 bp = repo_root / local_rel
                 if not bp.exists():
-                    print(f"AUDIT FAIL: missing bundle {local_rel} referenced in leaderboard.json", file=sys.stderr)
+                    print(f"AUDIT FAIL: missing bundle {local_rel} referenced in {lb_path.name}", file=sys.stderr)
                     return 1
                 actual_sha = hashlib.sha256(bp.read_bytes()).hexdigest()
                 expected_sha = entry.get("bundle_sha256", "")

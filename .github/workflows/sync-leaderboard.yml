@@ -10,26 +10,26 @@ permissions:
 
 jobs:
   sync:
-    name: Sync Worker Installs, GitHub Likes & Release Downloads
+    name: Sync Multi-Site Leaderboards from Worker, Issues & Releases
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Sync leaderboard.json from Worker, Issues & Releases
+      - name: Sync site leaderboards
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python3 - <<'PY'
-          import json, os, urllib.request
+          import json, os, re, urllib.request
           from datetime import datetime, timezone
           from pathlib import Path
 
           repo = os.environ.get("GITHUB_REPOSITORY", "sloptrap/sloptrap.github.io")
           token = os.environ.get("GH_TOKEN", "")
-          lb_path = Path("leaderboard.json")
-          lb = json.loads(lb_path.read_text(encoding="utf-8"))
+          root_lb_path = Path("leaderboard.json")
+          root_lb = json.loads(root_lb_path.read_text(encoding="utf-8"))
 
           def gh_get(url: str):
               req = urllib.request.Request(url, headers={
@@ -40,9 +40,9 @@ jobs:
               with urllib.request.urlopen(req, timeout=15) as r:
                   return json.loads(r.read().decode("utf-8"))
 
-          # 1. Cloudflare Worker stats (window_days, active_installs, all_time_installs)
-          endpoint = (lb.get("rankings_endpoint") or "").rstrip("/")
+          endpoint = (root_lb.get("rankings_endpoint") or "").rstrip("/")
           active_map, all_time_map = {}, {}
+          window_days = int(root_lb.get("active_window_days") or 30)
           if endpoint:
               try:
                   req = urllib.request.Request(
@@ -52,23 +52,30 @@ jobs:
                   with urllib.request.urlopen(req, timeout=15) as r:
                       st = json.loads(r.read().decode("utf-8"))
                   if int(st.get("window_days") or 0) > 0:
-                      lb["active_window_days"] = int(st["window_days"])
+                      window_days = int(st["window_days"])
                   active_map = st.get("active_installs") or {}
                   all_time_map = st.get("all_time_installs") or {}
               except Exception as exc:
                   print(f"Worker stats warning: {exc}")
 
-          # 2. GitHub Issue thumbs-up likes
-          likes_by_issue = {}
+          likes_by_rule = {}
           try:
               issues = gh_get(f"https://api.github.com/repos/{repo}/issues?labels=leaderboard-rule&state=open&per_page=100")
               for iss in issues:
-                  num = iss.get("number")
-                  likes_by_issue[num] = int((iss.get("reactions") or {}).get("+1", 0))
+                  if iss.get("pull_request"):
+                      continue
+                  m = re.search(r"\[rule:([^\]]+)\]", f"{iss.get('title', '')}\n{iss.get('body', '')}")
+                  if m:
+                      rid = m.group(1).strip()
+                      rx = iss.get("reactions") or {}
+                      likes_by_rule[rid] = (
+                          int(rx.get("+1", 0)) + int(rx.get("heart", 0)),
+                          iss.get("number"),
+                          iss.get("html_url"),
+                      )
           except Exception as exc:
               print(f"Issues warning: {exc}")
 
-          # 3. GitHub Release .strule download counts
           dl_total, dl_ver = {}, {}
           try:
               releases = gh_get(f"https://api.github.com/repos/{repo}/releases?per_page=100")
@@ -84,35 +91,51 @@ jobs:
           except Exception as exc:
               print(f"Releases warning: {exc}")
 
-          for e in lb.get("entries", []):
-              rid = e["rule_id"]
-              ver = e["version"]
-              tag = f"rule-{rid}-v{ver}"
-              if rid in active_map:
-                  e["active_installs"] = int(active_map[rid])
-              if rid in all_time_map:
-                  e["all_time_installs"] = max(int(all_time_map[rid]), int(e.get("active_installs", 0)))
-              elif e.get("active_installs", 0) > e.get("all_time_installs", 0):
-                  e["all_time_installs"] = int(e["active_installs"])
-              if e.get("issue_number") in likes_by_issue:
-                  e["likes"] = likes_by_issue[e["issue_number"]]
-              if rid in dl_total:
-                  e["downloads_total"] = dl_total[rid]
-              if (rid, tag) in dl_ver:
-                  e["downloads_version"] = dl_ver[(rid, tag)]
+          now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+          site_files = sorted(Path("leaderboard").glob("*/leaderboard.json"))
+          if not site_files:
+              site_files = [root_lb_path]
 
-          lb["generated_at"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-          encoded = json.dumps(lb, indent=2) + "\n"
-          lb_path.write_text(encoded, encoding="utf-8")
-          Path("leaderboard/leaderboard.json").write_text(encoded, encoding="utf-8")
+          for sf in site_files:
+              lb = json.loads(sf.read_text(encoding="utf-8"))
+              lb["active_window_days"] = window_days
+              lb["generated_at"] = now_iso
+              for e in lb.get("entries", []):
+                  rid = e["rule_id"]
+                  ver = e["version"]
+                  tag = f"rule-{rid}-v{ver}"
+                  if rid in active_map:
+                      e["active_installs"] = int(active_map[rid])
+                  if rid in all_time_map:
+                      e["all_time_installs"] = max(int(all_time_map[rid]), int(e.get("active_installs", 0)))
+                  else:
+                      e["all_time_installs"] = max(int(e.get("all_time_installs", 0)), int(e.get("active_installs", 0)))
+                  if rid in likes_by_rule:
+                      e["likes"], e["issue_number"], e["issue_url"] = likes_by_rule[rid]
+                  if rid in dl_total:
+                      e["downloads_total"] = dl_total[rid]
+                  if (rid, tag) in dl_ver:
+                      e["downloads_version"] = dl_ver[(rid, tag)]
+              encoded = json.dumps(lb, indent=2) + "\n"
+              sf.write_text(encoded, encoding="utf-8")
+              if lb.get("target_site") == "youtube":
+                  root_lb_path.write_text(encoded, encoding="utf-8")
+                  Path("leaderboard/leaderboard.json").write_text(encoded, encoding="utf-8")
+
+          idx_path = Path("leaderboard/index.json")
+          if idx_path.exists():
+              idx = json.loads(idx_path.read_text(encoding="utf-8"))
+              idx["active_window_days"] = window_days
+              idx["generated_at"] = now_iso
+              idx_path.write_text(json.dumps(idx, indent=2) + "\n", encoding="utf-8")
           PY
 
-      - name: Commit updated leaderboard if changed
+      - name: Commit updated leaderboards if changed
         run: |
-          if ! git diff --quiet leaderboard.json leaderboard/leaderboard.json; then
+          if ! git diff --quiet leaderboard.json leaderboard/; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add leaderboard.json leaderboard/leaderboard.json
-            git commit -m "chore(leaderboard): sync rankings stats [skip ci]"
+            git add leaderboard.json leaderboard/
+            git commit -m "chore(leaderboard): sync multi-site rankings stats [skip ci]"
             git push
           fi

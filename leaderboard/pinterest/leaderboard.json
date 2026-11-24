@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "target_site": "pinterest",
+  "site_display_name": "Pinterest",
+  "registry_repo": "sloptrap/sloptrap.github.io",
+  "rankings_endpoint": "https://sloptrap-rankings.assimilat.workers.dev",
+  "active_window_days": 14,
+  "generated_at": "2026-11-24T21:18:27Z",
+  "epoch_id": "2026-Q4",
+  "corpus_count": 4,
+  "corpus_hashes": [
+    "94185f60462e7e23",
+    "24d2c277502c397f",
+    "3f29ef34caacb2a9",
+    "430010a9dc917e89"
+  ],
+  "entries": [
+    {
+      "rank": 1,
+      "rule_id": "pinterest-affiliate-domain-ring",
+      "target_site": "pinterest",
+      "verified": true,
+      "verification_tier": "official",
+      "provenance": {
+        "verified": true,
+        "tier": "official",
+        "source_repo": "https://github.com/sloptrap/sloptrap"
+      },
+      "name": "Affiliate Domain Funnel \u0026 Board Hijack Guard",
+      "description": "Detects automated ad-farm accounts funneling outbound pin links to a single domain with templated titles and dormant account pivots.",
+      "version": "1.0.0",
+      "author": "@sloptrap-core",
+      "author_public_key": "33fee5d93b69abffb9d920da59d823a1c88a71119064a794ff6a8258bee2a472",
+      "author_reputation": 92,
+      "repo_url": "https://github.com/sloptrap/sloptrap",
+      "stars": 0,
+      "likes": 0,
+      "active_installs": 0,
+      "all_time_installs": 0,
+      "downloads_total": 0,
+      "downloads_version": 0,
+      "issue_number": 6,
+      "issue_url": "https://github.com/sloptrap/sloptrap.github.io/issues/6",
+      "overhead": 3,
+      "inputs": [
+        "metadata",
+        "upload_cadence",
+        "thumbnails"
+      ],
+      "band": "S",
+      "coarse_f1": 1,
+      "coarse_precision": 1,
+      "coarse_recall": 1,
+      "composite_score": 77.4,
+      "bundle_url": "https://github.com/sloptrap/sloptrap.github.io/releases/download/rule-pinterest-affiliate-domain-ring-v1.0.0/pinterest-affiliate-domain-ring.strule",
+      "local_bundle_path": "bundles/pinterest-affiliate-domain-ring.strule",
+      "bundle_sha256": "6f4413ea0fc2068282add34602eb8b651f9a522dc99b9d5d3a815f9e2f10ea5b",
+      "updated_at": "2026-11-24"
+    },
+    {
+      "rank": 2,
+      "rule_id": "pinterest-ai-pin-mill",
+      "target_site": "pinterest",
+      "verified": true,
+      "verification_tier": "official",
+      "provenance": {
+        "verified": true,
+        "tier": "official",
+        "source_repo": "https://github.com/sloptrap/sloptrap"
+      },
+      "name": "Synthetic Image \u0026 SEO Pin Mill",
+      "description": "Scores diffusion/upscaler image artifacts, batch aspect-ratio lock, keyword-stuffed pin descriptions, and automated daily pin floods.",
+      "version": "1.0.0",
+      "author": "@sloptrap-core",
+      "author_public_key": "33fee5d93b69abffb9d920da59d823a1c88a71119064a794ff6a8258bee2a472",
+      "author_reputation": 92,
+      "repo_url": "https://github.com/sloptrap/sloptrap",
+      "stars": 0,
+      "likes": 0,
+      "active_installs": 0,
+      "all_time_installs": 0,
+      "downloads_total": 0,
+      "downloads_version": 0,
+      "overhead": 6,
+      "inputs": [
+        "metadata",
+        "upload_cadence",
+        "transcript",
+        "thumbnails"
+      ],
+      "band": "S",
+      "coarse_f1": 1,
+      "coarse_precision": 1,
+      "coarse_recall": 1,
+      "composite_score": 74.4,
+      "bundle_url": "https://github.com/sloptrap/sloptrap.github.io/releases/download/rule-pinterest-ai-pin-mill-v1.0.0/pinterest-ai-pin-mill.strule",
+      "local_bundle_path": "bundles/pinterest-ai-pin-mill.strule",
+      "bundle_sha256": "77ab404086111668bd98cb86373cf076f140fd25b811947832ac1f25288ef612",
+      "updated_at": "2026-11-24"
+    }
+  ]
+}

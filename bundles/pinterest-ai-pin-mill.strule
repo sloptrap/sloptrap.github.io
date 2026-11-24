@@ -1,0 +1,30 @@
+{
+  "format": "sloptrap-bundle-v1",
+  "manifest": {
+    "rule_id": "pinterest-ai-pin-mill",
+    "target_site": "pinterest",
+    "name": "Synthetic Image \u0026 SEO Pin Mill",
+    "description": "Scores diffusion/upscaler image artifacts, batch aspect-ratio lock, keyword-stuffed pin descriptions, and automated daily pin floods.",
+    "version": "1.0.0",
+    "author": "@sloptrap-core",
+    "author_public_key": "33fee5d93b69abffb9d920da59d823a1c88a71119064a794ff6a8258bee2a472",
+    "repo_url": "https://github.com/sloptrap/sloptrap",
+    "interpreter": "wasm-v1",
+    "inputs": [
+      "metadata",
+      "upload_cadence",
+      "transcript",
+      "thumbnails"
+    ],
+    "default_weight": 1.35,
+    "overhead": 4,
+    "encryption": "aes-256-gcm-hkdf",
+    "provenance": {
+      "verified": true,
+      "tier": "official",
+      "source_repo": "https://github.com/sloptrap/sloptrap"
+    }
+  },
+  "payload_b64": "3Rk4klbRtJ4A8L5JlVaw+Z3QWwNmfgJofYh4laulcuYc9YTBZx1L3UlOHQbDuebylvNUxsHzAtBOalsTA0R1tsX+gCnDHvCai9mfJqvtvV2d8G0+3R2s6ixKT6W9KT3WYc9z293cTOymST6RGpYvDRigxiFTHgdjBvXRJSWznBb9AvojKUcfswC6IXu8nAYOUjgZLDF8SA3j4gl+3aZpVdwkPB6GlFp47NOCw8k1QaEKukqHZ3MfebLtp2OH3avxHRxd/4QoPv7TRszXt79Ji7jHA+O7W+k3pWllFUETJIVCttdDAz3i2ZrGTpQCT/gsB4ORONTHpwiS/xudMc/02u+kSejjr7egTodKbe2qMSbRuWoyS+1tjm7iKtvKp34MHhp/4YbUtw6YybFOTzY8CzobBaSEKBQERwLeQ5BUXd/YBpG48asIcuwsP8YFxbWzCbT0N9MmoBZSd9/yvDYUq4gugorWwXncdTsu3fdlaI3QxuhLenIINKOlAS3xVwdlKAPhGhlMjebDiljTdbRxBxAE6HfCDr2lfVSkgQbGRXbcw1ijQl3pBg/JlZqh5YH6qOy0Yv+eNQpLF1xWq/7LjkHupYueKIvsIH+esWsWX93+gULKRNQTDfIz1GolmIj4IQORLTVca5/RlCKlHqvmfEnHnMI2Ed3Ho4Sv82OH8Wp+2Qwrp7fEcZFcB3NL93zZR4+LArrmEifw7E5Ca9aQvAqQ0FkfuheAt2HMfdsQGVgriJ1GyaRZthEkm5g2dH2ah7qa2mvTvWEQrbKhyN4JUWM30PVsApaxGb8vJ7XO+BlUR/D/oCUJ2EVm4wJ7xLqF5Jotl9mqETKYq3D8ROw7c+qWV762D8y4HkrP4yMWIAP0D0uu4iXVazT3w5RH+RaE+7nZNdvcgR+M48Zpbz84B41uRhGJkibrLmYbs5NErWg/LcQtc2nTUvjyGaXnG0aohMeRR9dWQznKxDKhYc7R9S+KACbRkhGNYpI9izVUEeNzDQpIT/BBcA2IFr5jPwPZfG1DegzvYtRaHUxpOZl8gMxXL2A2/PZd7d2A3HaZsSwlibJF16kOPzW2li9ixEIRjcIoRV3apuABM4DD4vdB8r+ZW+ANOG29xyssymAM+34hqGpoRl1m5rWhqwSPOn0c8vNDtv4S6r2Kp4chwMSZc1N75jW7Lz/48IYZ1TtDAp3v0Ckuzqi6s0QjrwQhCgBxM8YuK2L+9jaGEM3qMy/QdqLqbYY7PuFE321r/XCob2vzfDmUp5/Xa+8EA6HN1E8iJGESG9mCTsmoGj9o65PoePSAEFqKbh6zUExXzO4xMtO/RmqrxBJ1abG97Hb2KNFKLrm/dm0+N8x8fgEZN5cVMjvihyIHUQcwHtx6pDf4twjwNG80U121hT4tSrHKc5C5Ee7xCVbHFvdavgzq89qxR7SrnntIgzxAjdS3vAducVh/Kp8pcZiK5H73eJQ6bdLWUPtwMfM/xxUMmZdfKe7Z55L8dgavGLldPOutTkJEb4kEbRAH9ePUiyOg0VNWUEcMGlFWpR/5iRc=",
+  "signature_b64": "g2dE1kc4MAweeTIZJxyZ75ec1bjDhcMF4tVEfGpXu9di5bGlU11B28iUFxq/nT5NbYKSpi2g3jOdlN7YHI6XDA=="
+}

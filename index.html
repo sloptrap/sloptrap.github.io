@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SlopTrap — YouTube Forensics, WASM Rules &amp; Verification API</title>
+  <title>SlopTrap — Pluggable AI-Slop Forensics, Sandboxed WASM Rules &amp; SDK</title>
   <link rel="stylesheet" href="./assets/gravity-uikit.css" />
   <link rel="stylesheet" href="./assets/style.css" />
 </head>
@@ -26,9 +26,9 @@
         </a>
         <nav class="g-nav" aria-label="Primary">
           <a class="g-nav__item g-nav__item_active" href="./">Overview</a>
-          <a class="g-nav__item" href="./docs/">Documentation</a>
+          <a class="g-nav__item" href="./docs/">Documentation &amp; SDK</a>
           <a class="g-nav__item" href="./rules/">WASM Spec</a>
-          <a class="g-nav__item" href="./leaderboard/">Leaderboard</a>
+          <a class="g-nav__item" href="./leaderboard/">Leaderboards</a>
         </nav>
       </div>
       <div class="g-header-actions">
@@ -45,40 +45,127 @@
     <section class="overview-split">
       <div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <span class="g-label g-label_theme_info">Go 1.24 + wazero</span>
-          <span class="g-label g-label_theme_normal">Ed25519 + AES-256-GCM</span>
-          <span class="g-label g-label_theme_positive">AiSList Compatible</span>
+          <span class="g-label g-label_theme_info">Pluggable Site Adapters</span>
+          <span class="g-label g-label_theme_positive">Verified WASM Rules</span>
+          <span class="g-label g-label_theme_normal">Go + WebAssembly SDK</span>
         </div>
-        <h1>YouTube channel forensics and sandboxed WASM filtering</h1>
+        <h1>Multi-platform content forensics and sandboxed WASM filtering</h1>
         <p class="overview-lead">
-          SlopTrap inspects upload history, account dormancy pivots, word-timed <code>json3</code> transcripts, and acoustic telemetry, then evaluates channels through deterministic <code>.strule</code> WebAssembly bundles in an interactive TUI or headless HTTP daemon.
+          SlopTrap extracts creator and account signals across pluggable target platforms — including <strong>YouTube</strong>, <strong>TikTok</strong>, <strong>Pinterest</strong>, and custom site adapters — and evaluates them inside deterministic <code>.strule</code> WebAssembly sandboxes. Embed it as a static rule library, drop in prebuilt UI panels, or run the standalone TUI and HTTP daemon.
         </p>
         <div class="btn-row">
-          <a class="g-btn g-btn_view_action g-btn_size_l" href="./docs/">Documentation</a>
-          <a class="g-btn g-btn_view_outlined g-btn_size_l" href="./leaderboard/">Rule Leaderboard</a>
+          <a class="g-btn g-btn_view_action g-btn_size_l" href="./docs/#sdk">Integrate Library &amp; UI</a>
+          <a class="g-btn g-btn_view_outlined g-btn_size_l" href="./leaderboard/">Site Leaderboards</a>
           <a class="g-btn g-btn_view_normal g-btn_size_l" href="./rules/">.strule Specification</a>
         </div>
       </div>
 
       <div>
-        <pre style="margin:0;"><code># Build standalone binary (no CGO required)
-git clone git@github.com:sloptrap/sloptrap.git
-cd sloptrap
-go build -o sloptrap ./cmd/sloptrap
+        <pre style="margin:0;"><code>// Embed in Go (static verified rules, zero network)
+eng, _ := sloptrap.NewStaticEngine(sloptrap.StaticConfig{
+    Site:            "pinterest", // or "youtube", "tiktok", custom
+    BuiltinVerified: true,
+    VerifiedOnly:    true,
+})
+verdict, _ := eng.Evaluate(ctx, fingerprint)
 
-# Interactive TUI + local HTTP verification API
-./sloptrap --listen 0.0.0.0:8787
-
-# Headless crawler + AiSList auto-reporter
-./sloptrap --serve 0.0.0.0:8787 \
-  --auto-crawl --auto-report --report-as=anonymous</code></pre>
+// Or drop the Web Component UI + WASM runtime into any web/extension page:
+// &lt;script type="module" src="https://sloptrap.github.io/sdk/sloptrap-ui.js"&gt;&lt;/script&gt;
+// &lt;sloptrap-rules-panel site="youtube" verified-only&gt;&lt;/sloptrap-rules-panel&gt;</code></pre>
       </div>
     </section>
 
     <div class="section-bar">
       <div>
-        <h2 class="section-title">Terminal workspace</h2>
-        <p class="section-sub">Keyboard and mouse navigation across channel queues, dormancy timelines, transcript prosody, and WASM rule traces.</p>
+        <h2 class="section-title">Cross-platform forensic dimensions</h2>
+        <p class="section-sub">Shared behavioral and media extractors adapt across video feeds, short-clip streams, and visual pinboards.</p>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="g-card">
+        <div class="signal-head">
+          <h3>Dormancy &amp; account hijacks</h3>
+          <span class="g-label g-label_theme_normal mono">cadence</span>
+        </div>
+        <p>Detects aged accounts that sit dormant for years before pivoting into high-frequency automated video, clip, or pin mills.</p>
+      </div>
+      <div class="g-card">
+        <div class="signal-head">
+          <h3>Publishing velocity &amp; cron lock</h3>
+          <span class="g-label g-label_theme_normal mono">cadence</span>
+        </div>
+        <p>Flags inhuman daily/weekly volume, fixed publish-hour schedules, and uniform duration or aspect-ratio batching.</p>
+      </div>
+      <div class="g-card">
+        <div class="signal-head">
+          <h3>LLM prose &amp; SEO stuffing</h3>
+          <span class="g-label g-label_theme_normal mono">text</span>
+        </div>
+        <p>Scores contrastive LLM phrasing, uncontracted prose ratios, formulaic hooks, and keyword/hashtag-stuffed descriptions.</p>
+      </div>
+      <div class="g-card">
+        <div class="signal-head">
+          <h3>Synthetic voice &amp; visual artifacts</h3>
+          <span class="g-label g-label_theme_normal mono">media</span>
+        </div>
+        <p>Measures metronomic TTS word-pacing CV, <code>-65dBFS</code> dead-air floors, diffusion image signatures, and cropped repost watermarks.</p>
+      </div>
+      <div class="g-card">
+        <div class="signal-head">
+          <h3>Clone stems &amp; outbound funnels</h3>
+          <span class="g-label g-label_theme_normal mono">network</span>
+        </div>
+        <p>Identifies batch-generated handle stems (<code>@Base-x8z</code>), templated title skeletons, and single-domain affiliate pin rings.</p>
+      </div>
+      <div class="g-card">
+        <div class="signal-head">
+          <h3>Verified build provenance</h3>
+          <span class="g-label g-label_theme_positive mono">verified</span>
+        </div>
+        <p>Marks official maintainer rules and community submissions tied to an inspected repository commit and GitHub Actions build as <strong>Verified</strong>.</p>
+      </div>
+    </div>
+
+    <div class="section-bar">
+      <div>
+        <h2 class="section-title">Site-specific WASM rule leaderboards</h2>
+        <p class="section-sub">Switch target site to inspect verified <code>.strule</code> bundles and live install metrics.</p>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="g-segmented" id="home-site-tabs" role="tablist" aria-label="Target site">
+          <button class="g-segmented__btn active" type="button" data-site="youtube">YouTube</button>
+          <button class="g-segmented__btn" type="button" data-site="tiktok">TikTok</button>
+          <button class="g-segmented__btn" type="button" data-site="pinterest">Pinterest</button>
+        </div>
+        <a class="g-btn g-btn_view_outlined g-btn_size_s" id="home-full-lb-link" href="./leaderboard/?site=youtube">Open leaderboard</a>
+      </div>
+    </div>
+
+    <div class="g-table-wrap">
+      <table class="g-table">
+        <thead>
+          <tr>
+            <th style="width:44px;">#</th>
+            <th>Rule</th>
+            <th>Provenance</th>
+            <th>Band / F1</th>
+            <th class="num" id="home-active-col">Active (30d)</th>
+            <th class="num">All-Time</th>
+            <th class="num">Overhead</th>
+            <th class="num">Artifact</th>
+          </tr>
+        </thead>
+        <tbody id="home-lb-rows">
+          <tr><td colspan="8" style="color:var(--g-color-text-secondary);">Loading leaderboard…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-bar">
+      <div>
+        <h2 class="section-title">Interactive forensic TUI &amp; HTTP daemon</h2>
+        <p class="section-sub">Included CLI workspace for deep channel/account inspection, continuous crawling, and local LAN verification APIs.</p>
       </div>
     </div>
 
@@ -87,12 +174,12 @@ go build -o sloptrap ./cmd/sloptrap
         <div class="g-segmented" role="tablist" aria-label="TUI Views">
           <button class="g-segmented__btn shot-tab active" type="button"
             data-src="./assets/screenshots/tui-overview.png"
-            data-caption="1:Overview — Per-signal score breakdown, AiSList sibling stem cross-checks, and corroborating evidence.">
+            data-caption="1:Overview — Multi-signal score breakdown, sibling stem cross-checks, and corroborating evidence.">
             1: Overview
           </button>
           <button class="g-segmented__btn shot-tab" type="button"
             data-src="./assets/screenshots/tui-timeline.png"
-            data-caption="2:Timeline — Aged-account dormancy gap comparison between Oldest and Latest channel uploads.">
+            data-caption="2:Timeline — Aged-account dormancy gap comparison between earliest and latest uploads.">
             2: Timeline
           </button>
           <button class="g-segmented__btn shot-tab" type="button"
@@ -102,12 +189,12 @@ go build -o sloptrap ./cmd/sloptrap
           </button>
           <button class="g-segmented__btn shot-tab" type="button"
             data-src="./assets/screenshots/tui-wasm-rules.png"
-            data-caption="5:WASM Rules — Signed .strule bundles executing inside zero-import WebAssembly sandboxes.">
+            data-caption="5:WASM Rules — Verified .strule bundles executing inside zero-import WebAssembly sandboxes.">
             5: WASM Rules
           </button>
           <button class="g-segmented__btn shot-tab" type="button"
             data-src="./assets/screenshots/tui-discovery.png"
-            data-caption="Discovery [d] — Topic presets and YouTube search queue harvesting.">
+            data-caption="Discovery [d] — Niche presets and automated search queue harvesting.">
             Discovery [d]
           </button>
         </div>
@@ -115,127 +202,28 @@ go build -o sloptrap ./cmd/sloptrap
       </div>
       <img id="tui-showcase-img" src="./assets/screenshots/tui-overview.png" alt="SlopTrap TUI Overview" />
       <div id="tui-showcase-caption" class="preview-panel__caption">
-        1:Overview — Per-signal score breakdown, AiSList sibling stem cross-checks, and corroborating evidence.
+        1:Overview — Multi-signal score breakdown, sibling stem cross-checks, and corroborating evidence.
       </div>
-    </div>
-
-    <div class="section-bar">
-      <div>
-        <h2 class="section-title">Forensic signal extractors</h2>
-        <p class="section-sub">Single-signal caps prevent false positives on prolific human creators; multi-signal corroboration isolates automated farms.</p>
-      </div>
-    </div>
-
-    <div class="grid-3">
-      <div class="g-card">
-        <div class="signal-head">
-          <h3>Aged-account dormancy pivot</h3>
-          <span class="g-label g-label_theme_warning mono">max 34</span>
-        </div>
-        <p>Compares the channel's <code>Oldest</code> upload tab against <code>Latest</code> uploads and total catalog count to detect dormant accounts acquired and repurposed for mass uploads.</p>
-      </div>
-      <div class="g-card">
-        <div class="signal-head">
-          <h3>Upload velocity &amp; cadence</h3>
-          <span class="g-label g-label_theme_normal mono">max 24</span>
-        </div>
-        <p>Measures weekly long-form output minutes, cron publish-hour standard deviation, and duration clustering across recent uploads.</p>
-      </div>
-      <div class="g-card">
-        <div class="signal-head">
-          <h3>Origin vs. modern era shift</h3>
-          <span class="g-label g-label_theme_normal mono">max 20</span>
-        </div>
-        <p>Contrasts early silent vertical phone clips or camera filenames (<code>IMG_0421.MOV</code>) against uniform widescreen HD narrated essays.</p>
-      </div>
-      <div class="g-card">
-        <div class="signal-head">
-          <h3>LLM script structure</h3>
-          <span class="g-label g-label_theme_normal mono">max 24</span>
-        </div>
-        <p>Parses <code>json3</code> captions for contrastive negation, tricolons, written-prose uncontracted verb ratios, and first-person pronoun absence.</p>
-      </div>
-      <div class="g-card">
-        <div class="signal-head">
-          <h3>TTS prosody &amp; acoustics</h3>
-          <span class="g-label g-label_theme_normal mono">max 18</span>
-        </div>
-        <p>Computes cross-video WPM variance, 20-second pacing CV, sentence pause regularity, and optional <code>ffmpeg</code> <code>-65dBFS</code> dead-air floors.</p>
-      </div>
-      <div class="g-card">
-        <div class="signal-head">
-          <h3>Handle stems &amp; disclosures</h3>
-          <span class="g-label g-label_theme_normal mono">max 18</span>
-        </div>
-        <p>Matches 70,000+ AiSList entries for sibling handle stems (<code>@BaseName-x8z</code>), auto-generated suffixes, synthetic media flags, and title templates.</p>
-      </div>
-    </div>
-
-    <div class="section-bar">
-      <div>
-        <h2 class="section-title">Runtime &amp; security architecture</h2>
-      </div>
-    </div>
-
-    <div class="grid-2">
-      <div class="g-card g-card_filled">
-        <h3>HTTP verification &amp; list server</h3>
-        <p>
-          <code>--serve</code> and <code>--listen</code> expose batched channel/video lookups (<code>POST /api/v1/check</code>), local SQLite caching, whitelist endpoints, and live AiSList-compatible blocklist and warnlist feeds for media clients and browser extensions.
-        </p>
-      </div>
-      <div class="g-card g-card_filled">
-        <h3>Audited zero-import <code>.strule</code> bundles</h3>
-        <p>
-          Rules compile to WebAssembly 1.0 with Ed25519 author signatures and HKDF-AES-256-GCM manifest-authenticated encryption. CI security audits reject WASM host imports, custom sections, unbounded memory, CPU loops, and feed-poisoning rules.
-        </p>
-      </div>
-    </div>
-
-    <div class="section-bar">
-      <div>
-        <h2 class="section-title">Ranked <code>.strule</code> bundles</h2>
-        <p class="section-sub">Live feed from <a href="./leaderboard.json"><code>leaderboard.json</code></a> and opt-in <em>Anonymous rule rankings</em>.</p>
-      </div>
-      <a class="g-btn g-btn_view_outlined g-btn_size_s" href="./leaderboard/">Full leaderboard</a>
-    </div>
-
-    <div class="g-table-wrap">
-      <table class="g-table">
-        <thead>
-          <tr>
-            <th style="width:48px;">#</th>
-            <th>Rule</th>
-            <th>Author</th>
-            <th>Band / F1</th>
-            <th class="num" id="home-active-col">Active (30d)</th>
-            <th class="num">All-Time</th>
-            <th class="num">Upvotes</th>
-            <th class="num">Overhead</th>
-            <th class="num">Artifact</th>
-          </tr>
-        </thead>
-        <tbody id="home-lb-rows">
-          <tr><td colspan="9" style="color:var(--g-color-text-secondary);">Loading <code>leaderboard.json</code>…</td></tr>
-        </tbody>
-      </table>
     </div>
   </main>
 
   <footer class="g-footer">
     <div class="g-footer__inner">
-      <div>SlopTrap — Open-source YouTube forensics &amp; sandboxed WebAssembly rule engine</div>
+      <div>SlopTrap — Pluggable content forensics, sandboxed WebAssembly rules &amp; embeddable SDK</div>
       <div class="g-footer__links">
-        <a href="./docs/">Documentation</a>
+        <a href="./docs/">Documentation &amp; SDK</a>
         <a href="./rules/">WASM Spec</a>
-        <a href="./leaderboard/">Leaderboard</a>
-        <a href="./leaderboard.json">leaderboard.json</a>
+        <a href="./leaderboard/">Leaderboards</a>
+        <a href="./leaderboard/index.json">leaderboard/index.json</a>
       </div>
     </div>
   </footer>
 
   <script src="./assets/site.js"></script>
   <script>
+    let workerStats = null;
+    let currentHomeSite = 'youtube';
+
     function esc(s) {
       return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
@@ -245,33 +233,37 @@ go build -o sloptrap ./cmd/sloptrap
       if (b === 'B') return 'warning';
       return 'normal';
     }
-    fetch('./leaderboard.json')
-      .then(r => r.json())
-      .then(async data => {
+    function provBadge(e) {
+      if (e.verified) {
+        const label = e.verification_tier === 'official' ? 'Verified · Official' : 'Verified · Source';
+        return `<span class="g-label g-label_theme_positive">${label}</span>`;
+      }
+      return `<span class="g-label g-label_theme_normal">Community</span>`;
+    }
+
+    async function loadHomeSite(site) {
+      currentHomeSite = site;
+      document.getElementById('home-full-lb-link').href = `./leaderboard/?site=${encodeURIComponent(site)}`;
+      try {
+        const data = await fetch(`./leaderboard/${encodeURIComponent(site)}/leaderboard.json`).then(r => r.json());
         let winDays = Number(data.active_window_days || 30);
-        try {
+        if (!workerStats) {
           const ep = (data.rankings_endpoint || 'https://sloptrap-rankings.assimilat.workers.dev').replace(/\/$/, '');
-          const st = await fetch(`${ep}/api/v1/rules/stats`).then(r => r.ok ? r.json() : null);
-          if (st) {
-            if (Number(st.window_days) > 0) winDays = Number(st.window_days);
-            for (const e of data.entries || []) {
-              if (st.active_installs && st.active_installs[e.rule_id] !== undefined) {
-                e.active_installs = Number(st.active_installs[e.rule_id]);
-              }
-              if (st.all_time_installs && st.all_time_installs[e.rule_id] !== undefined) {
-                e.all_time_installs = Math.max(Number(st.all_time_installs[e.rule_id]), Number(e.active_installs || 0));
-              } else {
-                e.all_time_installs = Math.max(Number(e.all_time_installs || 0), Number(e.active_installs || 0));
-              }
-            }
-          }
-        } catch (_) {}
+          workerStats = await fetch(`${ep}/api/v1/rules/stats`).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+        }
+        if (Number(workerStats?.window_days) > 0) winDays = Number(workerStats.window_days);
         const col = document.getElementById('home-active-col');
         if (col) col.textContent = `Active (${winDays}d)`;
 
         const rows = (data.entries || []).slice(0, 5).map(e => {
+          const act = workerStats?.active_installs?.[e.rule_id] !== undefined
+            ? Number(workerStats.active_installs[e.rule_id])
+            : Number(e.active_installs || 0);
+          const rawAll = workerStats?.all_time_installs?.[e.rule_id] !== undefined
+            ? Number(workerStats.all_time_installs[e.rule_id])
+            : Number(e.all_time_installs || 0);
+          const allTime = Math.max(rawAll, act);
           const dlHref = (e.bundle_url || '').startsWith('http') ? e.bundle_url : ('./' + e.bundle_url);
-          const allTime = Math.max(Number(e.all_time_installs || 0), Number(e.active_installs || 0));
           return `
             <tr>
               <td class="mono" style="color:var(--g-color-text-secondary);">${e.rank}</td>
@@ -279,24 +271,33 @@ go build -o sloptrap ./cmd/sloptrap
                 <div class="rule-name">${esc(e.name)} <span class="mono" style="color:var(--g-color-text-hint);font-weight:400;">v${esc(e.version)}</span></div>
                 <div class="rule-desc">${esc(e.description)}</div>
               </td>
-              <td class="mono">${esc(e.author)}</td>
+              <td>${provBadge(e)} <div class="mono" style="font-size:11px;color:var(--g-color-text-hint);margin-top:3px;">${esc(e.author)}</div></td>
               <td>
                 <span class="g-label g-label_theme_${bandTheme(e.band)}">Band ${esc(e.band)}</span>
                 <span class="mono" style="margin-left:6px;">${Number(e.coarse_f1).toFixed(2)}</span>
               </td>
-              <td class="num mono">${e.active_installs || 0}</td>
+              <td class="num mono">${act}</td>
               <td class="num mono">${allTime}</td>
-              <td class="num mono">${e.likes || 0}</td>
               <td class="num mono">${e.overhead}/10</td>
               <td class="num"><a class="g-btn g-btn_view_outlined g-btn_size_s mono" href="${esc(dlHref)}">.strule</a></td>
             </tr>
           `;
         }).join('');
-        document.getElementById('home-lb-rows').innerHTML = rows || '<tr><td colspan="9">No entries</td></tr>';
-      })
-      .catch(() => {
-        document.getElementById('home-lb-rows').innerHTML = '<tr><td colspan="9" style="color:var(--g-color-text-danger);">Failed to load leaderboard.json</td></tr>';
+        document.getElementById('home-lb-rows').innerHTML = rows || '<tr><td colspan="8">No rules registered for this site.</td></tr>';
+      } catch (_) {
+        document.getElementById('home-lb-rows').innerHTML = '<tr><td colspan="8" style="color:var(--g-color-text-danger);">Failed to load site leaderboard</td></tr>';
+      }
+    }
+
+    document.querySelectorAll('#home-site-tabs button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#home-site-tabs button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        loadHomeSite(btn.dataset.site);
       });
+    });
+
+    loadHomeSite('youtube');
   </script>
 </body>
 </html>

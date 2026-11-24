@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "default_site": "youtube",
+  "registry_repo": "sloptrap/sloptrap.github.io",
+  "rankings_endpoint": "https://sloptrap-rankings.assimilat.workers.dev",
+  "active_window_days": 14,
+  "generated_at": "2026-11-24T21:18:27Z",
+  "sites": [
+    {
+      "site_id": "youtube",
+      "display_name": "YouTube",
+      "feed_path": "leaderboard/youtube/leaderboard.json",
+      "rule_count": 3,
+      "verified_count": 3,
+      "corpus_count": 6
+    },
+    {
+      "site_id": "tiktok",
+      "display_name": "TikTok",
+      "feed_path": "leaderboard/tiktok/leaderboard.json",
+      "rule_count": 2,
+      "verified_count": 2,
+      "corpus_count": 4
+    },
+    {
+      "site_id": "pinterest",
+      "display_name": "Pinterest",
+      "feed_path": "leaderboard/pinterest/leaderboard.json",
+      "rule_count": 2,
+      "verified_count": 2,
+      "corpus_count": 4
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "format": "sloptrap-bundle-v1",
+  "manifest": {
+    "rule_id": "necro-hijack-guard",
+    "name": "Necro-Hijack \u0026 Dormancy Guard",
+    "description": "Detects aged/bought YouTube accounts with multi-year dormancy gaps, silent phone-clip origins, and sudden upload floods.",
+    "version": "1.2.0",
+    "author": "@sloptrap-core",
+    "author_public_key": "eb85cbf507e27e2c0f94ad723385db3138af32670ea37ca337f0c1866eae02cc",
+    "repo_url": "https://github.com/sloptrap/rule-necro-hijack-guard",
+    "interpreter": "wasm-v1",
+    "inputs": [
+      "metadata",
+      "upload_cadence",
+      "audio_video_stats"
+    ],
+    "default_weight": 1.25,
+    "overhead": 3,
+    "encryption": "aes-256-gcm-hkdf"
+  },
+  "payload_b64": "BrxED7sgQRuQb1PjkNUlfNwdQ1ZWvIfNgkmRDdhr+0roU2MBk7dGRFV70hax5MlhJQnSR/zUkvyusGISuEFu73M1lo8greSUC5h58UMJUGpiHaYvjJXbGDHbhXxjyP3zgSof+g4baDXLAgHct3AMMW1t3X7RJFoX1ftQ8STEZdEr/pIHwFTDrEdIpC8jQCOwpZvf4H5qfv/f/IzU2/EpAK41pRo1S476XaFmE7cgaI26/b6Q1Y8Xwmc0DsH1MDL5BU7raKKpA0LnsGwP6/OIBrW/fwXAdu3lKZm73QUFF+NWXExRq99v9PeZtCn8C5EUpMEQQORCddUH/5IBsr1jLiQTANtzLojE0fRc+pi2tpxa36T5eWyLoF2uuMdg06RKhm1fbxhtHzTqBJyM/VkVpIxVfIKJIG03Cl1zJLfAUW9Gzg+OHybFnLLzuVSRnjDtitNeZQcLdI+o8dbR2F2JTzm+cGdEUHNsBZ/Sj8V0yOs5CQP4cdFSdWaGzLnVybhXLcCozqquyvLWunWNpuyLaMtsmkJIByGJq/Aj1pCBLEGnc1N9pcrlzZ+1DNBXP32TDQMyi69grKvxxBC3l4ae/c/NAYBzjXLgOnTVxKwenjfOCUddKXOxLpXJDLyrrN/hKmJ8lq3/ld00DFbBAMc21iZVHvm8DebXHhfZ35pqS8eIoEQLCWi6tT77xT2nlvR8X2+83zSGwCtEDzqWmZArrDmM06p2JOfxeRFYk7uW2C8n4iAB/M/nZPHzWhf9pr+K4fFbjbbhss7o+BxU0ZNkRBTwao6ofXJCALVlpra1iV6GxhrGlSrwf3LuD3ymov8ZVWp2y9RgWzhhCQuLOzRy+LMqhb/BIC9xG8goIe3URDaPPQzqqsm45OyDUYon3ERhpkr8HUcfElZdvNonYSncUYTdZVGjS6jP1Aj5ECqEqYps0CCDLw1YyN89XtacGntVt88x7lTmSGUsXyAa2s7X+BVXm03AzxzwfrD5g9vUsSv7f1DwkIFj2ogSZbGrOWi4tvxdWqQIP+HPMHMxKAAUeUf8gSJmogU5zPlvoHLtrqQxw/iyrNu7ImfNCyD6GKbPdbvdvWhhMO8lKsvhZXO1b72t6T0Z77gQIuz1dRVcyXJbpvogx4A/NV0R7t0IGKlAadS/O+gbudGAFQKtNoqXVFbiqtztt0JHIgMaZMJFK/AywE/JKNdSuE9n3uvHvgYb2SUYQ/u42P9ugXOYWrGn0oVgdpBXXwm90QECxDbtFjonYNTULqKSjlePWxIP8QPBFdgE2ogOpNjPDxvSkqjq9VzpMOgwyf+BuRM4sNE59uD+8sWGIfp5/k5xWVEl1UGiNY2f92A8ZbIQ0iULf2OeYFckMN96aZ6hSIZThd666JQ4qq40noxB4SGj5EErXjRy6m60oW4YfPnSHTc5D2S1GwHlvmU41DKFp3cAFG9kXKmyJe10Ht3QesovMJAn/uG/rzzGDR/H9d3SC0q4denTt+DHLD8dtGk8JrhmQIm8VJRSUzRF6x4NsBlDZAZsqIziFu735lsGbYfxh+eKh8J0gMnjgnhR6EEVYy4CoHE3xY33uqDYfnjAdATGf2FIkZceNIhvNV92KgneoDHouLS64u7kOJOg0ZXbH0HyuXqQyWhwIisZDw+vqv1LLeDCyUhKMrPbpB77sSIZ5lRDuOsD+DR7cf63AZ4D32wS1KtNfAZboW1h49mKhvnWwpfAz0njjO/nLS8aoixCInCoA7+sLQI0HffQyMFJrE3Zoi74BEa4Iu9B7gd3AQPb0AFjFIFTtw==",
+  "signature_b64": "cxrFtc3zhILWCa+oUgkj+JI3eEV1ZQXvMnkwZtx/eOG2whkugTuEMQiE/JXjvhUbpirhE8rv7pInUS3XrrrBCQ=="
+}

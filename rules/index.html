@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WASM Rules &amp; .strule Spec — SlopTrap</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="nav-inner">
+      <a class="brand-link" href="../">
+        <span class="badge-brand">SLOPTRAP</span>
+        <span class="brand-title">Forensic Engine &amp; Rules</span>
+      </a>
+      <div class="nav-links">
+        <a href="../">Overview</a>
+        <a href="../docs/">Documentation</a>
+        <a class="active" href="./">WASM Rules &amp; .strule</a>
+        <a href="../leaderboard/">Leaderboard</a>
+        <a href="https://github.com/sloptrap/sloptrap" target="_blank" rel="noopener">GitHub ↗</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="docs-layout">
+      <aside class="docs-toc">
+        <h4>Specification</h4>
+        <ul>
+          <li><a href="#overview">1. Architecture Overview</a></li>
+          <li><a href="#fingerprint">2. ChannelFingerprint v1</a></li>
+          <li><a href="#wasm-abi">3. Guest WASM ABI</a></li>
+          <li><a href="#strule-crypto">4. .strule Container &amp; Crypto</a></li>
+          <li><a href="#cli-tooling">5. CLI Build &amp; Verify</a></li>
+          <li><a href="#leaderboard-design">6. Anti-Oracle Leaderboard</a></li>
+        </ul>
+      </aside>
+
+      <article class="docs-content">
+        <h1>Sandboxed WASM Rules &amp; <code>.strule</code> Specification</h1>
+        <p style="color: var(--muted); font-size: 1.05rem;">
+          SlopTrap decouples its open-source feature extraction and sandbox runtime from pluggable, cryptographically signed, obfuscated WebAssembly detection rules (<code>.strule</code>) that execute deterministically across platforms.
+        </p>
+
+        <h2 id="overview">1. Architecture Overview</h2>
+        <ul>
+          <li><strong>Open-Source Host, Opaque Rule Logic:</strong> The host runtime (<code>wazero</code> interpreter mode in Go, or any compliant WebAssembly 1.0 interpreter) is 100% open-source and deterministic, while rule authors distribute compiled, control-flow-flattened WebAssembly bytecode inside encrypted <code>.strule</code> containers.</li>
+          <li><strong>Zero Host Capabilities:</strong> Any WASM module containing an Import section (<code>secId == 2</code>, WASI, clocks, sockets, or filesystem imports) is rejected at compile time. Modules are capped at <strong>32 memory pages (2 MiB)</strong> and strict execution timeouts / instruction fuel budgets.</li>
+          <li><strong>Input-Driven Cost Optimization:</strong> Each rule manifest declares only the input categories it needs (<code>metadata</code>, <code>upload_cadence</code>, <code>transcript</code>, <code>thumbnails</code>, <code>audio_video_stats</code>) and receives a <code>1..10</code> overhead score so low-power client devices can pick fast <code>2/10</code> rules while servers run deep <code>8/10</code> ensembles.</li>
+        </ul>
+
+        <h2 id="fingerprint">2. Standardized <code>ChannelFingerprint</code> v1 Schema</h2>
+        <p>
+          Before invoking active WASM rules, SlopTrap extracts a neutral JSON document passed into guest linear memory as UTF-8 bytes:
+        </p>
+        <pre><code>{
+  "schema_version": 1,
+  "channel": {
+    "channel_id": "UC9xHijackedArchive2009",
+    "handle": "@UntoldTruths-x8z",
+    "title": "Untold Ancient Truths",
+    "subscriber_count": 48200,
+    "total_videos": 216,
+    "has_auto_suffix": true,
+    "stem_siblings": 2
+  },
+  "upload_cadence": {
+    "channel_age_days": 6200.0,
+    "max_dormancy_gap_days": 5800.0,
+    "pre_pivot_videos": 2,
+    "post_pivot_videos": 214,
+    "post_pivot_share": 0.991,
+    "recent_uploads_per_day": 1.16,
+    "output_minutes_per_week": 342.0,
+    "avg_duration_sec": 2526.0,
+    "duration_cv": 0.05,
+    "schedule_hour_stddev": 0.03
+  },
+  "transcript": {
+    "videos_sampled": 5,
+    "total_words": 4820,
+    "uncontracted_ratio": 0.88,
+    "first_person_per_1k": 0.0,
+    "disfluencies_per_1k": 0.0,
+    "antithesis_per_1k": 2.9,
+    "slop_hooks_per_1k": 1.86,
+    "llm_lexicon_per_1k": 1.65,
+    "mean_wpm": 158.2,
+    "cross_video_wpm_stddev": 1.8,
+    "intra_video_wpm_cv": 0.078,
+    "pause_cv": 0.20,
+    "earliest_has_speech": false
+  },
+  "thumbnails": {
+    "title_skeleton_reuse": 0.72,
+    "raw_camera_earliest_title": true
+  },
+  "audio_video_stats": {
+    "earliest_vertical": true,
+    "earliest_max_dim": 854,
+    "recent_widescreen_hd_ratio": 1.0,
+    "altered_content_flag": false,
+    "dead_air_floor": true,
+    "loudness_range_lu": 2.1,
+    "silence_cv": 0.17
+  }
+}</code></pre>
+
+        <h2 id="wasm-abi">3. Guest WebAssembly ABI (<code>wasm-v1</code>)</h2>
+        <p>
+          Any language targeting standalone WebAssembly 1.0 MVP (Rust <code>wasm32-unknown-unknown</code>, C/Clang, Zig, TinyGo, AssemblyScript, or SlopTrap's built-in <code>RuleSpec</code> compiler) can produce a valid rule module by exporting:
+        </p>
+        <ul>
+          <li><code>memory</code> — Linear memory (1–16 initial pages, max ≤ 32 pages).</li>
+          <li><code>st_alloc(size: i32) -&gt; i32</code> <em>(optional)</em> — Returns byte offset where the host writes the UTF-8 <code>ChannelFingerprint</code> JSON (defaults to scratch offset <code>16384</code> if omitted).</li>
+          <li>
+            <code>st_evaluate(ptr: i32, len: i32) -&gt; i64</code> <em>(required)</em> — Evaluates the fingerprint at <code>memory[ptr .. ptr+len]</code> and returns a packed 64-bit integer:
+            <ul>
+              <li><strong>Compact return (<code>upper 32 bits == 0</code>):</strong> Lower 32 bits hold the integer slop score clamped to <code>0..100</code> (confidence defaults to <code>1.0</code>).</li>
+              <li><strong>Structured JSON return (<code>upper 32 bits &gt; 0</code>):</strong> <code>(outPtr &lt;&lt; 32) | outLen</code> pointing to UTF-8 JSON <code>{"score": 88, "confidence": 0.92, "reason": "..."}</code> in linear memory.</li>
+            </ul>
+          </li>
+        </ul>
+
+        <h2 id="strule-crypto">4. <code>.strule</code> Container &amp; Cryptographic Verification</h2>
+        <p>
+          A <code>.strule</code> file is a portable JSON envelope binding a canonical manifest, an HKDF-AES-256-GCM encrypted WASM payload, and an Ed25519 author signature:
+        </p>
+        <pre><code>{
+  "format": "sloptrap-bundle-v1",
+  "manifest": {
+    "rule_id": "necro-hijack-guard",
+    "name": "Necro-Hijack &amp; Dormancy Guard",
+    "description": "Detects aged/bought YouTube accounts with multi-year dormancy gaps...",
+    "version": "1.2.0",
+    "author": "@sloptrap-core",
+    "author_public_key": "eb85cbf507e27e2c0f94ad723385db3138af32670ea37ca337f0c1866eae02cc",
+    "repo_url": "https://github.com/sloptrap/rule-necro-hijack-guard",
+    "interpreter": "wasm-v1",
+    "inputs": ["metadata", "upload_cadence", "audio_video_stats"],
+    "default_weight": 1.25,
+    "overhead": 3,
+    "encryption": "aes-256-gcm-hkdf"
+  },
+  "payload_b64": "&lt;12-byte GCM nonce || AES-256-GCM ciphertext || 16-byte tag&gt;",
+  "signature_b64": "&lt;64-byte Ed25519 signature&gt;"
+}</code></pre>
+        <ul>
+          <li><strong>Language-Neutral Canonical Manifest AAD:</strong> Compliant runtimes serialize a deterministic newline-delimited canonical byte string used as AES-GCM Additional Authenticated Data (AAD) — tampering with <em>any</em> manifest field (such as lowering <code>overhead</code> or swapping <code>author_public_key</code>) immediately fails authenticated decryption.</li>
+          <li><strong>RFC 5869 HKDF-SHA256 Key Derivation:</strong> Derives the 256-bit AES key from the scoring environment seed using salt <code>sloptrap-hkdf-salt-v1</code> and info <code>sloptrap-bundle-v1|&lt;rule_id&gt;|&lt;author_pub_hex&gt;|&lt;version&gt;</code>.</li>
+          <li><strong>Ed25519 Author Provenance:</strong> Verified over <code>SHA-256("sloptrap-sig-v1:" || canonicalManifest || 0x00 || rawWasmBytes)</code>.</li>
+        </ul>
+
+        <h2 id="cli-tooling">5. CLI Keygen, Build &amp; Verification</h2>
+        <pre><code># 1. Generate an Ed25519 author keypair
+./sloptrap rules keygen
+
+# 2. Compile reference specs (with state-machine control-flow flattening),
+#    sign &amp; encrypt .strule bundles, evaluate on holdout corpus, and write leaderboard.json
+./sloptrap rules build-defaults --out ../sloptrap-site --priv &lt;author-private-key-hex&gt;
+
+# 3. Verify Ed25519 signature &amp; decrypt payload of any .strule bundle
+./sloptrap rules verify ../sloptrap-site/bundles/necro-hijack-guard.strule</code></pre>
+
+        <h2 id="leaderboard-design">6. Anti-Oracle Leaderboard Design</h2>
+        <ul>
+          <li><strong>Private Holdout Corpus:</strong> Only truncated SHA-256 channel commitments appear publicly in <code>leaderboard.json</code>; raw channel handles and IDs remain private.</li>
+          <li><strong>Holdout Perturbation &amp; Rate Limiting:</strong> Periodic holdout subset rotation (<code>perturbSeed</code>) and per-author Ed25519 submission rate limits (<code>leaderboard.RateLimiter</code>) prevent iterative threshold probing.</li>
+          <li><strong>Coarse Banding:</strong> Published Precision, Recall, and F1 are rounded to <code>0.05</code> increments alongside coarse letter bands (<code>S</code> ≥ 0.90, <code>A</code> ≥ 0.78, <code>B</code> ≥ 0.60, <code>C</code> &lt; 0.60), combined with author reputation, low-overhead efficiency bonus, and GitHub ★ star popularity.</li>
+        </ul>
+      </article>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div><strong>SlopTrap WASM Rule Specification</strong></div>
+      <div>
+        <a href="../">Overview</a> ·
+        <a href="../docs/">Docs</a> ·
+        <a href="../leaderboard/">Leaderboard</a> ·
+        <a href="../leaderboard.json">leaderboard.json</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../assets/site.js"></script>
+</body>
+</html>

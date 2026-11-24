@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SlopTrap — YouTube AI Slop Forensics, Sandboxed WASM Rules &amp; API Server</title>
+  <link rel="stylesheet" href="./assets/style.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="nav-inner">
+      <a class="brand-link" href="./">
+        <span class="badge-brand">SLOPTRAP</span>
+        <span class="brand-title">Forensic Engine &amp; Rules</span>
+      </a>
+      <div class="nav-links">
+        <a class="active" href="./">Overview</a>
+        <a href="./docs/">Documentation</a>
+        <a href="./rules/">WASM Rules &amp; .strule</a>
+        <a href="./leaderboard/">Leaderboard</a>
+        <a href="https://github.com/sloptrap/sloptrap" target="_blank" rel="noopener">GitHub ↗</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <section class="hero">
+      <div>
+        <h1>Catch AI Slop Farms Before They Pollute Your Feed.</h1>
+        <p class="lead">
+          <strong>SlopTrap</strong> combines a 6-signal YouTube forensic detector, an interactive terminal UI, an autonomous mass-crawler, cryptographically signed <code>.strule</code> WebAssembly rule bundles, and a live HTTP verification API with automatic <strong>AiSList</strong> reporting.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="./docs/">Read the Documentation</a>
+          <a class="btn btn-secondary" href="./leaderboard/">Browse WASM Leaderboard</a>
+          <a class="btn btn-secondary" href="./rules/">Author a .strule Bundle</a>
+        </div>
+      </div>
+
+      <div>
+        <pre><code># Build SlopTrap
+git clone git@github.com:sloptrap/sloptrap.git
+cd sloptrap
+go build -o sloptrap ./cmd/sloptrap
+
+# Launch interactive TUI + HTTP API server
+./sloptrap --listen 0.0.0.0:8787
+
+# Or run 24/7 headless crawler + API server
+./sloptrap --serve 0.0.0.0:8787 \
+  --auto-crawl --auto-report --report-as=anonymous</code></pre>
+      </div>
+    </section>
+
+    <h2 class="section-title">Interactive Forensic TUI</h2>
+    <p class="section-sub">
+      Inspect channel upload histories, dormancy hijacks, word-timed <code>json3</code> LLM script structures, synthetic TTS prosody, and live sandboxed WASM rule evaluations — with full keyboard, arrow-key, and mouse navigation.
+    </p>
+
+    <div class="shot-tabs">
+      <button class="shot-tab active" type="button"
+        data-src="./assets/screenshots/tui-overview.png"
+        data-caption="1:Overview — Multi-signal forensic score bars, AiSList sibling stem alerts, and smoking-gun evidence.">
+        1: Overview
+      </button>
+      <button class="shot-tab" type="button"
+        data-src="./assets/screenshots/tui-timeline.png"
+        data-caption="2:Timeline — Aged-account dormancy gap detection comparing Oldest vs. Latest channel uploads.">
+        2: Timeline &amp; Dormancy
+      </button>
+      <button class="shot-tab" type="button"
+        data-src="./assets/screenshots/tui-script-voice.png"
+        data-caption="3:Script &amp; Voice — LLM antithesis/hook excerpts, WPM pacing CV, and 45s ffmpeg EBU R128 dead-air probe.">
+        3: Script &amp; Voice Lab
+      </button>
+      <button class="shot-tab" type="button"
+        data-src="./assets/screenshots/tui-wasm-rules.png"
+        data-caption="5:WASM Rules — Verified .strule bundles executing deterministically in microsecond sandboxes.">
+        5: WASM Rules (.strule)
+      </button>
+      <button class="shot-tab" type="button"
+        data-src="./assets/screenshots/tui-discovery.png"
+        data-caption="Topic Discovery Hunter ([d]) — Curated slop-niche presets and custom YouTube search harvesting.">
+        Topic Hunter [d]
+      </button>
+    </div>
+
+    <div class="shot-frame">
+      <img id="tui-showcase-img" src="./assets/screenshots/tui-overview.png" alt="SlopTrap TUI Overview" />
+    </div>
+    <p id="tui-showcase-caption" style="color: var(--muted); font-size: 0.88rem; margin-top: 0.65rem;">
+      1:Overview — Multi-signal forensic score bars, AiSList sibling stem alerts, and smoking-gun evidence.
+    </p>
+
+    <h2 class="section-title">Six Built-In Forensic Signals</h2>
+    <p class="section-sub">
+      Single-signal guardrails prevent false positives on prolific human educators while corroborating synergies catch hijacked accounts and automated content mills.
+    </p>
+
+    <div class="grid-3">
+      <div class="card">
+        <span class="signal-num">SIGNAL 01 · 34 PTS</span>
+        <h3>Aged-Account Dormancy Pivot</h3>
+        <p>Compares the channel's <code>Oldest</code> upload tab against <code>Latest</code> uploads and total catalog count to pinpoint 3–17 year dormant accounts bought and flooded with recent videos.</p>
+      </div>
+      <div class="card">
+        <span class="signal-num">SIGNAL 02 · 24 PTS</span>
+        <h3>Factory Upload Velocity</h3>
+        <p>Flags inhuman daily/weekly video output (e.g., 300+ minutes of long-form essays per week), cron publish-hour lock, and cookie-cutter duration clustering.</p>
+      </div>
+      <div class="card">
+        <span class="signal-num">SIGNAL 03 · 20 PTS</span>
+        <h3>Origin vs. Modern Era Shift</h3>
+        <p>Detects channels whose earliest uploads are silent vertical phone clips or raw camera filenames (<code>IMG_0421.MOV</code>) while recent uploads are uniform 1080p narrated essays.</p>
+      </div>
+      <div class="card">
+        <span class="signal-num">SIGNAL 04 · 24 PTS</span>
+        <h3>LLM Script Fingerprinting</h3>
+        <p>Inspects <code>json3</code> captions for contrastive negation (<em>"not merely X, it is Y"</em>), tricolons, slop hooks, written-prose uncontracted verb ratios, and omniscient pronoun absence.</p>
+      </div>
+      <div class="card">
+        <span class="signal-num">SIGNAL 05 · 18 PTS</span>
+        <h3>Synthetic TTS &amp; Acoustics</h3>
+        <p>Measures word-timestamp WPM lock across uploads, flat 20-second pacing CV, uniform sentence pauses, and optional <code>ffmpeg</code> <code>-65dBFS</code> digital dead-air floors.</p>
+      </div>
+      <div class="card">
+        <span class="signal-num">SIGNAL 06 · 18 PTS</span>
+        <h3>Clone Stems &amp; Disclosures</h3>
+        <p>Cross-checks 70,000+ <strong>AiSList</strong> entries for sibling handle stems (<code>@BaseName-x8z</code>), auto-generated bot suffixes, synthetic media flags, and title skeleton reuse.</p>
+      </div>
+    </div>
+
+    <h2 class="section-title">Unified Ecosystem: TUI, Autonomous Crawler, WASM Rules &amp; API</h2>
+    <div class="grid-2" style="margin-top: 1rem;">
+      <div class="card">
+        <h3>Real-Time HTTP Verification &amp; List Export Server</h3>
+        <p>
+          Run <code>sloptrap --serve</code> or <code>--listen</code> to expose batched channel/video checks (<code>POST /api/v1/check</code>), whitelist management, and dynamically updated <strong>AiSList</strong>-formatted blocklists and warnlists for media clients and browser/network tools.
+        </p>
+      </div>
+      <div class="card">
+        <h3>Sandboxed, Obfuscated <code>.strule</code> Bundles</h3>
+        <p>
+          Detection rules compile to zero-import WebAssembly 1.0 with state-machine control-flow flattening, Ed25519 author signatures, and HKDF-AES-256-GCM payload encryption — making filter logic resilient against reverse-engineering while keeping runtimes 100% open-source.
+        </p>
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 1rem; margin-top: 2.75rem;">
+      <div>
+        <h2 class="section-title" style="margin: 0;">Top Leaderboard WASM Rules</h2>
+        <p class="section-sub" style="margin: 0.3rem 0 1rem;">Live feed from <a href="./leaderboard.json"><code>leaderboard.json</code></a> — installable directly into SlopTrap and compatible WASM runtimes.</p>
+      </div>
+      <a class="btn btn-secondary" href="./leaderboard/">Open Full Leaderboard →</a>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Rule Bundle</th>
+            <th>Author</th>
+            <th>Band &amp; Coarse F1</th>
+            <th>Overhead</th>
+            <th>Bundle</th>
+          </tr>
+        </thead>
+        <tbody id="home-lb-rows">
+          <tr><td colspan="6" style="color: var(--muted);">Loading <code>leaderboard.json</code>…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div><strong>SlopTrap</strong> — Open-source AI slop detection, WASM rule runtime, and verification server.</div>
+      <div>
+        <a href="./docs/">Docs</a> ·
+        <a href="./rules/">WASM Spec</a> ·
+        <a href="./leaderboard/">Leaderboard</a> ·
+        <a href="./leaderboard.json">leaderboard.json</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./assets/site.js"></script>
+  <script>
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    fetch('./leaderboard.json')
+      .then(r => r.json())
+      .then(data => {
+        const rows = (data.entries || []).slice(0, 5).map(e => `
+          <tr>
+            <td class="mono"><strong>#${e.rank}</strong></td>
+            <td>
+              <div class="rule-title">${esc(e.name)} <span class="mono" style="color:var(--muted);font-weight:400;">v${esc(e.version)}</span></div>
+              <div class="rule-desc">${esc(e.description)}</div>
+            </td>
+            <td class="mono">${esc(e.author)}</td>
+            <td><span class="band band-${esc(e.band)}">Band ${esc(e.band)}</span> <span class="mono" style="margin-left:0.4rem;">F1 ${Number(e.coarse_f1).toFixed(2)}</span></td>
+            <td class="mono">${e.overhead} / 10</td>
+            <td><a class="dl-btn" href="./${esc(e.bundle_url)}" download>.strule</a></td>
+          </tr>
+        `).join('');
+        document.getElementById('home-lb-rows').innerHTML = rows || '<tr><td colspan="6">No entries</td></tr>';
+      })
+      .catch(() => {
+        document.getElementById('home-lb-rows').innerHTML = '<tr><td colspan="6" style="color:var(--crimson);">Unable to load leaderboard.json</td></tr>';
+      });
+  </script>
+</body>
+</html>

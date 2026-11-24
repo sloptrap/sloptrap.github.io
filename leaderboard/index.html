@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Leaderboard — SlopTrap Sandboxed WASM Rules</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <div class="nav-inner">
+      <a class="brand-link" href="../">
+        <span class="badge-brand">SLOPTRAP</span>
+        <span class="brand-title">Forensic Engine &amp; Rules</span>
+      </a>
+      <div class="nav-links">
+        <a href="../">Overview</a>
+        <a href="../docs/">Documentation</a>
+        <a href="../rules/">WASM Rules &amp; .strule</a>
+        <a class="active" href="./">Leaderboard</a>
+        <a href="https://github.com/sloptrap/sloptrap" target="_blank" rel="noopener">GitHub ↗</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;border-bottom:1px solid var(--border);padding-bottom:1.4rem;margin-bottom:1.5rem;">
+      <div>
+        <h1 style="margin:0;color:var(--heading);font-size:1.95rem;">WASM Detection Rule Leaderboard</h1>
+        <p style="color:var(--muted);margin:0.45rem 0 0;max-width:740px;">
+          Ed25519-signed, encrypted WebAssembly rule bundles (<code>.strule</code>) evaluated against a private holdout corpus with anti-oracle coarse banding. Pull this feed into <strong>SlopTrap</strong> or compatible clients via <a href="./leaderboard.json"><code>leaderboard.json</code></a>.
+        </p>
+      </div>
+      <div class="meta-chips" id="meta-chips"></div>
+    </div>
+
+    <div class="controls">
+      <input id="rule-filter" class="search-input" type="search" placeholder="Filter by rule name, input, or author…" />
+      <span style="color: var(--muted); font-size: 0.85rem; margin-left: 0.35rem;">Sort by:</span>
+      <button class="sort-btn active" type="button" data-sort="rank">Composite Rank</button>
+      <button class="sort-btn" type="button" data-sort="f1">Accuracy (Coarse F1)</button>
+      <button class="sort-btn" type="button" data-sort="overhead">Lowest Overhead (1–10)</button>
+      <button class="sort-btn" type="button" data-sort="stars">GitHub Stars ★</button>
+      <button class="sort-btn" type="button" id="copy-feed-btn" style="margin-left:auto;">Copy Feed URL</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Rule Bundle &amp; Declared Inputs</th>
+            <th>Author &amp; Ed25519 Key</th>
+            <th>Band &amp; Coarse Metrics</th>
+            <th>Overhead (1–10)</th>
+            <th>Repo &amp; .strule</th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr><td colspan="6" style="color: var(--muted);">Loading <code>leaderboard.json</code>…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout" style="margin-top: 1.75rem;">
+      <strong>Anti-Oracle Protections:</strong> Raw evaluation channel IDs are never published (only truncated SHA-256 commitments appear in <code>leaderboard.json</code>), submissions are rate-limited per author Ed25519 public key, holdout slices rotate under deterministic perturbation seeds, and Precision / Recall / F1 are quantized to <code>0.05</code> increments alongside letter bands (<code>S</code>, <code>A</code>, <code>B</code>, <code>C</code>) so slop farm operators cannot hill-climb thresholds against the benchmark.
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div><strong>SlopTrap</strong> — Sandboxed WASM Rule Leaderboard</div>
+      <div>
+        <a href="../">Overview</a> ·
+        <a href="../docs/">Docs</a> ·
+        <a href="../rules/">WASM Spec</a> ·
+        <a href="./leaderboard.json">leaderboard.json</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../assets/site.js"></script>
+  <script>
+    let docData = null;
+    let currentSort = 'rank';
+    let filterQuery = '';
+
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    }
+
+    function overheadColor(oh) {
+      if (oh <= 3) return '#22c55e';
+      if (oh <= 6) return '#f59e0b';
+      return '#f43f5e';
+    }
+
+    function render() {
+      if (!docData || !Array.isArray(docData.entries)) return;
+      const q = filterQuery.trim().toLowerCase();
+      let list = docData.entries.filter(e => {
+        if (!q) return true;
+        const hay = [e.name, e.rule_id, e.description, e.author, ...(e.inputs || [])].join(' ').toLowerCase();
+        return hay.includes(q);
+      });
+
+      if (currentSort === 'f1') list.sort((a, b) => b.coarse_f1 - a.coarse_f1 || a.overhead - b.overhead);
+      else if (currentSort === 'overhead') list.sort((a, b) => a.overhead - b.overhead || b.coarse_f1 - a.coarse_f1);
+      else if (currentSort === 'stars') list.sort((a, b) => b.stars - a.stars || a.rank - b.rank);
+      else list.sort((a, b) => a.rank - b.rank);
+
+      const tbody = document.getElementById('rows');
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);">No matching rule bundles.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.map(e => {
+        const pubShort = (e.author_public_key || '').slice(0, 14);
+        const shaShort = (e.bundle_sha256 || '').slice(0, 12);
+        const inputs = (e.inputs || []).map(i => `<span class="input-tag">${esc(i)}</span>`).join('');
+        const ohPct = Math.min(100, Math.max(10, e.overhead * 10));
+        return `
+          <tr>
+            <td class="mono"><strong>#${e.rank}</strong></td>
+            <td>
+              <div class="rule-title">${esc(e.name)} <span class="mono" style="color:var(--muted);font-weight:400;">v${esc(e.version)}</span></div>
+              <div class="rule-desc">${esc(e.description)}</div>
+              <div class="inputs-row">${inputs}</div>
+            </td>
+            <td>
+              <div><strong>${esc(e.author)}</strong></div>
+              <div class="mono" style="color:var(--muted);" title="${esc(e.author_public_key)}">ed25519:${esc(pubShort)}…</div>
+              <div style="font-size:0.8rem;color:var(--muted);">Rep: ${Number(e.author_reputation || 0).toFixed(0)}/100</div>
+            </td>
+            <td>
+              <span class="band band-${esc(e.band)}">Band ${esc(e.band)}</span>
+              <div class="mono" style="margin-top:0.35rem;">
+                F1 <strong>${Number(e.coarse_f1).toFixed(2)}</strong> · P ${Number(e.coarse_precision).toFixed(2)} · R ${Number(e.coarse_recall).toFixed(2)}
+              </div>
+              <div class="mono" style="font-size:0.76rem;color:var(--muted);">Composite: ${Number(e.composite_score || 0).toFixed(1)}</div>
+            </td>
+            <td>
+              <div class="mono"><strong>${e.overhead}</strong> / 10</div>
+              <div class="oh-bar"><div class="oh-fill" style="width:${ohPct}%;background:${overheadColor(e.overhead)};"></div></div>
+            </td>
+            <td>
+              <div style="margin-bottom:0.4rem;">
+                <a href="${esc(e.repo_url)}" target="_blank" rel="noopener">GitHub ★ ${e.stars || 0}</a>
+              </div>
+              <a class="dl-btn" href="./${esc(e.bundle_url)}" download>Download .strule</a>
+              <div class="mono" style="font-size:0.72rem;color:var(--muted);margin-top:0.3rem;" title="${esc(e.bundle_sha256)}">sha256:${esc(shaShort)}…</div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    document.querySelectorAll('.sort-btn[data-sort]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.sort-btn[data-sort]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentSort = btn.dataset.sort;
+        render();
+      });
+    });
+
+    document.getElementById('rule-filter').addEventListener('input', ev => {
+      filterQuery = ev.target.value;
+      render();
+    });
+
+    document.getElementById('copy-feed-btn').addEventListener('click', ev => {
+      const url = new URL('./leaderboard.json', window.location.href).href;
+      navigator.clipboard.writeText(url).then(() => {
+        ev.target.textContent = 'Copied URL!';
+        setTimeout(() => { ev.target.textContent = 'Copy Feed URL'; }, 1600);
+      });
+    });
+
+    fetch('./leaderboard.json')
+      .then(r => r.json())
+      .then(data => {
+        docData = data;
+        document.getElementById('meta-chips').innerHTML = `
+          <span class="chip">Epoch: <strong>${esc(data.epoch_id)}</strong></span>
+          <span class="chip">Holdout Corpus: <strong>${data.corpus_count}</strong> channels</span>
+          <span class="chip">Verified Bundles: <strong>${(data.entries || []).length}</strong></span>
+        `;
+        render();
+      })
+      .catch(err => {
+        document.getElementById('rows').innerHTML = `<tr><td colspan="6" style="color:var(--crimson);">Failed to load leaderboard.json: ${esc(err)}</td></tr>`;
+      });
+  </script>
+</body>
+</html>

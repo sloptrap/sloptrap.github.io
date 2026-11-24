@@ -40,7 +40,7 @@ except ImportError:
 MAX_BUNDLE_BYTES = 256 * 1024
 MAX_WASM_BYTES = 192 * 1024
 MAX_MEMORY_PAGES = 32
-FUEL_BUDGET = 500_000
+FUEL_BUDGET = 10_000_000
 DEFAULT_SCORING_SEED = "sloptrap-public-scoring-v1:9f84c2e0a1b74d6e8f3c5a2b1d9e0f4a"
 
 RULE_ID_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{1,63}$")

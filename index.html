@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SlopTrap — Pluggable AI-Slop Forensics, Sandboxed WASM Rules &amp; SDK</title>
+  <title>SlopTrap — Rule Definition Studio, Sandboxed WASM Rules &amp; SDK</title>
   <link rel="stylesheet" href="./assets/gravity-uikit.css" />
   <link rel="stylesheet" href="./assets/style.css" />
 </head>
@@ -26,6 +26,7 @@
         </a>
         <nav class="g-nav" aria-label="Primary">
           <a class="g-nav__item g-nav__item_active" href="./">Overview</a>
+          <a class="g-nav__item" href="./studio/">Rule Studio</a>
           <a class="g-nav__item" href="./docs/">Documentation &amp; SDK</a>
           <a class="g-nav__item" href="./rules/">WASM Spec</a>
           <a class="g-nav__item" href="./leaderboard/">Leaderboards</a>
@@ -42,95 +43,96 @@
   </header>
 
   <main class="g-container">
-    <section class="overview-split">
-      <div>
+    <section class="overview-split" style="border-bottom:0;padding-bottom:8px;">
+      <div class="text-card" style="padding:22px 24px;">
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <span class="g-label g-label_theme_info">Pluggable Site Adapters</span>
-          <span class="g-label g-label_theme_positive">Verified WASM Rules</span>
-          <span class="g-label g-label_theme_normal">Go + WebAssembly SDK</span>
+          <span class="g-label g-label_theme_info">Svelte 5 + Tauri v2 Studio</span>
+          <span class="g-label g-label_theme_positive">Tokenized WASM Rules</span>
+          <span class="g-label g-label_theme_normal">Pluggable Platforms</span>
         </div>
-        <h1>Multi-platform content forensics and sandboxed WASM filtering</h1>
+        <h1>Define, tokenize, and compile WebAssembly slop rules across platforms</h1>
         <p class="overview-lead">
-          SlopTrap extracts creator and account signals across pluggable target platforms — including <strong>YouTube</strong>, <strong>TikTok</strong>, <strong>Pinterest</strong>, and custom site adapters — and evaluates them inside deterministic <code>.strule</code> WebAssembly sandboxes. Embed it as a static rule library, drop in prebuilt UI panels, or run the standalone TUI and HTTP daemon.
+          <strong>SlopTrap</strong> is a rule definition studio and sandboxed WebAssembly (<code>.strule</code>) runtime for <strong>YouTube</strong>, <strong>TikTok</strong>, <strong>Pinterest</strong>, and custom platforms. Load known slop samples alongside clean controls, derive matching clauses, promote thresholds and patterns into reusable <code>$tokens</code>, and export cryptographically signed WASM bundles.
         </p>
         <div class="btn-row">
-          <a class="g-btn g-btn_view_action g-btn_size_l" href="./docs/#sdk">Integrate Library &amp; UI</a>
-          <a class="g-btn g-btn_view_outlined g-btn_size_l" href="./leaderboard/">Site Leaderboards</a>
-          <a class="g-btn g-btn_view_normal g-btn_size_l" href="./rules/">.strule Specification</a>
+          <a class="g-btn g-btn_view_action g-btn_size_l" href="./studio/">Open Rule Studio (Browser)</a>
+          <a class="g-btn g-btn_view_outlined g-btn_size_l" href="./docs/#sdk">Integrate Library &amp; UI</a>
+          <a class="g-btn g-btn_view_normal g-btn_size_l" href="./leaderboard/">Site Leaderboards</a>
         </div>
       </div>
 
-      <div>
-        <pre style="margin:0;"><code>// Embed in Go (static verified rules, zero network)
-eng, _ := sloptrap.NewStaticEngine(sloptrap.StaticConfig{
-    Site:            "pinterest", // or "youtube", "tiktok", custom
-    BuiltinVerified: true,
-    VerifiedOnly:    true,
-})
-verdict, _ := eng.Evaluate(ctx, fingerprint)
+      <div class="text-card" style="padding:16px 18px;">
+        <div style="font-size:12px;font-weight:600;color:var(--g-color-text-secondary);margin-bottom:6px;">
+          Run Studio in Browser or Desktop (Svelte 5 + Tauri v2)
+        </div>
+        <pre style="margin:0;"><code>git clone git@github.com:sloptrap/sloptrap.git
+cd sloptrap
+npm install
 
-// Or drop the Web Component UI + WASM runtime into any web/extension page:
-// &lt;script type="module" src="https://sloptrap.github.io/sdk/sloptrap-ui.js"&gt;&lt;/script&gt;
-// &lt;sloptrap-rules-panel site="youtube" verified-only&gt;&lt;/sloptrap-rules-panel&gt;</code></pre>
+# Run in any web browser (Vite + WebAssembly)
+npm run dev
+
+# Or launch native desktop app (Tauri v2 + live URL scraper)
+npm run tauri dev</code></pre>
       </div>
     </section>
 
     <div class="section-bar">
       <div>
-        <h2 class="section-title">Cross-platform forensic dimensions</h2>
-        <p class="section-sub">Shared behavioral and media extractors adapt across video feeds, short-clip streams, and visual pinboards.</p>
+        <h2 class="section-title">Corpus-driven workflow &amp; forensic dimensions</h2>
+        <p class="section-sub">Load known slop content, derive clauses that match each sample, tokenize parameters, and compile portable WASM.</p>
       </div>
     </div>
 
     <div class="grid-3">
       <div class="g-card">
         <div class="signal-head">
-          <h3>Dormancy &amp; account hijacks</h3>
-          <span class="g-label g-label_theme_normal mono">cadence</span>
+          <h3>Known content corpus</h3>
+          <span class="g-label g-label_theme_info mono">step 1</span>
         </div>
-        <p>Detects aged accounts that sit dormant for years before pivoting into high-frequency automated video, clip, or pin mills.</p>
+        <p>Load known slop accounts, clip farms, or synthetic pinboards alongside clean human controls to verify true-positive and false-positive separation live.</p>
       </div>
       <div class="g-card">
         <div class="signal-head">
-          <h3>Publishing velocity &amp; cron lock</h3>
-          <span class="g-label g-label_theme_normal mono">cadence</span>
+          <h3>Value &amp; pattern tokenization</h3>
+          <span class="g-label g-label_theme_warning mono">$tokens</span>
         </div>
-        <p>Flags inhuman daily/weekly volume, fixed publish-hour schedules, and uniform duration or aspect-ratio batching.</p>
-      </div>
-      <div class="g-card">
-        <div class="signal-head">
-          <h3>LLM prose &amp; SEO stuffing</h3>
-          <span class="g-label g-label_theme_normal mono">text</span>
-        </div>
-        <p>Scores contrastive LLM phrasing, uncontracted prose ratios, formulaic hooks, and keyword/hashtag-stuffed descriptions.</p>
-      </div>
-      <div class="g-card">
-        <div class="signal-head">
-          <h3>Synthetic voice &amp; visual artifacts</h3>
-          <span class="g-label g-label_theme_normal mono">media</span>
-        </div>
-        <p>Measures metronomic TTS word-pacing CV, <code>-65dBFS</code> dead-air floors, diffusion image signatures, and cropped repost watermarks.</p>
-      </div>
-      <div class="g-card">
-        <div class="signal-head">
-          <h3>Clone stems &amp; outbound funnels</h3>
-          <span class="g-label g-label_theme_normal mono">network</span>
-        </div>
-        <p>Identifies batch-generated handle stems (<code>@Base-x8z</code>), templated title skeletons, and single-domain affiliate pin rings.</p>
+        <p>Promote any numeric threshold, ramp span, weight, or phrase list into a named <code>$token</code> so sliders recompile and re-score the entire corpus in microseconds.</p>
       </div>
       <div class="g-card">
         <div class="signal-head">
           <h3>Verified build provenance</h3>
           <span class="g-label g-label_theme_positive mono">verified</span>
         </div>
-        <p>Marks official maintainer rules and community submissions tied to an inspected repository commit and GitHub Actions build as <strong>Verified</strong>.</p>
+        <p>Official maintainer keys and community rules pinned to an inspected source repository commit and GitHub Actions build earn <strong>Verified</strong> badges.</p>
+      </div>
+      <div class="g-card">
+        <div class="signal-head">
+          <h3>Dormancy &amp; cadence signals</h3>
+          <span class="g-label g-label_theme_normal mono">cadence</span>
+        </div>
+        <p>Captures multi-year account dormancy hijacks, post-pivot catalog shares, daily upload/pin bursts, and cookie-cutter duration or aspect-ratio locks.</p>
+      </div>
+      <div class="g-card">
+        <div class="signal-head">
+          <h3>LLM prose &amp; SEO stuffing</h3>
+          <span class="g-label g-label_theme_normal mono">text</span>
+        </div>
+        <p>Scores uncontracted written prose, contrastive antithesis, formulaic retention hooks, and hashtag/keyword-stuffed captions or pin descriptions.</p>
+      </div>
+      <div class="g-card">
+        <div class="signal-head">
+          <h3>TTS prosody &amp; synthetic visuals</h3>
+          <span class="g-label g-label_theme_normal mono">media</span>
+        </div>
+        <p>Measures metronomic TTS word-pacing CV, <code>-65dBFS</code> dead-air floors, diffusion image signatures, repost watermarks, and outbound domain funnels.</p>
       </div>
     </div>
 
     <div class="section-bar">
       <div>
         <h2 class="section-title">Site-specific WASM rule leaderboards</h2>
-        <p class="section-sub">Switch target site to inspect verified <code>.strule</code> bundles and live install metrics.</p>
+        <p class="section-sub">Switch target platform to inspect verified <code>.strule</code> bundles and live install metrics.</p>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <div class="g-segmented" id="home-site-tabs" role="tablist" aria-label="Target site">
@@ -164,22 +166,30 @@ verdict, _ := eng.Evaluate(ctx, fingerprint)
 
     <div class="section-bar">
       <div>
-        <h2 class="section-title">Interactive forensic TUI &amp; HTTP daemon</h2>
-        <p class="section-sub">Included CLI workspace for deep channel/account inspection, continuous crawling, and local LAN verification APIs.</p>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <h2 class="section-title">Example Application: <code>sloptrap-tube-tui</code></h2>
+          <span class="g-label g-label_theme_info">YouTube Reference App</span>
+        </div>
+        <p class="section-sub">
+          Standalone terminal workspace and LAN daemon (<a href="https://github.com/sloptrap/sloptrap-tube-tui" target="_blank" rel="noopener"><code>sloptrap/sloptrap-tube-tui</code></a>) demonstrating how a YouTube client integrates SlopTrap <code>.strule</code> bundles alongside transcript and acoustic extractors.
+        </p>
       </div>
+      <a class="g-btn g-btn_view_outlined g-btn_size_s" href="https://github.com/sloptrap/sloptrap-tube-tui" target="_blank" rel="noopener">
+        View sloptrap-tube-tui
+      </a>
     </div>
 
-    <div class="preview-panel">
-      <div class="preview-panel__toolbar">
-        <div class="g-segmented" role="tablist" aria-label="TUI Views">
+    <div class="preview-panel" style="background:var(--st-card-bg);">
+      <div class="preview-panel__toolbar" style="background:var(--st-card-bg);">
+        <div class="g-segmented" role="tablist" aria-label="Example YouTube TUI Views">
           <button class="g-segmented__btn shot-tab active" type="button"
             data-src="./assets/screenshots/tui-overview.png"
-            data-caption="1:Overview — Multi-signal score breakdown, sibling stem cross-checks, and corroborating evidence.">
+            data-caption="1:Overview — Example YouTube app combining channel extractors with Verified .strule WASM evaluation.">
             1: Overview
           </button>
           <button class="g-segmented__btn shot-tab" type="button"
             data-src="./assets/screenshots/tui-timeline.png"
-            data-caption="2:Timeline — Aged-account dormancy gap comparison between earliest and latest uploads.">
+            data-caption="2:Timeline — Aged-account dormancy gap comparison between earliest and latest YouTube uploads.">
             2: Timeline
           </button>
           <button class="g-segmented__btn shot-tab" type="button"
@@ -189,32 +199,32 @@ verdict, _ := eng.Evaluate(ctx, fingerprint)
           </button>
           <button class="g-segmented__btn shot-tab" type="button"
             data-src="./assets/screenshots/tui-wasm-rules.png"
-            data-caption="5:WASM Rules — Verified .strule bundles executing inside zero-import WebAssembly sandboxes.">
+            data-caption="5:WASM Rules — Loaded .strule bundles executing inside zero-import WebAssembly sandboxes.">
             5: WASM Rules
           </button>
           <button class="g-segmented__btn shot-tab" type="button"
             data-src="./assets/screenshots/tui-discovery.png"
-            data-caption="Discovery [d] — Niche presets and automated search queue harvesting.">
+            data-caption="Discovery [d] — Niche presets and automated YouTube search queue harvesting.">
             Discovery [d]
           </button>
         </div>
-        <span class="mono" style="color:var(--g-color-text-hint);font-size:12px;">Bubble Tea TUI</span>
+        <span class="mono" style="color:var(--g-color-text-hint);font-size:12px;">Example App · sloptrap-tube-tui</span>
       </div>
-      <img id="tui-showcase-img" src="./assets/screenshots/tui-overview.png" alt="SlopTrap TUI Overview" />
+      <img id="tui-showcase-img" src="./assets/screenshots/tui-overview.png" alt="Example App: sloptrap-tube-tui Overview" />
       <div id="tui-showcase-caption" class="preview-panel__caption">
-        1:Overview — Multi-signal score breakdown, sibling stem cross-checks, and corroborating evidence.
+        1:Overview — Example YouTube app combining channel extractors with Verified .strule WASM evaluation.
       </div>
     </div>
   </main>
 
   <footer class="g-footer">
     <div class="g-footer__inner">
-      <div>SlopTrap — Pluggable content forensics, sandboxed WebAssembly rules &amp; embeddable SDK</div>
+      <div>SlopTrap — Rule Definition Studio, sandboxed WebAssembly rules &amp; multi-platform SDK</div>
       <div class="g-footer__links">
+        <a href="./studio/">Rule Studio</a>
         <a href="./docs/">Documentation &amp; SDK</a>
         <a href="./rules/">WASM Spec</a>
         <a href="./leaderboard/">Leaderboards</a>
-        <a href="./leaderboard/index.json">leaderboard/index.json</a>
       </div>
     </div>
   </footer>
@@ -222,7 +232,6 @@ verdict, _ := eng.Evaluate(ctx, fingerprint)
   <script src="./assets/site.js"></script>
   <script>
     let workerStats = null;
-    let currentHomeSite = 'youtube';
 
     function esc(s) {
       return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -242,7 +251,6 @@ verdict, _ := eng.Evaluate(ctx, fingerprint)
     }
 
     async function loadHomeSite(site) {
-      currentHomeSite = site;
       document.getElementById('home-full-lb-link').href = `./leaderboard/?site=${encodeURIComponent(site)}`;
       try {
         const data = await fetch(`./leaderboard/${encodeURIComponent(site)}/leaderboard.json`).then(r => r.json());

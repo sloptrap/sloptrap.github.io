@@ -26,6 +26,7 @@
         </a>
         <nav class="g-nav" aria-label="Primary">
           <a class="g-nav__item" href="../">Overview</a>
+          <a class="g-nav__item" href="../studio/">Rule Studio</a>
           <a class="g-nav__item g-nav__item_active" href="./">Documentation &amp; SDK</a>
           <a class="g-nav__item" href="../rules/">WASM Spec</a>
           <a class="g-nav__item" href="../leaderboard/">Leaderboards</a>
@@ -44,180 +45,107 @@
   <main class="g-container">
     <div class="docs-grid">
       <aside class="docs-aside">
-        <div class="docs-aside__title">Contents</div>
-        <ul>
-          <li><a href="#sdk">1. Library &amp; UI Integration</a></li>
-          <li><a href="#adapters">2. Pluggable Site Adapters</a></li>
-          <li><a href="#installation">3. CLI &amp; Daemon Setup</a></li>
-          <li><a href="#tui">4. Terminal UI Guide</a></li>
-          <li><a href="#http-api">5. HTTP Server API</a></li>
-        </ul>
+        <div class="st-card g-card" style="padding:12px;">
+          <div class="docs-aside__title">Contents</div>
+          <ul>
+            <li><a href="#studio">1. Rule Studio (Svelte 5 + Tauri)</a></li>
+            <li><a href="#sdk">2. Library &amp; UI Integration</a></li>
+            <li><a href="#adapters">3. Pluggable Site Adapters</a></li>
+            <li><a href="#examples">4. Example Apps (YouTube TUI &amp; Extension)</a></li>
+          </ul>
+        </div>
       </aside>
 
       <article class="docs-article">
-        <h1>Documentation &amp; Library SDK</h1>
-        <p style="margin-top:0;">
-          Integrate <strong>SlopTrap</strong> into your own application in two ways: as a zero-network <strong>static rule library</strong>, or with <strong>drop-in UI sections</strong> providing rule toggling, Verified provenance filtering, site-specific updates, and opt-in <em>Anonymous rule rankings</em>.
-        </p>
+        <section class="docs-section" id="studio">
+          <h1>1. Rule Definition Studio (<code>sloptrap</code>)</h1>
+          <p>
+            The core <a href="https://github.com/sloptrap/sloptrap" target="_blank" rel="noopener"><code>sloptrap/sloptrap</code></a> repository provides the <strong>Svelte 5 + Tauri v2 Rule Definition Studio</strong>, which runs either directly in the browser (<a href="../studio/">launch hosted Studio</a>) or as a native desktop app:
+          </p>
+          <ul>
+            <li><strong>Load Known Slop &amp; Controls:</strong> Import known slop channels, short-form clip farms, or synthetic pinboards alongside clean human control accounts for any target site (<code>youtube</code>, <code>tiktok</code>, <code>pinterest</code>, or custom).</li>
+            <li><strong>Derive &amp; Tokenize Rules:</strong> Inspect extracted signals and phrases on each sample, click <em>+ Match</em> or <em>Auto-Fit &amp; Tokenize from Slop</em>, and promote literal thresholds, ramp spans, weights, or pattern lists into reusable <code>$tokens</code> (<code>.struledef.json</code>).</li>
+            <li><strong>Compile &amp; Audit <code>.strule</code>:</strong> Tune <code>$token</code> sliders with live microsecond WebAssembly recompilation, verify the 4-layer capability and anti-poisoning security audit, and export Ed25519-signed <code>.strule</code> bundles.</li>
+          </ul>
+          <pre><code>git clone git@github.com:sloptrap/sloptrap.git
+cd sloptrap
+npm install
 
-        <h2 id="sdk" style="border-top:0;padding-top:0;margin-top:20px;">1. Library &amp; UI integration</h2>
+# Run in a browser
+npm run dev
 
-        <h3>Mode A — Static rule set (headless, zero network)</h3>
-        <p>
-          Ideal for backend services, moderation pipelines, mobile/TV apps, or offline tools that want deterministic <code>.strule</code> evaluation without external network calls or UI state.
-        </p>
+# Or run as a desktop application (Tauri v2 + Rust live URL extractor)
+npm run tauri dev</code></pre>
+        </section>
 
-        <pre><code>// Go — pkg/sloptrap (built-in official verified rules or embed.FS)
-import "sloptrap/pkg/sloptrap"
+        <section class="docs-section" id="sdk">
+          <h2>2. Library &amp; Drop-in UI Integration</h2>
+          <p>
+            Applications can embed SlopTrap either as a headless <strong>static rule evaluator</strong> or with <strong>prebuilt UI sections</strong> for full rule management.
+          </p>
 
-eng, err := sloptrap.NewStaticEngine(sloptrap.StaticConfig{
-    Site:            sloptrap.SitePinterest, // "youtube", "tiktok", "pinterest", or custom
-    BuiltinVerified: true,                   // or BundlesFS: embeddedRulesFS / BundlesDir: "./rules"
-    VerifiedOnly:    true,                   // enforce Official or Source-Attested rules only
-})
-verdict, err := eng.Evaluate(ctx, fingerprint)
-// verdict.Action -> "allow" | "warn" | "block" (verdict.Score 0..100)</code></pre>
-
-        <pre><code>// JavaScript / Browser / Extension — sdk/sloptrap-sdk.js
+          <h3>Mode A — Static rule set (headless, zero network)</h3>
+          <pre><code>// JavaScript / Browser / Extension — sdk/sloptrap-sdk.js
 import { SlopTrapStaticEngine, normalizeAccountSnapshot } from "https://sloptrap.github.io/sdk/sloptrap-sdk.js";
 
-const engine = new SlopTrapStaticEngine({ site: "tiktok", verifiedOnly: true });
-await engine.loadBundles([myBundledRuleJson]);
+const engine = new SlopTrapStaticEngine({ site: "pinterest", verifiedOnly: true });
+await engine.loadBundles([myStaticStruleJson]);
 
-const fp = normalizeAccountSnapshot("tiktok", { handle: "@clipfarm-x9z", recentUploadsPerDay: 4.5 });
-const verdict = await engine.evaluate(fp);</code></pre>
+const fp = normalizeAccountSnapshot("pinterest", { handle: "@decor-mill-z4k", recentUploadsPerDay: 12 });
+const verdict = await engine.evaluate(fp); // { score, action: "allow" | "warn" | "block" }</code></pre>
 
-        <h3>Mode B — Full functionality with drop-in UI sections</h3>
-        <p>
-          When your application exposes user settings, pair <code>ManagedClient</code> / <code>SlopTrapClient</code> with SlopTrap's prebuilt UI components for Web/Extension views, Go HTTP/WebView apps, or Bubble Tea TUIs:
-        </p>
+          <pre><code>// Go — pkg/sloptrap (in sloptrap/sloptrap-tube-tui)
+eng, err := sloptrap.NewStaticEngine(sloptrap.StaticConfig{
+    Site:            sloptrap.SitePinterest,
+    BuiltinVerified: true, // or BundlesFS: embeddedRulesFS / BundlesDir: "./rules"
+    VerifiedOnly:    true,
+})
+verdict, err := eng.Evaluate(ctx, fingerprint)</code></pre>
 
-        <pre><code>&lt;!-- Web / Browser Extension / Electron: 2-line Gravity UI Web Component --&gt;
+          <h3>Mode B — Drop-in UI sections for full functionality</h3>
+          <pre><code>&lt;!-- Web / Browser Extension / Electron: Gravity UI Web Component --&gt;
 &lt;script type="module" src="https://sloptrap.github.io/sdk/sloptrap-ui.js"&gt;&lt;/script&gt;
 &lt;sloptrap-rules-panel site="youtube" verified-only&gt;&lt;/sloptrap-rules-panel&gt;</code></pre>
 
-        <pre><code>// Go — Mountable Web UI section (Wails / WebView / Admin HTTP) OR Bubble Tea TUI panel
-client, _ := sloptrap.NewManagedClient(sloptrap.ManagedConfig{
-    Site:            "youtube",
-    StorageDir:      "~/.config/myapp/sloptrap",
-    VerifiedOnly:    true,
-    FallbackBuiltin: true,
-})
+          <p>Live interactive <code>&lt;sloptrap-rules-panel&gt;</code> running WebAssembly in your browser:</p>
+          <div style="margin:10px 0 4px;">
+            <sloptrap-rules-panel site="youtube" verified-only registry-url=".."></sloptrap-rules-panel>
+          </div>
+        </section>
 
-// Option 1: Mount prebuilt Gravity UI settings section on any net/http router
-mux.Handle("/sloptrap/", http.StripPrefix("/sloptrap", sloptrapui.NewWebSectionHandler(client)))
+        <section class="docs-section" id="adapters">
+          <h2>3. Pluggable Target Site Adapters</h2>
+          <p>
+            Site adapters decouple platform DOM/API extraction from <code>.strule</code> WebAssembly execution. Built-in adapters cover <code>youtube</code>, <code>tiktok</code>, and <code>pinterest</code>, while custom platforms register in one call:
+          </p>
+          <pre><code>import { registerSiteAdapter, normalizeAccountSnapshot } from "https://sloptrap.github.io/sdk/sloptrap-sdk.js";
 
-// Option 2: Embed Bubble Tea TUI sub-model inside an existing terminal app
-rulesTab := sloptrapui.NewRulesPanel(client)</code></pre>
+registerSiteAdapter({
+  siteId: "bluesky",
+  displayName: "Bluesky",
+  matchUrl: url => /bsky\.app/i.test(url),
+  extract: actorData => normalizeAccountSnapshot("bluesky", actorData),
+});</code></pre>
+        </section>
 
-        <h3>Live embedded preview (<code>&lt;sloptrap-rules-panel&gt;</code>)</h3>
-        <p>
-          The component below is running live in your browser using <a href="../sdk/sloptrap-ui.js"><code>sdk/sloptrap-ui.js</code></a> and WebAssembly:
-        </p>
-        <div style="margin:12px 0 20px;">
-          <sloptrap-rules-panel site="youtube" verified-only registry-url=".."></sloptrap-rules-panel>
-        </div>
-
-        <h2 id="adapters">2. Pluggable target site adapters</h2>
-        <p>
-          SlopTrap decouples site scraping/DOM extraction from rule evaluation via <code>PlatformAdapter</code>. Built-in adapters ship for <strong>YouTube</strong> (<code>youtube</code>), <strong>TikTok</strong> (<code>tiktok</code>), and <strong>Pinterest</strong> (<code>pinterest</code>), and custom platforms register in one call:
-        </p>
-        <pre><code>// Go — Register a custom target platform adapter
-sloptrap.RegisterAdapter(sloptrap.NewAdapter(
-    "bluesky",
-    "Bluesky",
-    func(target string) bool { return strings.Contains(target, "bsky.app/") },
-    func(ctx context.Context, target string) (sloptrap.Fingerprint, error) {
-        snap := fetchBlueskyActor(ctx, target)
-        return sloptrap.NormalizeAccountSnapshot("bluesky", snap), nil
-    },
-))</code></pre>
-
-        <div class="g-alert">
-          <strong>Cross-site signal reuse:</strong> Because account dormancy gaps, post velocity, handle-stem clones, LLM/keyword-stuffed captions, TTS prosody, synthetic image ratios, and outbound link rings map into the same normalized <code>Fingerprint</code> schema, rule authors use identical tooling across video, short-form, and image platforms.
-        </div>
-
-        <h2 id="installation">3. Standalone CLI &amp; daemon setup</h2>
-        <ul>
-          <li><strong>Go 1.24+</strong> — Pure-Go SQLite (<code>modernc.org/sqlite</code>) and pure-Go WebAssembly runtime (<code>wazero</code>); no CGO required.</li>
-          <li><strong>Optional — <code>ffmpeg</code></strong>: Enables 45-second EBU R128 loudness range (<code>LRA</code>) and <code>-65dBFS</code> digital dead-air acoustic TTS probing (<kbd>a</kbd> in TUI or <code>--audio</code> on CLI).</li>
-          <li><strong>Optional — Community blocklists</strong>: Auto-detects local <code>AiSList</code> checkouts (or <code>--aislist /path</code>) for offline stem-sibling matching.</li>
-        </ul>
-
-        <pre><code>git clone git@github.com:sloptrap/sloptrap.git
-cd sloptrap
-go build -o sloptrap ./cmd/sloptrap
-
-# Build &amp; audit all site-specific .strule leaderboards
-./sloptrap rules build-defaults --out ../sloptrap-site
-./sloptrap rules audit ../sloptrap-site/bundles</code></pre>
-
-        <h2 id="tui">4. Terminal UI guide</h2>
-        <p>
-          Running <code>./sloptrap</code> launches the interactive Bubble Tea workspace. Pass <code>--listen 0.0.0.0:8787</code> to serve the HTTP verification API alongside the TUI.
-        </p>
-        <div class="g-table-wrap">
-          <table class="g-table">
-            <thead>
-              <tr>
-                <th style="width:210px;">Input</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><kbd>↑</kbd> / <kbd>↓</kbd>, <kbd>j</kbd> / <kbd>k</kbd></td>
-                <td>Move selection in queue or scroll Forensic Inspector when right pane is focused.</td>
-              </tr>
-              <tr>
-                <td><kbd>←</kbd> / <kbd>→</kbd>, <kbd>Tab</kbd></td>
-                <td>Switch focus between queue and Inspector tabs (<kbd>[</kbd> / <kbd>]</kbd> cycle tabs directly).</td>
-              </tr>
-              <tr>
-                <td><kbd>1</kbd> .. <kbd>5</kbd></td>
-                <td>Select tab: <code>1:Overview</code>, <code>2:Timeline</code>, <code>3:Script &amp; Voice</code>, <code>4:Report</code>, <code>5:WASM Rules</code>.</td>
-              </tr>
-              <tr>
-                <td><kbd>s</kbd> / <kbd>d</kbd> / <kbd>C</kbd></td>
-                <td>Scan target URL/handle (<kbd>s</kbd>), open Niche Discovery (<kbd>d</kbd>), or toggle Continuous Crawl (<kbd>C</kbd>).</td>
-              </tr>
-              <tr>
-                <td><kbd>w</kbd> / <kbd>e</kbd> / <kbd>A</kbd></td>
-                <td>Toggle local whitelist (<kbd>w</kbd>), export plain-text lists (<kbd>e</kbd>), or toggle <strong>Anonymous rule rankings</strong> (<kbd>A</kbd>).</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h2 id="http-api">5. HTTP server API reference (<code>--serve</code> / <code>--listen</code>)</h2>
-        <div class="g-table-wrap">
-          <table class="g-table">
-            <thead>
-              <tr>
-                <th style="width:260px;">Endpoint</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><code>GET /api/v1/health</code></td>
-                <td>Returns service status and local SQLite scan/block/warn/whitelist counts.</td>
-              </tr>
-              <tr>
-                <td><code>POST /api/v1/check</code></td>
-                <td>Batched account/item verification with singleflight live scanning when <code>scan_unknown: true</code>.</td>
-              </tr>
-              <tr>
-                <td><code>POST /api/v1/whitelist</code></td>
-                <td>Marks or unmarks an account as whitelisted in SQLite.</td>
-              </tr>
-              <tr>
-                <td><code>GET /lists/blocklist.txt</code><br/><code>GET /lists/warnlist.txt</code></td>
-                <td>Plain-text blocklist and warnlist feeds for media clients and browser extensions.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <section class="docs-section" id="examples">
+          <h2>4. Example Applications</h2>
+          <ul>
+            <li>
+              <strong><a href="https://github.com/sloptrap/sloptrap-tube-tui" target="_blank" rel="noopener"><code>sloptrap/sloptrap-tube-tui</code></a> (Example YouTube Forensic TUI &amp; Server):</strong>
+              Reference Go terminal application combining YouTube upload-history dormancy analysis, <code>json3</code> caption prosody, optional 45-second <code>ffmpeg</code> EBU R128 dead-air probing, autonomous crawling, and local HTTP verification APIs with SlopTrap's <code>.strule</code> WebAssembly runtime.
+            </li>
+            <li>
+              <strong><a href="https://github.com/sloptrap/sloptrap-extension" target="_blank" rel="noopener"><code>sloptrap/sloptrap-extension</code></a> (Chromium &amp; Firefox Extension):</strong>
+              Single-monorepo Manifest V3 extension filtering YouTube, TikTok, and Pinterest feeds in real time using static and registry-synced Verified <code>.strule</code> bundles.
+            </li>
+          </ul>
+          <pre><code># Build &amp; run the example YouTube TUI application
+git clone git@github.com:sloptrap/sloptrap-tube-tui.git
+cd sloptrap-tube-tui
+go build -o sloptrap-tube-tui ./cmd/sloptrap
+./sloptrap-tube-tui --listen 0.0.0.0:8787</code></pre>
+        </section>
       </article>
     </div>
   </main>
@@ -227,9 +155,9 @@ go build -o sloptrap ./cmd/sloptrap
       <div>SlopTrap Documentation &amp; SDK</div>
       <div class="g-footer__links">
         <a href="../">Overview</a>
+        <a href="../studio/">Rule Studio</a>
         <a href="../rules/">WASM Spec</a>
         <a href="../leaderboard/">Leaderboards</a>
-        <a href="../sdk/sloptrap-sdk.js">sloptrap-sdk.js</a>
       </div>
     </div>
   </footer>

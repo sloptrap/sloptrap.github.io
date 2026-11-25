@@ -128,14 +128,67 @@ jobs:
               idx["active_window_days"] = window_days
               idx["generated_at"] = now_iso
               idx_path.write_text(json.dumps(idx, indent=2) + "\n", encoding="utf-8")
+
+          # Sync opt-in rule-matched account lists (`lists/<site>/<rule_id>.txt` & `lists/manifest.json`)
+          if endpoint:
+              try:
+                  import hashlib
+                  req = urllib.request.Request(
+                      f"{endpoint}/api/v1/lists/entries",
+                      headers={"User-Agent": "sloptrap-leaderboard-sync/1.0"},
+                  )
+                  with urllib.request.urlopen(req, timeout=15) as r:
+                      list_doc = json.loads(r.read().decode("utf-8"))
+                  by_pair = {}
+                  for row in list_doc.get("entries") or []:
+                      s_id = str(row.get("site") or "").strip().lower()
+                      r_id = str(row.get("rule_id") or "").strip().lower()
+                      acc = str(row.get("account_key") or "").strip()
+                      if s_id and r_id and acc:
+                          by_pair.setdefault((s_id, r_id), set()).add(acc)
+
+                  manifest_path = Path("lists/manifest.json")
+                  manifest = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.exists() else {"schema_version": 1, "lists": {}}
+                  for (s_id, r_id), incoming in by_pair.items():
+                      lfile = Path("lists") / s_id / f"{r_id}.txt"
+                      lfile.parent.mkdir(parents=True, exist_ok=True)
+                      existing = set()
+                      if lfile.exists():
+                          for ln in lfile.read_text(encoding="utf-8").splitlines():
+                              ln = ln.strip()
+                              if ln and not ln.startswith("!"):
+                                  existing.add(ln if ln.startswith("UC") else ln.lower())
+                      merged = sorted(existing | {a if a.startswith("UC") else a.lower() for a in incoming})
+                      if len(merged) != len(existing) or not lfile.exists():
+                          txt = "\n".join([
+                              "! SlopTrap Public Rule Matched Accounts",
+                              f"! Rule: {r_id}",
+                              f"! Site: {s_id}",
+                              f"! Entries: {len(merged)}",
+                              *merged,
+                          ]) + "\n"
+                          lfile.write_text(txt, encoding="utf-8")
+                      raw_bytes = lfile.read_bytes()
+                      manifest["lists"][f"{s_id}/{r_id}"] = {
+                          "site": s_id,
+                          "rule_id": r_id,
+                          "path": f"lists/{s_id}/{r_id}.txt",
+                          "count": len(merged),
+                          "sha256": hashlib.sha256(raw_bytes).hexdigest(),
+                      }
+                  manifest["generated_at"] = now_iso
+                  manifest_path.parent.mkdir(parents=True, exist_ok=True)
+                  manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+              except Exception as exc:
+                  print(f"Rule matched lists sync warning: {exc}")
           PY
 
-      - name: Commit updated leaderboards if changed
+      - name: Commit updated leaderboards & rule lists if changed
         run: |
-          if ! git diff --quiet leaderboard.json leaderboard/; then
+          if ! git diff --quiet leaderboard.json leaderboard/ lists/; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add leaderboard.json leaderboard/
-            git commit -m "chore(leaderboard): sync multi-site rankings stats [skip ci]"
+            git add leaderboard.json leaderboard/ lists/
+            git commit -m "chore(leaderboard): sync multi-site rankings & rule-matched lists [skip ci]"
             git push
           fi

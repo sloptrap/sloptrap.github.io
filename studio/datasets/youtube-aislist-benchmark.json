@@ -12,34 +12,52 @@
       "contentSource": "curated",
       "samplePosts": [
         {
+          "id": "zqzk43bSdDI",
           "title": "We've been asking: “What if AI solved the Riemann Hypothesis?”",
           "published": "2026-11-21",
-          "durationSec": 819
+          "durationSec": 819,
+          "thumbnailUrl": "https://i.ytimg.com/vi/zqzk43bSdDI/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=zqzk43bSdDI"
         },
         {
+          "id": "qbsb9DpdZ6s",
           "title": "This algorithm changed how I think about compression | Information theory, part 3",
           "published": "2026-11-17",
-          "durationSec": 2245
+          "durationSec": 2245,
+          "thumbnailUrl": "https://i.ytimg.com/vi/qbsb9DpdZ6s/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=qbsb9DpdZ6s"
         },
         {
+          "id": "LKrwhjOI8Nc",
           "title": "Will mathematicians still exist?",
           "published": "2026-10-16",
-          "durationSec": 2444
+          "durationSec": 2444,
+          "thumbnailUrl": "https://i.ytimg.com/vi/LKrwhjOI8Nc/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=LKrwhjOI8Nc"
         },
         {
+          "id": "Nbwv5wHQoj0",
           "title": "The last IMO problem AI could not solve",
           "published": "2026-09-18",
-          "durationSec": 3116
+          "durationSec": 3116,
+          "thumbnailUrl": "https://i.ytimg.com/vi/Nbwv5wHQoj0/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=Nbwv5wHQoj0"
         },
         {
-          "title": "What is cross-entropy, and why is it used in ML? | Information theory, part 2",
+          "id": "GlYgs6v2YfU",
+          "title": "Visualizing ML's favorite loss function | Information theory, part 2",
           "published": "2026-07-16",
-          "durationSec": 2031
+          "durationSec": 2031,
+          "thumbnailUrl": "https://i.ytimg.com/vi/GlYgs6v2YfU/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=GlYgs6v2YfU"
         },
         {
+          "id": "l6DKRf-fAAM",
           "title": "Shannon's dream: The limit of compressibility | Information theory, part 1",
           "published": "2026-06-07",
-          "durationSec": 1883
+          "durationSec": 1883,
+          "thumbnailUrl": "https://i.ytimg.com/vi/l6DKRf-fAAM/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=l6DKRf-fAAM"
         }
       ],
       "fingerprint": {
@@ -62,7 +80,7 @@
           "title": "3Blue1Brown",
           "total_videos": 250
         },
-        "sample_text": "3Blue1Brown | My name is Grant Sanderson. Videos here cover a variety of topics in math, or adjacent fields like physics and CS, all with an emphasis on visualizing the core ideas. The goal is to use animation to help elucidate and motivate otherwise tricky topics, and for difficult problems to be made simple with changes in perspective.\n\nFor more information, other projects, FAQs, and inquiries see the website: https://www.3blue1brown.com | We've been asking: “What if AI solved the Riemann Hypothesis?” | That's a great question. That's because it appeals to my sense of humor, that idea that a computer just you press a button and you get this billion line long proof of the Riemann hypothesis and it's just like let A be this function, let B be this function, let C be this number, let D be this function. Just like pages and pages but like no explanation of why any of these things are being used. That to me that would be funny. Hundreds, if not thousands of papers are written assuming the Riemann hypothesis is true. And that's a brand new toolkit. If you could prove the Riemann hypothesis, there'll be a quantum leap in knowledge in mathematics. As a romantic in terms of mathematics what you describe would be horrible. I would want a human being involved in the proof and I'd I'd like to believe that the proof is beautiful and if it isn't beautiful I don't think the search for a beautiful conc | This algorithm changed how I think about compression | Information theory, part 3 | This animation is previewing an algorithm that can compress large pieces of text down to less than just one bit per character, which is kind of mind-boggling if you think about it. There's actually an open cash prize for text compression. It's known as the Hutter Prize, available to anyone who can beat the current best record for compressing a gigabyte of Wikipedia as small as possible. I promise we'll build up to what exactly this animation is showing in due time. The core idea that it conveys underlies Well, I was going to say it underlies several of the winning submissions here, but that's not true. It's actually the backbone for all of them, every single one. And the method is not even specific to text. It is a fully general technique that you could use to compress images or videos, audio, really any data type. And this algorithm also got me thinking differently about that phrase, co | Will mathematicians still exist? | Well, let's talk about it. Feels like the whole math world is on fire talking about AI and math. I have been thinking about this for a very long time. So, I put up this post last week soliciting questions that people had on the matter, and a lot of what I saw were comments from students, maybe PhD students or undergrads, who had been planning on going into math or adjacent theoretical fields, who were basically just saying, \"What am I supposed to do? What am I supposed to do next when the future seems so uncertain?\" You know, there's a lot of fear that math is dead or math is solved or even if you don't believe those, that whatever the thing that math will become is is unpleasant or not what you want it to do. I've also talked to a lot of different professors who are essentially throwing up their hands saying, \"What am I supposed to tell my students? Like, how am I supposed to advise the | The last IMO problem AI could not solve | What is cross-entropy, and why is it used in ML? | Information theory, part 2 | Shannon's dream: The limit of compressibility | Information theory, part 1 | Escher’s “most peculiar” piece touches deeper math than he realized | The most beautiful formula not enough people understand | Why you can't comb a hairy ball, and why we care | Why Laplace transforms are so useful | But what is a Laplace Transform? |",
+        "sample_text": "3Blue1Brown | My name is Grant Sanderson. Videos here cover a variety of topics in math, or adjacent fields like physics and CS, all with an emphasis on visualizing the core ideas. The goal is to use animation to help elucidate and motivate otherwise tricky topics, and for difficult problems to be made simple with changes in perspective.\n\nFor more information, other projects, FAQs, and inquiries see the website: https://www.3blue1brown.com | We've been asking: “What if AI solved the Riemann Hypothesis?” | That's a great question. That's because it appeals to my sense of humor, that idea that a computer just you press a button and you get this billion line long proof of the Riemann hypothesis and it's just like let A be this function, let B be this function, let C be this number, let D be this function. Just like pages and pages but like no explanation of why any of these things are being used. That to me that would be funny. Hundreds, if not thousands of papers are written assuming the Riemann hypothesis is true. And that's a brand new toolkit. If you could prove the Riemann hypothesis, there'll be a quantum leap in knowledge in mathematics. As a romantic in terms of mathematics what you describe would be horrible. I would want a human being involved in the proof and I'd I'd like to believe that the proof is beautiful and if it isn't beautiful I don't think the search for a beautiful conc | This algorithm changed how I think about compression | Information theory, part 3 | This animation is previewing an algorithm that can compress large pieces of text down to less than just one bit per character, which is kind of mind-boggling if you think about it. There's actually an open cash prize for text compression. It's known as the Hutter Prize, available to anyone who can beat the current best record for compressing a gigabyte of Wikipedia as small as possible. I promise we'll build up to what exactly this animation is showing in due time. The core idea that it conveys underlies Well, I was going to say it underlies several of the winning submissions here, but that's not true. It's actually the backbone for all of them, every single one. And the method is not even specific to text. It is a fully general technique that you could use to compress images or videos, audio, really any data type. And this algorithm also got me thinking differently about that phrase, co | Will mathematicians still exist? | Well, let's talk about it. Feels like the whole math world is on fire talking about AI and math. I have been thinking about this for a very long time. So, I put up this post last week soliciting questions that people had on the matter, and a lot of what I saw were comments from students, maybe PhD students or undergrads, who had been planning on going into math or adjacent theoretical fields, who were basically just saying, \"What am I supposed to do? What am I supposed to do next when the future seems so uncertain?\" You know, there's a lot of fear that math is dead or math is solved or even if you don't believe those, that whatever the thing that math will become is is unpleasant or not what you want it to do. I've also talked to a lot of different professors who are essentially throwing up their hands saying, \"What am I supposed to tell my students? Like, how am I supposed to advise the | The last IMO problem AI could not solve | Visualizing ML's favorite loss function | Information theory, part 2 | Shannon's dream: The limit of compressibility | Information theory, part 1 | How (and why) to take a logarithm of an image | The most beautiful formula not enough people understand | Why you can't comb a hairy ball, and why we care | Why Laplace transforms are so useful | But what is a Laplace Transform? | The Physics of Euler's Formula | Lap",
         "schema_version": 1,
         "site": "youtube",
         "thumbnails": {
@@ -86,7 +104,7 @@
         },
         "upload_cadence": {
           "avg_duration_sec": 1940.333,
-          "channel_age_days": 4282.772,
+          "channel_age_days": 4282.815,
           "duration_cv": 0.392,
           "max_dormancy_gap_days": 0,
           "output_minutes_per_week": 6.754,
@@ -108,34 +126,52 @@
       "contentSource": "curated",
       "samplePosts": [
         {
+          "id": "uXuQF_PPg5U",
           "title": "Randomness is a lie. Let me explain",
           "published": "2026-11-18",
-          "durationSec": 2328
+          "durationSec": 2328,
+          "thumbnailUrl": "https://i.ytimg.com/vi/uXuQF_PPg5U/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=uXuQF_PPg5U"
         },
         {
+          "id": "KfODG5REyss",
           "title": "I finally saw quantum physics with my own eyes... (It's spookier than I expected)",
           "published": "2026-11-04",
-          "durationSec": 3956
+          "durationSec": 3956,
+          "thumbnailUrl": "https://i.ytimg.com/vi/KfODG5REyss/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=KfODG5REyss"
         },
         {
+          "id": "eyZEqSPeMwg",
           "title": "Relativity is so much weirder than we thought...",
           "published": "2026-10-23",
-          "durationSec": 2068
+          "durationSec": 2068,
+          "thumbnailUrl": "https://i.ytimg.com/vi/eyZEqSPeMwg/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=eyZEqSPeMwg"
         },
         {
+          "id": "NiCgcUTL9_Q",
           "title": "Fiber Optics are so much cooler than I thought",
           "published": "2026-10-12",
-          "durationSec": 2072
+          "durationSec": 2072,
+          "thumbnailUrl": "https://i.ytimg.com/vi/NiCgcUTL9_Q/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=NiCgcUTL9_Q"
         },
         {
+          "id": "ONAuUyml0yI",
           "title": "We're trying something new...",
           "published": "2026-09-30",
-          "durationSec": 308
+          "durationSec": 308,
+          "thumbnailUrl": "https://i.ytimg.com/vi/ONAuUyml0yI/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=ONAuUyml0yI"
         },
         {
+          "id": "JsBZOcqZerk",
           "title": "The Insane Real Engineering of the Nazi Enigma Machine",
           "published": "2026-09-21",
-          "durationSec": 2862
+          "durationSec": 2862,
+          "thumbnailUrl": "https://i.ytimg.com/vi/JsBZOcqZerk/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=JsBZOcqZerk"
         }
       ],
       "fingerprint": {
@@ -182,7 +218,7 @@
         },
         "upload_cadence": {
           "avg_duration_sec": 2102.8,
-          "channel_age_days": 5945.367,
+          "channel_age_days": 5945.409,
           "duration_cv": 0.375,
           "max_dormancy_gap_days": 0,
           "output_minutes_per_week": 21.108,
@@ -204,34 +240,52 @@
       "contentSource": "curated",
       "samplePosts": [
         {
+          "id": "FcbwVXk83U8",
           "title": "It's a Fiber Optic Christmas (or... was)",
           "published": "2026-11-19",
-          "durationSec": 2254
+          "durationSec": 2254,
+          "thumbnailUrl": "https://i.ytimg.com/vi/FcbwVXk83U8/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=FcbwVXk83U8"
         },
         {
+          "id": "qh44Mo3mRzg",
           "title": "Why does a loose gas cap turn on the check engine light?",
           "published": "2026-11-03",
-          "durationSec": 1381
+          "durationSec": 1381,
+          "thumbnailUrl": "https://i.ytimg.com/vi/qh44Mo3mRzg/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=qh44Mo3mRzg"
         },
         {
+          "id": "I1rlK3BKmyA",
           "title": "Alkaline batteries are obsolete — but not for the reason you'd think",
           "published": "2026-10-30",
-          "durationSec": 1819
+          "durationSec": 1819,
+          "thumbnailUrl": "https://i.ytimg.com/vi/I1rlK3BKmyA/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=I1rlK3BKmyA"
         },
         {
+          "id": "0KoeY54M5VA",
           "title": "Engines haven't been fully mechanical in decades - and that's good!",
           "published": "2026-09-24",
-          "durationSec": 3037
+          "durationSec": 3037,
+          "thumbnailUrl": "https://i.ytimg.com/vi/0KoeY54M5VA/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=0KoeY54M5VA"
         },
         {
+          "id": "F_7B2shTPPU",
           "title": "My water heater is cooler than yours",
           "published": "2026-08-21",
-          "durationSec": 3525
+          "durationSec": 3525,
+          "thumbnailUrl": "https://i.ytimg.com/vi/F_7B2shTPPU/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=F_7B2shTPPU"
         },
         {
+          "id": "_KWdCqpXB7A",
           "title": "Ceiling fans: the simple idea we keep screwing up",
           "published": "2026-06-17",
-          "durationSec": 4271
+          "durationSec": 4271,
+          "thumbnailUrl": "https://i.ytimg.com/vi/_KWdCqpXB7A/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=_KWdCqpXB7A"
         }
       ],
       "fingerprint": {
@@ -278,7 +332,7 @@
         },
         "upload_cadence": {
           "avg_duration_sec": 2292.033,
-          "channel_age_days": 4080.282,
+          "channel_age_days": 4080.325,
           "duration_cv": 0.436,
           "max_dormancy_gap_days": 0,
           "output_minutes_per_week": 8.632,
@@ -300,34 +354,52 @@
       "contentSource": "curated",
       "samplePosts": [
         {
+          "id": "rj-G_gmFWtE",
           "title": "Why Are There So Many Different Transmission Towers?",
           "published": "2026-11-17",
-          "durationSec": 1357
+          "durationSec": 1357,
+          "thumbnailUrl": "https://i.ytimg.com/vi/rj-G_gmFWtE/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=rj-G_gmFWtE"
         },
         {
+          "id": "n05Yu3UAI_o",
           "title": "My First Mistake as an Engineer",
           "published": "2026-11-10",
-          "durationSec": 469
+          "durationSec": 469,
+          "thumbnailUrl": "https://i.ytimg.com/vi/n05Yu3UAI_o/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=n05Yu3UAI_o"
         },
         {
+          "id": "JsRiC6vGb1E",
           "title": "Windows Are Absurd",
           "published": "2026-11-03",
-          "durationSec": 1469
+          "durationSec": 1469,
+          "thumbnailUrl": "https://i.ytimg.com/vi/JsRiC6vGb1E/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=JsRiC6vGb1E"
         },
         {
+          "id": "awV7FP9sAHE",
           "title": "Whatever Happened to Fire Escapes?",
           "published": "2026-10-20",
-          "durationSec": 1087
+          "durationSec": 1087,
+          "thumbnailUrl": "https://i.ytimg.com/vi/awV7FP9sAHE/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=awV7FP9sAHE"
         },
         {
+          "id": "5_B1Mq02wcI",
           "title": "The Hidden Engineering of Pressure Regulators",
           "published": "2026-10-06",
-          "durationSec": 994
+          "durationSec": 994,
+          "thumbnailUrl": "https://i.ytimg.com/vi/5_B1Mq02wcI/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=5_B1Mq02wcI"
         },
         {
+          "id": "n_1wzYQwnts",
           "title": "Every US Electrical Outlet Explained",
           "published": "2026-09-15",
-          "durationSec": 1293
+          "durationSec": 1293,
+          "thumbnailUrl": "https://i.ytimg.com/vi/n_1wzYQwnts/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=n_1wzYQwnts"
         }
       ],
       "fingerprint": {
@@ -374,7 +446,7 @@
         },
         "upload_cadence": {
           "avg_duration_sec": 1138.833,
-          "channel_age_days": 4428.353,
+          "channel_age_days": 4428.396,
           "duration_cv": 0.184,
           "max_dormancy_gap_days": 828.636,
           "output_minutes_per_week": 10.538,
@@ -396,34 +468,52 @@
       "contentSource": "curated",
       "samplePosts": [
         {
+          "id": "BuRyQYf03xA",
           "title": "My dog won't stay out of mud so I made this...",
           "published": "2026-10-31",
-          "durationSec": 1310
+          "durationSec": 1310,
+          "thumbnailUrl": "https://i.ytimg.com/vi/BuRyQYf03xA/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=BuRyQYf03xA"
         },
         {
+          "id": "RpslsMqPFWA",
           "title": "I made an apple peel itself",
           "published": "2026-08-05",
-          "durationSec": 1766
+          "durationSec": 1766,
+          "thumbnailUrl": "https://i.ytimg.com/vi/RpslsMqPFWA/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=RpslsMqPFWA"
         },
         {
+          "id": "2OfjZ3ORJfc",
           "title": "Robot golf vs holes that keep getting harder",
-          "published": "2026-11-24",
-          "durationSec": 1486
+          "published": "2026-04-15",
+          "durationSec": 1486,
+          "thumbnailUrl": "https://i.ytimg.com/vi/2OfjZ3ORJfc/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=2OfjZ3ORJfc"
         },
         {
+          "id": "JQB8aNKyeao",
           "title": "Making an autocorrect mini golf club (part 1)",
           "published": "2025-12-31",
-          "durationSec": 1617
+          "durationSec": 1617,
+          "thumbnailUrl": "https://i.ytimg.com/vi/JQB8aNKyeao/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=JQB8aNKyeao"
         },
         {
+          "id": "vJ43DjwLPGA",
           "title": "Why is this task so difficult for machines?",
           "published": "2025-08-30",
-          "durationSec": 1627
+          "durationSec": 1627,
+          "thumbnailUrl": "https://i.ytimg.com/vi/vJ43DjwLPGA/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=vJ43DjwLPGA"
         },
         {
+          "id": "dXIkUkwzTQU",
           "title": "Baking brownies from the inside out",
           "published": "2025-06-01",
-          "durationSec": 1401
+          "durationSec": 1401,
+          "thumbnailUrl": "https://i.ytimg.com/vi/dXIkUkwzTQU/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=dXIkUkwzTQU"
         }
       ],
       "fingerprint": {
@@ -470,15 +560,15 @@
         },
         "upload_cadence": {
           "avg_duration_sec": 1332.9,
-          "channel_age_days": 2456.397,
+          "channel_age_days": 2432.53,
           "duration_cv": 0.224,
           "max_dormancy_gap_days": 0,
-          "output_minutes_per_week": 1.203,
+          "output_minutes_per_week": 1.504,
           "post_pivot_share": 0,
           "post_pivot_videos": 0,
           "pre_pivot_videos": 0,
-          "recent_uploads_per_day": 0.008,
-          "schedule_hour_stddev": 0
+          "recent_uploads_per_day": 0.01,
+          "schedule_hour_stddev": 4.763
         }
       }
     },
@@ -492,34 +582,52 @@
       "contentSource": "curated",
       "samplePosts": [
         {
+          "id": "ID-K64Jk6JM",
           "title": "Turning air into alcohol",
           "published": "2026-08-05",
-          "durationSec": 5412
+          "durationSec": 5412,
+          "thumbnailUrl": "https://i.ytimg.com/vi/ID-K64Jk6JM/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=ID-K64Jk6JM"
         },
         {
+          "id": "GmwaJnj6pfY",
           "title": "Making liquid nitrogen from scratch (an absurd amount)",
           "published": "2025-10-23",
-          "durationSec": 3333
+          "durationSec": 3333,
+          "thumbnailUrl": "https://i.ytimg.com/vi/GmwaJnj6pfY/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=GmwaJnj6pfY"
         },
         {
+          "id": "QzP3vx8XadU",
           "title": "Turning children's glue into drinkable alcohol",
           "published": "2025-03-29",
-          "durationSec": 3699
+          "durationSec": 3699,
+          "thumbnailUrl": "https://i.ytimg.com/vi/QzP3vx8XadU/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=QzP3vx8XadU"
         },
         {
+          "id": "jLX1-tNnvEo",
           "title": "Making an atomic trampoline",
           "published": "2024-08-30",
-          "durationSec": 3481
+          "durationSec": 3481,
+          "thumbnailUrl": "https://i.ytimg.com/vi/jLX1-tNnvEo/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=jLX1-tNnvEo"
         },
         {
+          "id": "zMaTrgUKC1w",
           "title": "Turning styrofoam into cinnamon candy",
           "published": "2024-03-16",
-          "durationSec": 3177
+          "durationSec": 3177,
+          "thumbnailUrl": "https://i.ytimg.com/vi/zMaTrgUKC1w/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=zMaTrgUKC1w"
         },
         {
+          "id": "d6Pcp944sRI",
           "title": "Making purple gold",
           "published": "2023-12-22",
-          "durationSec": 3200
+          "durationSec": 3200,
+          "thumbnailUrl": "https://i.ytimg.com/vi/d6Pcp944sRI/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=d6Pcp944sRI"
         }
       ],
       "fingerprint": {
@@ -588,34 +696,52 @@
       "contentSource": "curated",
       "samplePosts": [
         {
+          "id": "of60wacXiTQ",
           "title": "Old trams waste power on purpose. Here's why (*this is mostly an excuse for a tram driving contest)",
           "published": "2026-11-23",
-          "durationSec": 1631
+          "durationSec": 1631,
+          "thumbnailUrl": "https://i.ytimg.com/vi/of60wacXiTQ/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=of60wacXiTQ"
         },
         {
+          "id": "sdORrH7d2ug",
           "title": "The chances of being surprised by a giant are low, but not zero.",
           "published": "2026-11-16",
-          "durationSec": 1329
+          "durationSec": 1329,
+          "thumbnailUrl": "https://i.ytimg.com/vi/sdORrH7d2ug/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=sdORrH7d2ug"
         },
         {
+          "id": "0V-4lQYNugA",
           "title": "Why you can't touch Stonehenge any more",
           "published": "2026-11-09",
-          "durationSec": 1585
+          "durationSec": 1585,
+          "thumbnailUrl": "https://i.ytimg.com/vi/0V-4lQYNugA/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=0V-4lQYNugA"
         },
         {
+          "id": "NBXu6Z9Fw_M",
           "title": "It's getting harder to balance the power grid. Here's why.",
           "published": "2026-11-02",
-          "durationSec": 981
+          "durationSec": 981,
+          "thumbnailUrl": "https://i.ytimg.com/vi/NBXu6Z9Fw_M/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=NBXu6Z9Fw_M"
         },
         {
+          "id": "-E47v4Oy7fE",
           "title": "This machine breaks things.",
           "published": "2026-10-26",
-          "durationSec": 1397
+          "durationSec": 1397,
+          "thumbnailUrl": "https://i.ytimg.com/vi/-E47v4Oy7fE/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=-E47v4Oy7fE"
         },
         {
+          "id": "BxXfeotgVVA",
           "title": "Clocks are so much more interesting than I thought.",
           "published": "2026-10-19",
-          "durationSec": 1265
+          "durationSec": 1265,
+          "thumbnailUrl": "https://i.ytimg.com/vi/BxXfeotgVVA/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=BxXfeotgVVA"
         }
       ],
       "fingerprint": {
@@ -662,7 +788,7 @@
         },
         "upload_cadence": {
           "avg_duration_sec": 1334.1,
-          "channel_age_days": 7476.1,
+          "channel_age_days": 7476.143,
           "duration_cv": 0.209,
           "max_dormancy_gap_days": 0,
           "output_minutes_per_week": 22.209,
@@ -671,102 +797,6 @@
           "pre_pivot_videos": 0,
           "recent_uploads_per_day": 0.143,
           "schedule_hour_stddev": 0.484
-        }
-      }
-    },
-    {
-      "id": "yt-UC3KEoMzNz8eYnwBC34RaKCQ@simonegiertz",
-      "site": "youtube",
-      "label": "clean",
-      "title": "@simonegiertz — Simone Giertz",
-      "sourceUrl": "https://www.youtube.com/@simonegiertz",
-      "summary": "0.03/day · 261 videos · 16% formal prose · 7% title reuse",
-      "contentSource": "curated",
-      "samplePosts": [
-        {
-          "title": "I tried remodelling my kitchen in 3 days",
-          "published": "2026-11-10",
-          "durationSec": 674
-        },
-        {
-          "title": "Solving my workshop’s most annoying problem",
-          "published": "2026-10-09",
-          "durationSec": 732
-        },
-        {
-          "title": "This lamp looks like a pair of scissors",
-          "published": "2026-09-11",
-          "durationSec": 551
-        },
-        {
-          "title": "Redesigning an old welding jacket for everyday life",
-          "published": "2026-08-28",
-          "durationSec": 960
-        },
-        {
-          "title": "Can this invention solve my messy t-shirt pile?",
-          "published": "2026-08-01",
-          "durationSec": 805
-        },
-        {
-          "title": "The only life hack I believe in",
-          "published": "2026-06-16",
-          "durationSec": 752
-        }
-      ],
-      "fingerprint": {
-        "audio_video_stats": {
-          "altered_content_flag": false,
-          "dead_air_floor": false,
-          "earliest_max_dim": 640,
-          "earliest_vertical": false,
-          "loudness_range_lu": 0,
-          "recent_widescreen_hd_ratio": 1,
-          "silence_cv": 0
-        },
-        "channel": {
-          "channel_id": "UC3KEoMzNz8eYnwBC34RaKCQ",
-          "description": "Inventor and breaker of things. Founder of https://yetch.studio.\n\nWant to send me something? All poop-free packages go here:\n\n3183 Wilshire Blvd Ste 196L\nLos Angeles CA 90010\nUnited States\n",
-          "handle": "@simonegiertz",
-          "has_auto_suffix": false,
-          "stem_siblings": 0,
-          "subscriber_count": 2860000,
-          "title": "Simone Giertz",
-          "total_videos": 261
-        },
-        "sample_text": "Simone Giertz | Inventor and breaker of things. Founder of https://yetch.studio.\n\nWant to send me something? All poop-free packages go here:\n\n3183 Wilshire Blvd Ste 196L\nLos Angeles CA 90010\nUnited States\n | I tried remodelling my kitchen in 3 days | My kitchen is just like me, small but mighty, and could use a little work. No. I should not talk about myself like that. It's unhealthy for everyone. My kitchen is just like me, but mighty and worthy of time and love. So I want to redo my kitchen because there are just so many unfinished details. My least favorite part being this bare butt of a kitchen island and this area right here. I like to call it my my fridge mullet. There are also three different cabinet colors and just too much wonk for comfort. There's a small problem though. For boring scheduling reasons, I only have three days to finish this project. And by I, I mean my entire team. Because I'm about to make my kitchen everyone's problem, including yours. This video is sponsored by Samsung. Okay, first step, removing the cabinet doors because they're all cracked and mirrored and I want to repaint them. Also, I thought that I w | Solving my workshop’s most annoying problem | My previous workshop had this very pretty tool wall and my current workshop has this and I could make another tool wall, but I would prefer to once again weaponize my incompetence against my friend Laura who helped me build the first one. What are we doing? Ooh. I remember that. I was young and full of energy when we made that. I kept all of it. I put a put a lot of effort into this. I like you. Oh, well, I know. Why are you saying that like that would be a surprise to me? you're just convincing myself again. No, I do like this person. The goal for the day is to get rid of this tool cart because it's hell and also I'm trying to fit more tools into my workshop. I like where this is going. So the idea is I want to get as many power tools as possible up on this wall and then I'm going to take photos and print out photos of each tool so I know which tool goes where and in what orientation. I | This lamp looks like a pair of scissors | Six years ago, I made this lamp. And today, I'm releasing it as a product. But the final version looks very different from this. And it's not for the reason you think. Okay. So, there's a pretty obvious pattern to the projects I've been making recently. It's just combining two things into one. And today we're taking lamps and scissors and forcing them together consensually. Consensually. When I die, please delete all of my raw video footage. Or turn it into like a really sappy documentary where everyone will be like, \"Well, she was so inspiring.\" Why is everything I make always so flaccid? So inspiring. I just from the moment I finished this project, I knew that I wanted to turn it into a product. But manufacturing this at scale required skills and expertise that I wasn't even close to having at the time. So, I turned to something that felt more familiar, maker kits. Like, what if the sc | Redesigning an old welding jacket for everyday life | Can this invention solve my messy t-shirt pile? | The only life hack I believe in | Please forgive me for tearing out this staircase | This art has a secret function | I made a chair for your half-dirty clothes PART 2 | A fruit bowl that mechanically changes size | This lamp changes every time you look at it | Never thought this build would make me quit | This plant will die if I'm on my phone too much | I built a motorized umbrella to protect my outdoor furniture | I made a spinning coffee table",
-        "schema_version": 1,
-        "site": "youtube",
-        "thumbnails": {
-          "raw_camera_earliest_title": false,
-          "title_skeleton_reuse": 0.067
-        },
-        "transcript": {
-          "antithesis_per_1k": 0,
-          "cross_video_wpm_stddev": 8.835,
-          "disfluencies_per_1k": 1.902,
-          "earliest_has_speech": true,
-          "first_person_per_1k": 60.651,
-          "intra_video_wpm_cv": 0.242,
-          "llm_lexicon_per_1k": 0,
-          "mean_wpm": 148.237,
-          "pause_cv": 0.772,
-          "slop_hooks_per_1k": 0.211,
-          "total_words": 4732,
-          "uncontracted_ratio": 0.159,
-          "videos_sampled": 3
-        },
-        "upload_cadence": {
-          "avg_duration_sec": 776.533,
-          "channel_age_days": 4452.8,
-          "duration_cv": 0.29,
-          "max_dormancy_gap_days": 0,
-          "output_minutes_per_week": 3.077,
-          "post_pivot_share": 0,
-          "post_pivot_videos": 0,
-          "pre_pivot_videos": 0,
-          "recent_uploads_per_day": 0.034,
-          "schedule_hour_stddev": 2.089
         }
       }
     },
@@ -780,34 +810,52 @@
       "contentSource": "curated",
       "samplePosts": [
         {
+          "id": "ZZTC_dXcC2o",
           "title": "The 3-Nanometer Air Gap Inside Every Hard Drive",
           "published": "2026-11-07",
-          "durationSec": 318
+          "durationSec": 318,
+          "thumbnailUrl": "https://i.ytimg.com/vi/ZZTC_dXcC2o/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=ZZTC_dXcC2o"
         },
         {
+          "id": "N_6k_jd5pnA",
           "title": "How does Tap to Pay Work?",
-          "published": "2026-11-24",
-          "durationSec": 1818
+          "published": "2026-09-21",
+          "durationSec": 1818,
+          "thumbnailUrl": "https://i.ytimg.com/vi/N_6k_jd5pnA/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=N_6k_jd5pnA"
         },
         {
+          "id": "9kM3mnxrMMM",
           "title": "How do microSD Cards Store 2 TB in such a TINY space?",
           "published": "2026-08-21",
-          "durationSec": 367
+          "durationSec": 367,
+          "thumbnailUrl": "https://i.ytimg.com/vi/9kM3mnxrMMM/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=9kM3mnxrMMM"
         },
         {
+          "id": "TfhL5kBiQVI",
           "title": "How does Computer Cache, Memory, and Storage Work? 🖥️💿🛠️",
           "published": "2026-05-28",
-          "durationSec": 1647
+          "durationSec": 1647,
+          "thumbnailUrl": "https://i.ytimg.com/vi/TfhL5kBiQVI/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=TfhL5kBiQVI"
         },
         {
+          "id": "aa6YISbAJEA",
           "title": "The Incredible Evolution of Computers",
           "published": "2026-02-17",
-          "durationSec": 2019
+          "durationSec": 2019,
+          "thumbnailUrl": "https://i.ytimg.com/vi/aa6YISbAJEA/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=aa6YISbAJEA"
         },
         {
+          "id": "16zrEPOsIcI",
           "title": "The Engineering that Runs the Digital World 🛠️⚙️💻 How do CPUs Work?",
           "published": "2025-11-15",
-          "durationSec": 2183
+          "durationSec": 2183,
+          "thumbnailUrl": "https://i.ytimg.com/vi/16zrEPOsIcI/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=16zrEPOsIcI"
         }
       ],
       "fingerprint": {
@@ -854,15 +902,15 @@
         },
         "upload_cadence": {
           "avg_duration_sec": 1164,
-          "channel_age_days": 3105.48,
+          "channel_age_days": 3088.225,
           "duration_cv": 0.54,
           "max_dormancy_gap_days": 0,
-          "output_minutes_per_week": 1.521,
+          "output_minutes_per_week": 1.902,
           "post_pivot_share": 0,
           "post_pivot_videos": 0,
           "pre_pivot_videos": 0,
-          "recent_uploads_per_day": 0.011,
-          "schedule_hour_stddev": 0
+          "recent_uploads_per_day": 0.014,
+          "schedule_hour_stddev": 2.292
         }
       }
     },
@@ -876,34 +924,52 @@
       "contentSource": "curated",
       "samplePosts": [
         {
+          "id": "xDLxFGXuPEc",
           "title": "CD / Blur",
-          "published": "2025-11-24",
-          "durationSec": 583
+          "published": "2025-05-22",
+          "durationSec": 583,
+          "thumbnailUrl": "https://i.ytimg.com/vi/xDLxFGXuPEc/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=xDLxFGXuPEc"
         },
         {
+          "id": "aGDSt5XF02I",
           "title": "something funny right now",
           "published": "2024-12-28",
-          "durationSec": 281
+          "durationSec": 281,
+          "thumbnailUrl": "https://i.ytimg.com/vi/aGDSt5XF02I/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=aGDSt5XF02I"
         },
         {
+          "id": "2yCjO-wRxyM",
           "title": "SNL VFX Mystery | Quick D",
           "published": "2024-12-20",
-          "durationSec": 587
+          "durationSec": 587,
+          "thumbnailUrl": "https://i.ytimg.com/vi/2yCjO-wRxyM/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=2yCjO-wRxyM"
         },
         {
+          "id": "oVWsbpdDxTg",
           "title": "Beckham Beach Kicks DEBUNK",
           "published": "2024-08-02",
-          "durationSec": 1040
+          "durationSec": 1040,
+          "thumbnailUrl": "https://i.ytimg.com/vi/oVWsbpdDxTg/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=oVWsbpdDxTg"
         },
         {
+          "id": "28S47EE_opA",
           "title": "CD / Shutter Speed",
           "published": "2024-01-27",
-          "durationSec": 726
+          "durationSec": 726,
+          "thumbnailUrl": "https://i.ytimg.com/vi/28S47EE_opA/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=28S47EE_opA"
         },
         {
+          "id": "XQgYQ-ILHEE",
           "title": "Surviving Feedback - Live at the Blender Conference 2023",
           "published": "2023-11-02",
-          "durationSec": 374
+          "durationSec": 374,
+          "thumbnailUrl": "https://i.ytimg.com/vi/XQgYQ-ILHEE/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=XQgYQ-ILHEE"
         }
       ],
       "fingerprint": {
@@ -950,15 +1016,15 @@
         },
         "upload_cadence": {
           "avg_duration_sec": 604.967,
-          "channel_age_days": 6642.087,
+          "channel_age_days": 6455.971,
           "duration_cv": 0.945,
           "max_dormancy_gap_days": 0,
-          "output_minutes_per_week": 0.668,
+          "output_minutes_per_week": 0.623,
           "post_pivot_share": 0,
           "post_pivot_videos": 0,
           "pre_pivot_videos": 0,
           "recent_uploads_per_day": 0.009,
-          "schedule_hour_stddev": 0
+          "schedule_hour_stddev": 6.578
         }
       }
     },
@@ -972,34 +1038,52 @@
       "contentSource": "curated",
       "samplePosts": [
         {
+          "id": "GUww8Y4Sexc",
           "title": "Disney found an anomaly in a ride. They made it a feature.",
           "published": "2026-11-20",
-          "durationSec": 1011
+          "durationSec": 1011,
+          "thumbnailUrl": "https://i.ytimg.com/vi/GUww8Y4Sexc/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=GUww8Y4Sexc"
         },
         {
+          "id": "beWipV80nRw",
           "title": "But when will GTA 7 come out?",
           "published": "2026-11-17",
-          "durationSec": 536
+          "durationSec": 536,
+          "thumbnailUrl": "https://i.ytimg.com/vi/beWipV80nRw/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=beWipV80nRw"
         },
         {
+          "id": "zuaVFnj4SWY",
           "title": "The mystery of the 14 fractions",
           "published": "2026-10-30",
-          "durationSec": 1213
+          "durationSec": 1213,
+          "thumbnailUrl": "https://i.ytimg.com/vi/zuaVFnj4SWY/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=zuaVFnj4SWY"
         },
         {
+          "id": "KxHKrbfnmTU",
           "title": "Did Hannah Fry crack The Traitors?",
           "published": "2026-10-22",
-          "durationSec": 1674
+          "durationSec": 1674,
+          "thumbnailUrl": "https://i.ytimg.com/vi/KxHKrbfnmTU/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=KxHKrbfnmTU"
         },
         {
+          "id": "9xwU-ochogk",
           "title": "We tested Babish's 15,000% claim!",
           "published": "2026-09-30",
-          "durationSec": 1110
+          "durationSec": 1110,
+          "thumbnailUrl": "https://i.ytimg.com/vi/9xwU-ochogk/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=9xwU-ochogk"
         },
         {
+          "id": "c79PsbkHw4A",
           "title": "Has a Millennium Prize Problem been solved by AI?",
           "published": "2026-09-21",
-          "durationSec": 1409
+          "durationSec": 1409,
+          "thumbnailUrl": "https://i.ytimg.com/vi/c79PsbkHw4A/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=c79PsbkHw4A"
         }
       ],
       "fingerprint": {
@@ -1046,7 +1130,7 @@
         },
         "upload_cadence": {
           "avg_duration_sec": 1214.433,
-          "channel_age_days": 5439.365,
+          "channel_age_days": 5439.407,
           "duration_cv": 0.214,
           "max_dormancy_gap_days": 0,
           "output_minutes_per_week": 11.732,
@@ -1068,34 +1152,52 @@
       "contentSource": "curated",
       "samplePosts": [
         {
+          "id": "J2dOXL5FUj0",
           "title": "New Video: Early Preview for Bonnie Bees!",
           "published": "2025-08-15",
-          "durationSec": 438
+          "durationSec": 438,
+          "thumbnailUrl": "https://i.ytimg.com/vi/J2dOXL5FUj0/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=J2dOXL5FUj0"
         },
         {
+          "id": "HSRmfNDk87s",
           "title": "Why Runways Have to Be Repainted",
           "published": "2025-04-14",
-          "durationSec": 1177
+          "durationSec": 1177,
+          "thumbnailUrl": "https://i.ytimg.com/vi/HSRmfNDk87s/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=HSRmfNDk87s"
         },
         {
+          "id": "58SrtQNt4YE",
           "title": "America Forgot It's Allowed to Stop Making Coins",
           "published": "2025-04-13",
-          "durationSec": 456
+          "durationSec": 456,
+          "thumbnailUrl": "https://i.ytimg.com/vi/58SrtQNt4YE/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=58SrtQNt4YE"
         },
         {
+          "id": "8hiXZ5b4kOM",
           "title": "The Strange Story of a 3-cent Coin",
           "published": "2025-04-13",
-          "durationSec": 489
+          "durationSec": 489,
+          "thumbnailUrl": "https://i.ytimg.com/vi/8hiXZ5b4kOM/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=8hiXZ5b4kOM"
         },
         {
+          "id": "n1KgxqEQn0A",
           "title": "Zero Is Technically an Amount",
           "published": "2025-02-17",
-          "durationSec": 313
+          "durationSec": 313,
+          "thumbnailUrl": "https://i.ytimg.com/vi/n1KgxqEQn0A/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=n1KgxqEQn0A"
         },
         {
+          "id": "1K5oDtVAYzk",
           "title": "Your Post Code Is the Directions, Not the Destination",
           "published": "2025-01-28",
-          "durationSec": 469
+          "durationSec": 469,
+          "thumbnailUrl": "https://i.ytimg.com/vi/1K5oDtVAYzk/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=1K5oDtVAYzk"
         }
       ],
       "fingerprint": {
@@ -1155,7 +1257,7 @@
       }
     }
   ],
-  "generatedAt": "2026-11-25T00:47:01Z",
+  "generatedAt": "2026-11-25T01:48:27Z",
   "slop": [
     {
       "id": "yt-UCgMdpYSsfnbFBMZ1Af4SDVA@TheGroceryTrap",
@@ -1168,34 +1270,52 @@
       "contentSource": "aislist-scan",
       "samplePosts": [
         {
+          "id": "pgXOOeEXd_I",
           "title": "4 Lunch Meats Families Should Stop Buying (And 3 Worth Buying)",
           "published": "2026-11-21",
-          "durationSec": 959
+          "durationSec": 959,
+          "thumbnailUrl": "https://i.ytimg.com/vi/pgXOOeEXd_I/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=pgXOOeEXd_I"
         },
         {
+          "id": "Wtf2KC9RTKY",
           "title": "7 Chocolate Milk Powder Brands to Stop Buying And 2 Better Picks",
           "published": "2026-11-20",
-          "durationSec": 891
+          "durationSec": 891,
+          "thumbnailUrl": "https://i.ytimg.com/vi/Wtf2KC9RTKY/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=Wtf2KC9RTKY"
         },
         {
+          "id": "4K3Gc6GrbNY",
           "title": "7 Cereals Your Kids Should NEVER Eat (And 3 Better Picks)",
           "published": "2026-11-18",
-          "durationSec": 1150
+          "durationSec": 1150,
+          "thumbnailUrl": "https://i.ytimg.com/vi/4K3Gc6GrbNY/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=4K3Gc6GrbNY"
         },
         {
+          "id": "WTT5f3R7dBA",
           "title": "4 Soap Brands to Stop Buying And 4 That Are ACTUALLY Worth It",
           "published": "2026-10-27",
-          "durationSec": 1155
+          "durationSec": 1155,
+          "thumbnailUrl": "https://i.ytimg.com/vi/WTT5f3R7dBA/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=WTT5f3R7dBA"
         },
         {
+          "id": "czfw_uzjSbo",
           "title": "7 Tortilla Brands You Should NEVER Buy (And 2 Worth Every Penny)",
           "published": "2026-10-26",
-          "durationSec": 1528
+          "durationSec": 1528,
+          "thumbnailUrl": "https://i.ytimg.com/vi/czfw_uzjSbo/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=czfw_uzjSbo"
         },
         {
+          "id": "cgnB-LjW2z8",
           "title": "Don’t Buy These 7 Canned Tuna Brands (The 2 Best Ones Surprised Me)",
           "published": "2026-10-23",
-          "durationSec": 1388
+          "durationSec": 1388,
+          "thumbnailUrl": "https://i.ytimg.com/vi/cgnB-LjW2z8/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=cgnB-LjW2z8"
         }
       ],
       "fingerprint": {
@@ -1242,7 +1362,7 @@
         },
         "upload_cadence": {
           "avg_duration_sec": 1414.692,
-          "channel_age_days": 63.324,
+          "channel_age_days": 63.367,
           "duration_cv": 0.166,
           "max_dormancy_gap_days": 0,
           "output_minutes_per_week": 21.892,
@@ -1265,34 +1385,52 @@
       "contentSource": "aislist-scan",
       "samplePosts": [
         {
+          "id": "NIbXiq5zTWA",
           "title": "10 Target Foods to AVOID (And FIVE that are SAFE)",
           "published": "2026-10-27",
-          "durationSec": 1685
+          "durationSec": 1685,
+          "thumbnailUrl": "https://i.ytimg.com/vi/NIbXiq5zTWA/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=NIbXiq5zTWA"
         },
         {
+          "id": "droPKwLCwMY",
           "title": "8 DEODORANT BRANDS TO AVOID (AND 5 that are actually safe)",
           "published": "2026-10-26",
-          "durationSec": 1690
+          "durationSec": 1690,
+          "thumbnailUrl": "https://i.ytimg.com/vi/droPKwLCwMY/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=droPKwLCwMY"
         },
         {
+          "id": "aSJxO8nzOVg",
           "title": "15 Dollar Store DUPES  (BETTER) than Expensive Brands)",
           "published": "2026-10-09",
-          "durationSec": 1527
+          "durationSec": 1527,
+          "thumbnailUrl": "https://i.ytimg.com/vi/aSJxO8nzOVg/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=aSJxO8nzOVg"
         },
         {
+          "id": "BMEFu6eHu9g",
           "title": "10 Costco Foods To Avoid (Plus 5 Must Haves)",
           "published": "2026-10-03",
-          "durationSec": 1983
+          "durationSec": 1983,
+          "thumbnailUrl": "https://i.ytimg.com/vi/BMEFu6eHu9g/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=BMEFu6eHu9g"
         },
         {
+          "id": "I2LTr-Ni8UA",
           "title": "8 Publix Store Brands That Are Toxic (And 4 To Buy)",
           "published": "2026-10-03",
-          "durationSec": 1304
+          "durationSec": 1304,
+          "thumbnailUrl": "https://i.ytimg.com/vi/I2LTr-Ni8UA/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=I2LTr-Ni8UA"
         },
         {
+          "id": "a3BQVxUTzqU",
           "title": "The Truth About Panera Bread: What They Don't Want You to Know",
           "published": "2026-10-01",
-          "durationSec": 1490
+          "durationSec": 1490,
+          "thumbnailUrl": "https://i.ytimg.com/vi/a3BQVxUTzqU/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=a3BQVxUTzqU"
         }
       ],
       "fingerprint": {
@@ -1339,7 +1477,7 @@
         },
         "upload_cadence": {
           "avg_duration_sec": 1388.231,
-          "channel_age_days": 104.861,
+          "channel_age_days": 104.903,
           "duration_cv": 0.233,
           "max_dormancy_gap_days": 0,
           "output_minutes_per_week": 16.945,
@@ -1362,34 +1500,52 @@
       "contentSource": "aislist-scan",
       "samplePosts": [
         {
+          "id": "LN47R8pt-2E",
           "title": "Judge CLEARS Path to PRISON as Trump Lawyers ADMIT HORRIFIC Crimes!!",
           "published": "2026-11-24",
-          "durationSec": 1486
+          "durationSec": 1486,
+          "thumbnailUrl": "https://i.ytimg.com/vi/LN47R8pt-2E/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=LN47R8pt-2E"
         },
         {
+          "id": "iWrQFu3KsOo",
           "title": "Trump SCREAMS Threats as Supreme Court STRIPS Executive Power!!",
           "published": "2026-11-23",
-          "durationSec": 1316
+          "durationSec": 1316,
+          "thumbnailUrl": "https://i.ytimg.com/vi/iWrQFu3KsOo/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=iWrQFu3KsOo"
         },
         {
+          "id": "Wzc40wRm1es",
           "title": "Impeachment FINALIZED as FURIOUS Congress DEMANDS Trump Out of Office Tonight!!",
           "published": "2026-11-21",
-          "durationSec": 1380
+          "durationSec": 1380,
+          "thumbnailUrl": "https://i.ytimg.com/vi/Wzc40wRm1es/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=Wzc40wRm1es"
         },
         {
+          "id": "YAe6-n7nznw",
           "title": "Trump Gets Impeached as Supreme Court SHUTS HIM DOWN!!",
           "published": "2026-11-20",
-          "durationSec": 1584
+          "durationSec": 1584,
+          "thumbnailUrl": "https://i.ytimg.com/vi/YAe6-n7nznw/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=YAe6-n7nznw"
         },
         {
+          "id": "c4Q45PLFKBc",
           "title": "Capitol Hill ERUPTS As Trump DRAGGED to Court DC PANICS!!",
           "published": "2026-11-19",
-          "durationSec": 1472
+          "durationSec": 1472,
+          "thumbnailUrl": "https://i.ytimg.com/vi/c4Q45PLFKBc/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=c4Q45PLFKBc"
         },
         {
+          "id": "KFoJ3cOhDpI",
           "title": "BREAKING: Federal Judge HOLDS Trump in Criminal Contempt for Defying Court Orders!!",
           "published": "2026-11-18",
-          "durationSec": 1748
+          "durationSec": 1748,
+          "thumbnailUrl": "https://i.ytimg.com/vi/KFoJ3cOhDpI/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=KFoJ3cOhDpI"
         }
       ],
       "fingerprint": {
@@ -1459,34 +1615,52 @@
       "contentSource": "aislist-scan",
       "samplePosts": [
         {
+          "id": "e7Dcpy13upg",
           "title": "Outlaws Forced a Widow to Dig Her Own Grave — What She Unearthed Made Them Run!",
           "published": "2026-11-24",
-          "durationSec": 1099
+          "durationSec": 1099,
+          "thumbnailUrl": "https://i.ytimg.com/vi/e7Dcpy13upg/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=e7Dcpy13upg"
         },
         {
+          "id": "Uaa2MKPQ4ug",
           "title": "Bruce Lee Was Challenged By Bolo Yeung and Said “Try Me” — 3 Seconds Later Made History",
           "published": "2026-11-18",
-          "durationSec": 1103
+          "durationSec": 1103,
+          "thumbnailUrl": "https://i.ytimg.com/vi/Uaa2MKPQ4ug/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=Uaa2MKPQ4ug"
         },
         {
+          "id": "37Cft0UduMI",
           "title": "Bullies Spit On a Waitress — Then Bruce Lee Stood Up and Did the Unthinkable!",
           "published": "2026-11-14",
-          "durationSec": 1163
+          "durationSec": 1163,
+          "thumbnailUrl": "https://i.ytimg.com/vi/37Cft0UduMI/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=37Cft0UduMI"
         },
         {
+          "id": "B4PoiVYhqUg",
           "title": "Undefeated Karate Champion Refused to Bow to Bruce Lee — 10 Seconds Later, 5,000 Fans Fell Silent",
           "published": "2026-11-12",
-          "durationSec": 1246
+          "durationSec": 1246,
+          "thumbnailUrl": "https://i.ytimg.com/vi/B4PoiVYhqUg/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=B4PoiVYhqUg"
         },
         {
+          "id": "s343A5A2sx4",
           "title": "An Iron Body Fighter Told Bruce Your Punches Are Useless — Bruce Was Down, 6 Seconds Later!",
           "published": "2026-11-11",
-          "durationSec": 1042
+          "durationSec": 1042,
+          "thumbnailUrl": "https://i.ytimg.com/vi/s343A5A2sx4/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=s343A5A2sx4"
         },
         {
+          "id": "-fRf38XEsTI",
           "title": "Bullies Harassed an Old Waitress — Unaware Bruce Lee Was Standing Right Behind Them!",
           "published": "2026-11-10",
-          "durationSec": 1204
+          "durationSec": 1204,
+          "thumbnailUrl": "https://i.ytimg.com/vi/-fRf38XEsTI/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=-fRf38XEsTI"
         }
       ],
       "fingerprint": {
@@ -1533,7 +1707,7 @@
         },
         "upload_cadence": {
           "avg_duration_sec": 1120.571,
-          "channel_age_days": 338.931,
+          "channel_age_days": 338.974,
           "duration_cv": 0.202,
           "max_dormancy_gap_days": 0,
           "output_minutes_per_week": 3.088,
@@ -1551,39 +1725,57 @@
       "label": "slop",
       "title": "@TheScienceBehindFood-v7v — The Science Behind Food",
       "sourceUrl": "https://www.youtube.com/@TheScienceBehindFood-v7v",
-      "summary": "0.10/day · 19 videos · 27% formal prose · 10% title reuse",
+      "summary": "0.13/day · 19 videos · 27% formal prose · 10% title reuse",
       "aislistStatus": "blocklist",
       "contentSource": "aislist-scan",
       "samplePosts": [
         {
+          "id": "vBCosyEayW0",
           "title": "What Raw Honey REALLY Does to a Fatty Liver",
           "published": "2026-11-24",
-          "durationSec": 875
+          "durationSec": 875,
+          "thumbnailUrl": "https://i.ytimg.com/vi/vBCosyEayW0/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=vBCosyEayW0"
         },
         {
+          "id": "JrL9Ae6Ob3I",
           "title": "What 2 Tablespoons of Olive Oil REALLY Does to Your Arteries",
           "published": "2026-11-21",
-          "durationSec": 699
+          "durationSec": 699,
+          "thumbnailUrl": "https://i.ytimg.com/vi/JrL9Ae6Ob3I/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=JrL9Ae6Ob3I"
         },
         {
+          "id": "c4oMKE5pAWM",
           "title": "The Truth About Daily Greek Yogurt: What Happens To Your Gut Microbiome",
           "published": "2026-11-16",
-          "durationSec": 660
+          "durationSec": 660,
+          "thumbnailUrl": "https://i.ytimg.com/vi/c4oMKE5pAWM/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=c4oMKE5pAWM"
         },
         {
+          "id": "LfqLuIcn1eU",
           "title": "What Chia Seeds REALLY Do to Your Body",
           "published": "2026-11-14",
-          "durationSec": 749
+          "durationSec": 749,
+          "thumbnailUrl": "https://i.ytimg.com/vi/LfqLuIcn1eU/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=LfqLuIcn1eU"
         },
         {
+          "id": "XztpFeH8dBo",
           "title": "Is 1 Banana Safe for Your Kidneys?",
           "published": "2026-11-10",
-          "durationSec": 676
+          "durationSec": 676,
+          "thumbnailUrl": "https://i.ytimg.com/vi/XztpFeH8dBo/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=XztpFeH8dBo"
         },
         {
+          "id": "hJxPD7TE7Jw",
           "title": "Are Walnuts Actually Bad for Your Kidneys?",
           "published": "2026-11-08",
-          "durationSec": 965
+          "durationSec": 965,
+          "thumbnailUrl": "https://i.ytimg.com/vi/hJxPD7TE7Jw/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=hJxPD7TE7Jw"
         }
       ],
       "fingerprint": {
@@ -1602,7 +1794,7 @@
           "handle": "@TheScienceBehindFood-v7v",
           "has_auto_suffix": true,
           "stem_siblings": 0,
-          "subscriber_count": 994,
+          "subscriber_count": 991,
           "title": "The Science Behind Food",
           "total_videos": 19
         },
@@ -1630,15 +1822,15 @@
         },
         "upload_cadence": {
           "avg_duration_sec": 802,
-          "channel_age_days": 62.303,
+          "channel_age_days": 62.346,
           "duration_cv": 0.157,
           "max_dormancy_gap_days": 0,
-          "output_minutes_per_week": 9.046,
+          "output_minutes_per_week": 12.061,
           "post_pivot_share": 0,
           "post_pivot_videos": 0,
           "pre_pivot_videos": 0,
-          "recent_uploads_per_day": 0.097,
-          "schedule_hour_stddev": 3.586
+          "recent_uploads_per_day": 0.129,
+          "schedule_hour_stddev": 3.142
         }
       }
     },
@@ -1648,39 +1840,57 @@
       "label": "slop",
       "title": "@MenofReason-z4q — Men of Reason",
       "sourceUrl": "https://www.youtube.com/@MenofReason-z4q",
-      "summary": "0.09/day · 17 videos · 23% formal prose · 18% title reuse",
+      "summary": "0.09/day · 18 videos · 33% formal prose · 17% title reuse",
       "aislistStatus": "blocklist",
       "contentSource": "aislist-scan",
       "samplePosts": [
         {
+          "id": "8rGcmCE-GrY",
+          "title": "EVERYONE IS AVOIDING Corporate Jobs‼️",
+          "published": "2026-11-24",
+          "durationSec": 854,
+          "thumbnailUrl": "https://i.ytimg.com/vi/8rGcmCE-GrY/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=8rGcmCE-GrY"
+        },
+        {
+          "id": "ayuTXQNntHg",
           "title": "How Men BROKE Corporate Loyalty",
           "published": "2026-11-24",
-          "durationSec": 810
+          "durationSec": 810,
+          "thumbnailUrl": "https://i.ytimg.com/vi/ayuTXQNntHg/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=ayuTXQNntHg"
         },
         {
+          "id": "ZeSWQIVwya0",
           "title": "After 50, Men Stopped Going to the Office Christmas Party \u0026 HR Asked Why",
           "published": "2026-11-24",
-          "durationSec": 918
+          "durationSec": 918,
+          "thumbnailUrl": "https://i.ytimg.com/vi/ZeSWQIVwya0/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=ZeSWQIVwya0"
         },
         {
+          "id": "Gh3AkHpPjeQ",
           "title": "Men Stopped Mentoring New Coworkers \u0026 Companies Are Losing Their Best Knowledge",
           "published": "2026-11-22",
-          "durationSec": 880
+          "durationSec": 880,
+          "thumbnailUrl": "https://i.ytimg.com/vi/Gh3AkHpPjeQ/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=Gh3AkHpPjeQ"
         },
         {
+          "id": "iZ1SAvjbVe8",
           "title": "Men Stopped Answering Emails After Hours \u0026 Managers Didn't See It Coming",
           "published": "2026-11-22",
-          "durationSec": 949
+          "durationSec": 949,
+          "thumbnailUrl": "https://i.ytimg.com/vi/iZ1SAvjbVe8/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=iZ1SAvjbVe8"
         },
         {
+          "id": "FrSNYm0N6z4",
           "title": "Men Stopped Doing Work Outside Their Job Description and HR Can't Figure Out Why",
           "published": "2026-11-21",
-          "durationSec": 836
-        },
-        {
-          "title": "Men Stopped Working Extra for Pizza Parties and Managers Can't Figure Out Why",
-          "published": "2026-11-21",
-          "durationSec": 1250
+          "durationSec": 836,
+          "thumbnailUrl": "https://i.ytimg.com/vi/FrSNYm0N6z4/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=FrSNYm0N6z4"
         }
       ],
       "fingerprint": {
@@ -1699,43 +1909,43 @@
           "handle": "@MenofReason-z4q",
           "has_auto_suffix": true,
           "stem_siblings": 0,
-          "subscriber_count": 217,
+          "subscriber_count": 216,
           "title": "Men of Reason",
-          "total_videos": 17
+          "total_videos": 18
         },
-        "sample_text": "Men of Reason | \n | How Men BROKE Corporate Loyalty | A man in a regional office sent out a leaving invitation in the spring of 2004. He had been with the firm for 31 years. 140 people accepted within 2 days and the catering order was raised twice. The invitation was one paragraph long and went out on a Monday. Last spring, a man in the same office sent out the same invitation. He had been there 19 years. Nine people accepted. Three of them came. The cake had been ordered for 40. It sat on a trolley by the lift, and the man who was leaving stood beside it, holding the card and a pen, waiting for someone to sign. At 10 4, a colleague signed it a second time in different handwriting so that the card would not look empty. Nobody mentioned it. The cake was cut at 4 and most of it went into the bin. That is not a quiet afternoon, and it is not a story about one office. It is the end of a currency and the man holding the card could feel that imme | After 50, Men Stopped Going to the Office Christmas Party \u0026 HR Asked Why | The invitation lands on a Thursday in November. Cream card stock, gold ink. Saturday, December 12th, at a restored train station downtown. Dennis Alrech is 58. He's a claim supervisor at a regional insurance company. In 30 years there, he has never missed a holiday party. Not one. Even the year his daughter was born, he made it for an hour. This time, he reads the card once and drops it in the recycling bin under his desk. By 4:00, Janelle Brooks is standing in his doorway. She's 38. She runs HR. She's holding the RSVP list. Dennis, is everything okay? You've never skipped one before. He tells her everything's fine. He doesn't tell her the real reason. Not yet. Dennis isn't alone. A lot of men over 50 have quietly made the same decision. Some send a polite no. Others still show up, stay an hour, and slip out before the photos start. They didn't stop caring about the people. They stopped  | Men Stopped Mentoring New Coworkers \u0026 Companies Are Losing Their Best Knowledge | Back in spring, at a packaging plant outside Dayton, roughly 300 workers clocked in daily, and 12 seasoned hands received invitations to train rookies. Management dubbed it a mentor program. Each man got a single-page sheet with a checkbox near the bottom, asking whether he'd take a new hire under his wing. 11 checked identical answers, too busy. Nobody mentioned pay, scheduling, or foreman. Not a soul scribbled a note in the margin. An operations director, careful and 48, who'd overseen teaching since 2013, spread these pages across her desk one rainy Tuesday in April and stared. Eight had learned their own trades from older co-workers. Two only landed jobs because a retiree gave up weekends to coach them. Five boasted over 25 years. Stranger still, these fellows arrived first every morning and left last at night. Loyalty was never in question. That's the mystery. Because something bigg | Men Stopped Answering Emails After Hours \u0026 Managers Didn't See It Coming | Men Stopped Doing Work Outside Their Job Description and HR Can't Figure Out Why | Men Stopped Working Extra for Pizza Parties and Managers Can't Figure Out Why | Men Stopped Fighting Bad Corporate Decisions \u0026 Management Got Scared | Men Stopped Volunteering for Extra Projects \u0026 Managers Can’t Figure Out Why | Men Quit Telling the Truth in Exit Interviews \u0026 HR Can't Figure Out Why They're Leaving  | How Horses Recognize a Toxic Person: 12 Silent Signs | 5 Things Horses LOVE That Owners Rarely Do (Your Horse Wishes You Knew This) | How Horses Recognize a Good Person: 12 Silent Signs | One Horse or Two: 17 Differences People Learn TOO LATE! | You Talk to Your Horse Every Day… This Is What Actually Happens  | Every Sound Your Horse Makes and What It Actually Means",
+        "sample_text": "Men of Reason | \n | EVERYONE IS AVOIDING Corporate Jobs‼️ | A man steps into the elevator of a glass office building at 8:52 on a Monday morning. Lanyard turned backwards so the photo faces his chest, coffee in one hand, phone in the other, and nobody in the car says a word. It is the same kind of elevator in the same kind of building that his father rode in the same kind of month. And if you could play the two mornings side by side, you would hear almost nothing different. the same hum, the same floor numbers lighting up one after another, the same polite refusal to make eye contact. But in his father's elevator, somewhere between the third floor and the 9inth, somebody always said it, not as a speech, just a small piece of grammar that rode up with them. When I make senior after I made director once I've been here long enough, futures spoken casually, the way you'd mentioned next Thursday. In the son's elevator, the futures are gone. His salary | How Men BROKE Corporate Loyalty | A man in a regional office sent out a leaving invitation in the spring of 2004. He had been with the firm for 31 years. 140 people accepted within 2 days and the catering order was raised twice. The invitation was one paragraph long and went out on a Monday. Last spring, a man in the same office sent out the same invitation. He had been there 19 years. Nine people accepted. Three of them came. The cake had been ordered for 40. It sat on a trolley by the lift, and the man who was leaving stood beside it, holding the card and a pen, waiting for someone to sign. At 10 4, a colleague signed it a second time in different handwriting so that the card would not look empty. Nobody mentioned it. The cake was cut at 4 and most of it went into the bin. That is not a quiet afternoon, and it is not a story about one office. It is the end of a currency and the man holding the card could feel that imme | After 50, Men Stopped Going to the Office Christmas Party \u0026 HR Asked Why | The invitation lands on a Thursday in November. Cream card stock, gold ink. Saturday, December 12th, at a restored train station downtown. Dennis Alrech is 58. He's a claim supervisor at a regional insurance company. In 30 years there, he has never missed a holiday party. Not one. Even the year his daughter was born, he made it for an hour. This time, he reads the card once and drops it in the recycling bin under his desk. By 4:00, Janelle Brooks is standing in his doorway. She's 38. She runs HR. She's holding the RSVP list. Dennis, is everything okay? You've never skipped one before. He tells her everything's fine. He doesn't tell her the real reason. Not yet. Dennis isn't alone. A lot of men over 50 have quietly made the same decision. Some send a polite no. Others still show up, stay an hour, and slip out before the photos start. They didn't stop caring about the people. They stopped  | Men Stopped Mentoring New Coworkers \u0026 Companies Are Losing Their Best Knowledge | Men Stopped Answering Emails After Hours \u0026 Managers Didn't See It Coming | Men Stopped Doing Work Outside Their Job Description and HR Can't Figure Out Why | Men Stopped Working Extra for Pizza Parties and Managers Can't Figure Out Why | Men Stopped Fighting Bad Corporate Decisions \u0026 Management Got Scared | Men Stopped Volunteering for Extra Projects \u0026 Managers Can’t Figure Out Why | Men Quit Telling the Truth in Exit Interviews \u0026 HR Can't Figure Out Why They're Leaving  | How Horses Recognize a Toxic Person: 12 Silent Signs | 5 Things Horses LOVE That Owners Rarely Do (Your Horse Wishes You Knew This) | How Horses Recognize a Good Person: 12 Silent Signs | One Horse or Two: 17 Differences People Learn TOO LATE! | You Talk to Your Horse Every Day… This Is What Actually Happens ",
         "schema_version": 1,
         "site": "youtube",
         "thumbnails": {
           "raw_camera_earliest_title": false,
-          "title_skeleton_reuse": 0.176
+          "title_skeleton_reuse": 0.167
         },
         "transcript": {
-          "antithesis_per_1k": 0.294,
-          "cross_video_wpm_stddev": 8.7,
+          "antithesis_per_1k": 0.293,
+          "cross_video_wpm_stddev": 9.933,
           "disfluencies_per_1k": 0,
           "earliest_has_speech": true,
-          "first_person_per_1k": 1.47,
-          "intra_video_wpm_cv": 0.081,
+          "first_person_per_1k": 1.757,
+          "intra_video_wpm_cv": 0.08,
           "llm_lexicon_per_1k": 0,
-          "mean_wpm": 165.426,
-          "pause_cv": 0.228,
+          "mean_wpm": 168.136,
+          "pause_cv": 0.244,
           "slop_hooks_per_1k": 0.098,
-          "total_words": 10203,
-          "uncontracted_ratio": 0.234,
+          "total_words": 10243,
+          "uncontracted_ratio": 0.326,
           "videos_sampled": 4
         },
         "upload_cadence": {
-          "avg_duration_sec": 1013.882,
-          "channel_age_days": 89.205,
-          "duration_cv": 0.163,
+          "avg_duration_sec": 1005,
+          "channel_age_days": 89.248,
+          "duration_cv": 0.164,
           "max_dormancy_gap_days": 0,
-          "output_minutes_per_week": 10.627,
+          "output_minutes_per_week": 10.514,
           "post_pivot_share": 0,
           "post_pivot_videos": 0,
           "pre_pivot_videos": 0,
           "recent_uploads_per_day": 0.09,
-          "schedule_hour_stddev": 3.291
+          "schedule_hour_stddev": 3.699
         }
       }
     },
@@ -1750,34 +1960,52 @@
       "contentSource": "aislist-scan",
       "samplePosts": [
         {
+          "id": "3WTxuHycvNg",
           "title": "Jim Carrey Lived A Double Life For Years, And No One Knew - Until Now",
           "published": "2026-09-30",
-          "durationSec": 1550
+          "durationSec": 1550,
+          "thumbnailUrl": "https://i.ytimg.com/vi/3WTxuHycvNg/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=3WTxuHycvNg"
         },
         {
+          "id": "YKU-Foy47jw",
           "title": "Dennis Haskins Lived A Double Life For Years, And No One Knew - Until Now",
           "published": "2026-09-29",
-          "durationSec": 1367
+          "durationSec": 1367,
+          "thumbnailUrl": "https://i.ytimg.com/vi/YKU-Foy47jw/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=YKU-Foy47jw"
         },
         {
+          "id": "KeISVkbY0dI",
           "title": "Dolly Parton's Sister Frieda Just Confirmed The Truth About Her Estate",
           "published": "2026-09-25",
-          "durationSec": 1383
+          "durationSec": 1383,
+          "thumbnailUrl": "https://i.ytimg.com/vi/KeISVkbY0dI/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=KeISVkbY0dI"
         },
         {
+          "id": "s8AeH1zYrXw",
           "title": "At 80, Goldie Hawn Finally Breaks Silence on Kurt Russell - The Real Reason They Never Married",
           "published": "2026-09-24",
-          "durationSec": 1597
+          "durationSec": 1597,
+          "thumbnailUrl": "https://i.ytimg.com/vi/s8AeH1zYrXw/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=s8AeH1zYrXw"
         },
         {
+          "id": "EyTEX0bguh8",
           "title": "Presley Gerber's Cause Of Death: Sh*cking New Details Emerge",
           "published": "2026-09-21",
-          "durationSec": 1354
+          "durationSec": 1354,
+          "thumbnailUrl": "https://i.ytimg.com/vi/EyTEX0bguh8/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=EyTEX0bguh8"
         },
         {
+          "id": "R8quk1pAykY",
           "title": "Kenny Rogers' Final Message To Dolly Parton Before He Died — She Kept It Secret Until Now",
           "published": "2026-09-20",
-          "durationSec": 1120
+          "durationSec": 1120,
+          "thumbnailUrl": "https://i.ytimg.com/vi/R8quk1pAykY/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=R8quk1pAykY"
         }
       ],
       "fingerprint": {
@@ -1824,7 +2052,7 @@
         },
         "upload_cadence": {
           "avg_duration_sec": 1103.952,
-          "channel_age_days": 89,
+          "channel_age_days": 89.043,
           "duration_cv": 0.259,
           "max_dormancy_gap_days": 0,
           "output_minutes_per_week": 30.435,
@@ -1847,34 +2075,52 @@
       "contentSource": "aislist-scan",
       "samplePosts": [
         {
+          "id": "M0ebdFes_Ro",
           "title": "Your Career Ends Tonight!—A Sumo Wrestler Attacked Bruce Lee Live, But He Made A Terrible Mistake!",
           "published": "2026-11-23",
-          "durationSec": 1621
+          "durationSec": 1621,
+          "thumbnailUrl": "https://i.ytimg.com/vi/M0ebdFes_Ro/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=M0ebdFes_Ro"
         },
         {
+          "id": "GHsgPy84Jv8",
           "title": "Three Gangsters Surrounded Bruce Lee With A Baseball Bat — Biggest Mistake Of Their Lives!",
           "published": "2026-11-22",
-          "durationSec": 1776
+          "durationSec": 1776,
+          "thumbnailUrl": "https://i.ytimg.com/vi/GHsgPy84Jv8/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=GHsgPy84Jv8"
         },
         {
+          "id": "dWFY86PvP6Y",
           "title": "A Giant Gangster Grabbed Bruce Lee In A Restaurant — He Regretted It Instantly!",
           "published": "2026-11-21",
-          "durationSec": 1870
+          "durationSec": 1870,
+          "thumbnailUrl": "https://i.ytimg.com/vi/dWFY86PvP6Y/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=dWFY86PvP6Y"
         },
         {
+          "id": "v6C6TjGa5HU",
           "title": "They Pressed A Wooden Stick Against Bruce Lee's Neck — Big Mistake!",
           "published": "2026-11-20",
-          "durationSec": 2090
+          "durationSec": 2090,
+          "thumbnailUrl": "https://i.ytimg.com/vi/v6C6TjGa5HU/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=v6C6TjGa5HU"
         },
         {
+          "id": "yJRfIRLbVI0",
           "title": "Three Gangsters Demanded Bruce Lee's Seat — They Regretted It In Seconds!",
           "published": "2026-11-19",
-          "durationSec": 1884
+          "durationSec": 1884,
+          "thumbnailUrl": "https://i.ytimg.com/vi/yJRfIRLbVI0/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=yJRfIRLbVI0"
         },
         {
+          "id": "Fmlq3sDn2Tw",
           "title": "They Kicked An Old Man's Cane Away — But They Didn't See Bruce Lee Watching!",
           "published": "2026-11-18",
-          "durationSec": 1733
+          "durationSec": 1733,
+          "thumbnailUrl": "https://i.ytimg.com/vi/Fmlq3sDn2Tw/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=Fmlq3sDn2Tw"
         }
       ],
       "fingerprint": {
@@ -1893,7 +2139,7 @@
           "handle": "@BruceLeeLegacy-p7w",
           "has_auto_suffix": true,
           "stem_siblings": 0,
-          "subscriber_count": 526,
+          "subscriber_count": 528,
           "title": "Bruce Lee Legacy",
           "total_videos": 14
         },
@@ -1944,34 +2190,52 @@
       "contentSource": "aislist-scan",
       "samplePosts": [
         {
+          "id": "VUb08UddYrE",
           "title": "40 URGENT Items the Red Cross Says You MUST Have Before a Winter Blackout",
           "published": "2026-11-23",
-          "durationSec": 3465
+          "durationSec": 3465,
+          "thumbnailUrl": "https://i.ytimg.com/vi/VUb08UddYrE/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=VUb08UddYrE"
         },
         {
+          "id": "GJIX0yKe1i4",
           "title": "40 “Poor Man” Fixes That Keep Heat From Escaping When Your Furnace Dies",
           "published": "2026-11-21",
-          "durationSec": 3136
+          "durationSec": 3136,
+          "thumbnailUrl": "https://i.ytimg.com/vi/GJIX0yKe1i4/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=GJIX0yKe1i4"
         },
         {
+          "id": "vdtSFhDT1ZI",
           "title": "50 Cheap Walmart Foods for a Blackout — No Cooking, No Fridge",
           "published": "2026-11-19",
-          "durationSec": 3297
+          "durationSec": 3297,
+          "thumbnailUrl": "https://i.ytimg.com/vi/vdtSFhDT1ZI/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=vdtSFhDT1ZI"
         },
         {
+          "id": "OcIG9lzD8Aw",
           "title": "45 Things You Already Own That Become WORTH GOLD in a Winter Blackout",
           "published": "2026-11-17",
-          "durationSec": 3179
+          "durationSec": 3179,
+          "thumbnailUrl": "https://i.ytimg.com/vi/OcIG9lzD8Aw/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=OcIG9lzD8Aw"
         },
         {
+          "id": "5rbSrzIZsGc",
           "title": "50 Cheap Walmart Items You'll Wish You Had by Day 3 of a Winter Blackout",
           "published": "2026-11-14",
-          "durationSec": 3368
+          "durationSec": 3368,
+          "thumbnailUrl": "https://i.ytimg.com/vi/5rbSrzIZsGc/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=5rbSrzIZsGc"
         },
         {
+          "id": "bKYWbg2NkTQ",
           "title": "50 Cheap Tractor Supply Items Every Family Needs Before a Winter Blackout",
           "published": "2026-11-11",
-          "durationSec": 3143
+          "durationSec": 3143,
+          "thumbnailUrl": "https://i.ytimg.com/vi/bKYWbg2NkTQ/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=bKYWbg2NkTQ"
         }
       ],
       "fingerprint": {
@@ -2041,34 +2305,52 @@
       "contentSource": "aislist-scan",
       "samplePosts": [
         {
+          "id": "JJqCL1aL1Wg",
           "title": "How Nuns Really Lived in Medieval Times | The Strange Rules They Had to Follow",
           "published": "2026-11-05",
-          "durationSec": 8948
+          "durationSec": 8948,
+          "thumbnailUrl": "https://i.ytimg.com/vi/JJqCL1aL1Wg/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=JJqCL1aL1Wg"
         },
         {
+          "id": "MCHz4zWugBw",
           "title": "How Travelers Survived a Freezing Night in Medieval London Inn ?",
           "published": "2026-10-29",
-          "durationSec": 9773
+          "durationSec": 9773,
+          "thumbnailUrl": "https://i.ytimg.com/vi/MCHz4zWugBw/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=MCHz4zWugBw"
         },
         {
+          "id": "3o7U1alORIc",
           "title": "Living in a Medieval English Castle 1066 | The Strange Rules Everyone Was Expected to Follow",
           "published": "2026-10-25",
-          "durationSec": 9630
+          "durationSec": 9630,
+          "thumbnailUrl": "https://i.ytimg.com/vi/3o7U1alORIc/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=3o7U1alORIc"
         },
         {
+          "id": "kAdwQYVW8Eo",
           "title": "Living in Medieval York 1350 | How Ordinary People Survived Winters in Northern England",
           "published": "2026-10-19",
-          "durationSec": 8904
+          "durationSec": 8904,
+          "thumbnailUrl": "https://i.ytimg.com/vi/kAdwQYVW8Eo/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=kAdwQYVW8Eo"
         },
         {
+          "id": "FbfV6kSTTdI",
           "title": "Why Comanche Tipis Were Actually Warmer Than You Think",
           "published": "2026-09-28",
-          "durationSec": 10551
+          "durationSec": 10551,
+          "thumbnailUrl": "https://i.ytimg.com/vi/FbfV6kSTTdI/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=FbfV6kSTTdI"
         },
         {
+          "id": "ZD8qLBl7uyM",
           "title": "How Apaches Built Shelters to Survive Freezing Winters Outdoors",
           "published": "2026-09-22",
-          "durationSec": 11616
+          "durationSec": 11616,
+          "thumbnailUrl": "https://i.ytimg.com/vi/ZD8qLBl7uyM/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=ZD8qLBl7uyM"
         }
       ],
       "fingerprint": {
@@ -2115,7 +2397,7 @@
         },
         "upload_cadence": {
           "avg_duration_sec": 9664.5,
-          "channel_age_days": 524.49,
+          "channel_age_days": 524.532,
           "duration_cv": 0.216,
           "max_dormancy_gap_days": 0,
           "output_minutes_per_week": 128.231,
@@ -2138,34 +2420,52 @@
       "contentSource": "aislist-scan",
       "samplePosts": [
         {
+          "id": "CHNQ7n7KHgg",
           "title": "How 50 Canadians Held the Gap for 3 Days After Hong Kong Was Cut in Two",
           "published": "2026-11-18",
-          "durationSec": 869
+          "durationSec": 869,
+          "thumbnailUrl": "https://i.ytimg.com/vi/CHNQ7n7KHgg/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=CHNQ7n7KHgg"
         },
         {
+          "id": "3MgaKr-8ZIc",
           "title": "How One Van Doos Company Held Casa Berardi (Moro River, 1943)",
           "published": "2026-11-16",
-          "durationSec": 817
+          "durationSec": 817,
+          "thumbnailUrl": "https://i.ytimg.com/vi/3MgaKr-8ZIc/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=3MgaKr-8ZIc"
         },
         {
+          "id": "PQ_sl35cRv4",
           "title": "How 2 Canadian Battalions Beat Germany's Best Paratroopers in Ortona (1943)",
           "published": "2026-11-14",
-          "durationSec": 796
+          "durationSec": 796,
+          "thumbnailUrl": "https://i.ytimg.com/vi/PQ_sl35cRv4/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=PQ_sl35cRv4"
         },
         {
+          "id": "PcL6HLnWEQs",
           "title": "What German Soldiers Said After the Canadian Disaster at Dieppe",
           "published": "2026-07-21",
-          "durationSec": 1687
+          "durationSec": 1687,
+          "thumbnailUrl": "https://i.ytimg.com/vi/PcL6HLnWEQs/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=PcL6HLnWEQs"
         },
         {
+          "id": "JldbOhnWJlc",
           "title": "German POWs Were Shocked by Canada's Industrial Might",
           "published": "2026-07-18",
-          "durationSec": 1831
+          "durationSec": 1831,
+          "thumbnailUrl": "https://i.ytimg.com/vi/JldbOhnWJlc/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=JldbOhnWJlc"
         },
         {
+          "id": "XFd9-stK3wI",
           "title": "Why the 1st Parachute Army Panicked at the Name of the 1st Canadian Rocket Battery",
           "published": "2026-07-16",
-          "durationSec": 1376
+          "durationSec": 1376,
+          "thumbnailUrl": "https://i.ytimg.com/vi/XFd9-stK3wI/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=XFd9-stK3wI"
         }
       ],
       "fingerprint": {
@@ -2212,7 +2512,7 @@
         },
         "upload_cadence": {
           "avg_duration_sec": 1603.2,
-          "channel_age_days": 140.241,
+          "channel_age_days": 140.283,
           "duration_cv": 0.356,
           "max_dormancy_gap_days": 0,
           "output_minutes_per_week": 11.163,
@@ -2230,39 +2530,57 @@
       "label": "slop",
       "title": "@BritainInBattle-u4n — Britain in Battle",
       "sourceUrl": "https://www.youtube.com/@BritainInBattle-u4n",
-      "summary": "0.20/day · 75 videos · 67% formal prose · 20% title reuse",
+      "summary": "0.25/day · 75 videos · 67% formal prose · 20% title reuse",
       "aislistStatus": "blocklist",
       "contentSource": "aislist-scan",
       "samplePosts": [
         {
+          "id": "fpuKFQFxeCY",
           "title": "Britain Had NO SOE Until 1940 — Who Sabotaged The Enemy Behind Its Lines?",
           "published": "2026-08-03",
-          "durationSec": 1844
+          "durationSec": 1844,
+          "thumbnailUrl": "https://i.ytimg.com/vi/fpuKFQFxeCY/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=fpuKFQFxeCY"
         },
         {
+          "id": "aEcUSFyreGY",
           "title": "Britain Had No Safe Vault for Its Gold Until 1940 — Where Did It Go?",
           "published": "2026-07-27",
-          "durationSec": 2232
+          "durationSec": 2232,
+          "thumbnailUrl": "https://i.ytimg.com/vi/aEcUSFyreGY/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=aEcUSFyreGY"
         },
         {
+          "id": "Q6SB1w7vSL4",
           "title": "Britain Had No Commandos Until 1940 — How Did It Strike Hitler’s Coast?",
           "published": "2026-07-24",
-          "durationSec": 1785
+          "durationSec": 1785,
+          "thumbnailUrl": "https://i.ytimg.com/vi/Q6SB1w7vSL4/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=Q6SB1w7vSL4"
         },
         {
+          "id": "wEV9yDZCZig",
           "title": "Britain Had No Tanks Until 1916 — How Did It Break Through The Trenches?",
           "published": "2026-07-21",
-          "durationSec": 2101
+          "durationSec": 2101,
+          "thumbnailUrl": "https://i.ytimg.com/vi/wEV9yDZCZig/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=wEV9yDZCZig"
         },
         {
+          "id": "VCTL7Vxjh6k",
           "title": "Britain Had No NHS Until 1948 — Who Treated the Wounded During the Blitz?",
-          "published": "2026-11-24",
-          "durationSec": 1938
+          "published": "2026-07-17",
+          "durationSec": 1938,
+          "thumbnailUrl": "https://i.ytimg.com/vi/VCTL7Vxjh6k/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=VCTL7Vxjh6k"
         },
         {
+          "id": "QHRLQE93vE8",
           "title": "Britain Had No RAF Until 1918 — So Who Defended Its Skies?",
           "published": "2026-07-14",
-          "durationSec": 1258
+          "durationSec": 1258,
+          "thumbnailUrl": "https://i.ytimg.com/vi/QHRLQE93vE8/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=QHRLQE93vE8"
         }
       ],
       "fingerprint": {
@@ -2309,15 +2627,15 @@
         },
         "upload_cadence": {
           "avg_duration_sec": 1389.767,
-          "channel_age_days": 384.664,
+          "channel_age_days": 384.707,
           "duration_cv": 0.218,
           "max_dormancy_gap_days": 0,
-          "output_minutes_per_week": 32.299,
+          "output_minutes_per_week": 40.374,
           "post_pivot_share": 0,
           "post_pivot_videos": 0,
           "pre_pivot_videos": 0,
-          "recent_uploads_per_day": 0.199,
-          "schedule_hour_stddev": 0
+          "recent_uploads_per_day": 0.249,
+          "schedule_hour_stddev": 0.997
         }
       }
     },
@@ -2332,34 +2650,52 @@
       "contentSource": "aislist-scan",
       "samplePosts": [
         {
+          "id": "WdgXlxvzdnU",
           "title": "Feeding a Castle Through Winter: Goodrich, 1296",
           "published": "2026-11-19",
-          "durationSec": 1495
+          "durationSec": 1495,
+          "thumbnailUrl": "https://i.ytimg.com/vi/WdgXlxvzdnU/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=WdgXlxvzdnU"
         },
         {
+          "id": "VSV7ZAtnXME",
           "title": "What Medieval Peasants Wore to Survive the Cold",
           "published": "2026-11-16",
-          "durationSec": 1662
+          "durationSec": 1662,
+          "thumbnailUrl": "https://i.ytimg.com/vi/VSV7ZAtnXME/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=VSV7ZAtnXME"
         },
         {
+          "id": "YM_o5N32k1I",
           "title": "A Day Inside a Medieval Merchant’s House in London (1380)",
           "published": "2026-11-13",
-          "durationSec": 1524
+          "durationSec": 1524,
+          "thumbnailUrl": "https://i.ytimg.com/vi/YM_o5N32k1I/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=YM_o5N32k1I"
         },
         {
+          "id": "I9bNUm-BER0",
           "title": "Last Orders Before Curfew: London’s Taverns After Dark (1300)",
           "published": "2026-11-10",
-          "durationSec": 1206
+          "durationSec": 1206,
+          "thumbnailUrl": "https://i.ytimg.com/vi/I9bNUm-BER0/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=I9bNUm-BER0"
         },
         {
+          "id": "crMnR8DUYd4",
           "title": "Why You Wouldn’t Survive a Medieval Winter in 1315",
           "published": "2026-07-15",
-          "durationSec": 2665
+          "durationSec": 2665,
+          "thumbnailUrl": "https://i.ytimg.com/vi/crMnR8DUYd4/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=crMnR8DUYd4"
         },
         {
+          "id": "z3jld3w0xV8",
           "title": "A Day in the Life of a Medieval Tavern Keeper (1348)",
           "published": "2026-07-05",
-          "durationSec": 2508
+          "durationSec": 2508,
+          "thumbnailUrl": "https://i.ytimg.com/vi/z3jld3w0xV8/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=z3jld3w0xV8"
         }
       ],
       "fingerprint": {
@@ -2406,7 +2742,7 @@
         },
         "upload_cadence": {
           "avg_duration_sec": 2073.167,
-          "channel_age_days": 557.897,
+          "channel_age_days": 557.939,
           "duration_cv": 0.21,
           "max_dormancy_gap_days": 0,
           "output_minutes_per_week": 8.825,
@@ -2429,34 +2765,52 @@
       "contentSource": "aislist-scan",
       "samplePosts": [
         {
+          "id": "cp0k9bZN_aI",
           "title": "Her Land Was Choked By 40 Tons of Mesquite — She Turned \"Trash\" Into an Indestructible Winter Haven",
           "published": "2026-08-12",
-          "durationSec": 7966
+          "durationSec": 7966,
+          "thumbnailUrl": "https://i.ytimg.com/vi/cp0k9bZN_aI/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=cp0k9bZN_aI"
         },
         {
+          "id": "vyGZxfqrmKE",
           "title": "\"You Cannot Chop Wood and I have No Shelter for My Kids\" said the Freezing Widow",
           "published": "2026-08-12",
-          "durationSec": 8000
+          "durationSec": 8000,
+          "thumbnailUrl": "https://i.ytimg.com/vi/vyGZxfqrmKE/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=vyGZxfqrmKE"
         },
         {
+          "id": "Oz8jAHrxnpk",
           "title": "They Laughed at the Farm Girl's Soot-Stained Hands — Until a Wealthy Banker Changed Her Fate Forever",
           "published": "2026-08-11",
-          "durationSec": 7820
+          "durationSec": 7820,
+          "thumbnailUrl": "https://i.ytimg.com/vi/Oz8jAHrxnpk/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=Oz8jAHrxnpk"
         },
         {
+          "id": "0IfcygSumaU",
           "title": "They Laughed When the Orphan Boy Collected Their Rusted Wagon Tires — Until They Saw Inside the Barn",
           "published": "2026-08-10",
-          "durationSec": 7022
+          "durationSec": 7022,
+          "thumbnailUrl": "https://i.ytimg.com/vi/0IfcygSumaU/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=0IfcygSumaU"
         },
         {
+          "id": "LCI8aykOH7Y",
           "title": "She Whispered, \"Let's Go... We Can't Pay\"... But Her Little Girl Couldn't Look Away from His Plate",
           "published": "2026-08-04",
-          "durationSec": 6021
+          "durationSec": 6021,
+          "thumbnailUrl": "https://i.ytimg.com/vi/LCI8aykOH7Y/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=LCI8aykOH7Y"
         },
         {
+          "id": "t2aICDswZcg",
           "title": "The Drifter Girl Started Carving Shelves Into the Cave Wall — And Broke Through Into a Finished Home",
           "published": "2026-08-03",
-          "durationSec": 7646
+          "durationSec": 7646,
+          "thumbnailUrl": "https://i.ytimg.com/vi/t2aICDswZcg/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=t2aICDswZcg"
         }
       ],
       "fingerprint": {
@@ -2503,7 +2857,7 @@
         },
         "upload_cadence": {
           "avg_duration_sec": 6356.167,
-          "channel_age_days": 422.184,
+          "channel_age_days": 422.227,
           "duration_cv": 0.309,
           "max_dormancy_gap_days": 0,
           "output_minutes_per_week": 415.351,
@@ -2526,34 +2880,52 @@
       "contentSource": "aislist-scan",
       "samplePosts": [
         {
+          "id": "t0YbZ_8jtZM",
           "title": "\"My Sons Avoid Me Because They Witnessed What I Did To Their Father\" - Feminist's Painful Awakening",
           "published": "2026-02-03",
-          "durationSec": 1731
+          "durationSec": 1731,
+          "thumbnailUrl": "https://i.ytimg.com/vi/t0YbZ_8jtZM/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=t0YbZ_8jtZM"
         },
         {
+          "id": "O82IbHhULoI",
           "title": "Feminist REGRETS Emasculating Husband After He Files Divorce And Finds Younger Wife Within Months",
           "published": "2026-02-02",
-          "durationSec": 2266
+          "durationSec": 2266,
+          "thumbnailUrl": "https://i.ytimg.com/vi/O82IbHhULoI/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=O82IbHhULoI"
         },
         {
+          "id": "TzNoZZ87NH4",
           "title": "HR Director DESTROYED When Male Employee Records Her Admitting She Won't Hire Men \u0026 Gets Her Fired",
           "published": "2026-02-01",
-          "durationSec": 1859
+          "durationSec": 1859,
+          "thumbnailUrl": "https://i.ytimg.com/vi/TzNoZZ87NH4/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=TzNoZZ87NH4"
         },
         {
+          "id": "V7wtjJ-BQ8w",
           "title": "\"Mom, You're Why I'm Afraid of Women\" - Feminist CRUSHED By Son's Confession About Her Parenting",
           "published": "2026-01-31",
-          "durationSec": 2066
+          "durationSec": 2066,
+          "thumbnailUrl": "https://i.ytimg.com/vi/V7wtjJ-BQ8w/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=V7wtjJ-BQ8w"
         },
         {
+          "id": "Cz2BAWB5Y9A",
           "title": "\"My Friends Convinced Me to Leave Him, Now He's Remarried and I'm Drowning in Regret\"",
           "published": "2026-01-30",
-          "durationSec": 1706
+          "durationSec": 1706,
+          "thumbnailUrl": "https://i.ytimg.com/vi/Cz2BAWB5Y9A/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=Cz2BAWB5Y9A"
         },
         {
+          "id": "UDvnEjyOitQ",
           "title": "Feminist HR DESTROYED When Investigation Reveals She Ignored Female-on-Male Misconduct for YEARS",
           "published": "2026-01-29",
-          "durationSec": 1954
+          "durationSec": 1954,
+          "thumbnailUrl": "https://i.ytimg.com/vi/UDvnEjyOitQ/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=UDvnEjyOitQ"
         }
       ],
       "fingerprint": {
@@ -2600,7 +2972,7 @@
         },
         "upload_cadence": {
           "avg_duration_sec": 1860.833,
-          "channel_age_days": 726.539,
+          "channel_age_days": 726.582,
           "duration_cv": 0.183,
           "max_dormancy_gap_days": 0,
           "output_minutes_per_week": 222.58,
@@ -2623,34 +2995,52 @@
       "contentSource": "aislist-scan",
       "samplePosts": [
         {
+          "id": "4k-qxURBPbY",
           "title": "Wolves \u0026 War-Forge: Orgrimmar Awakens –  AI Fantasy Film",
           "published": "2025-11-03",
-          "durationSec": 437
+          "durationSec": 437,
+          "thumbnailUrl": "https://i.ytimg.com/vi/4k-qxURBPbY/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=4k-qxURBPbY"
         },
         {
+          "id": "_swtjpqalLY",
           "title": "Pirate Fleet vs Jungle Trolls | AI Fantasy Film",
           "published": "2025-11-02",
-          "durationSec": 537
+          "durationSec": 537,
+          "thumbnailUrl": "https://i.ytimg.com/vi/_swtjpqalLY/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=_swtjpqalLY"
         },
         {
+          "id": "nVd40Z6_ii4",
           "title": "30 Warriors vs 10,000 Orcs - AI Fantasy Film",
           "published": "2025-10-27",
-          "durationSec": 435
+          "durationSec": 435,
+          "thumbnailUrl": "https://i.ytimg.com/vi/nVd40Z6_ii4/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=nVd40Z6_ii4"
         },
         {
+          "id": "3XtiX-TtSFk",
           "title": "The Orcs' Gravest Mistake | AI Fantasy Film",
           "published": "2025-10-24",
-          "durationSec": 448
+          "durationSec": 448,
+          "thumbnailUrl": "https://i.ytimg.com/vi/3XtiX-TtSFk/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=3XtiX-TtSFk"
         },
         {
+          "id": "SwHNBk6kcbw",
           "title": "Starving Orcs Raid a City | AI Fantasy Film",
           "published": "2025-10-22",
-          "durationSec": 469
+          "durationSec": 469,
+          "thumbnailUrl": "https://i.ytimg.com/vi/SwHNBk6kcbw/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=SwHNBk6kcbw"
         },
         {
+          "id": "889-iYem_o8",
           "title": "The Warlord's Final Stand - AI Fantasy Film",
           "published": "2025-10-20",
-          "durationSec": 513
+          "durationSec": 513,
+          "thumbnailUrl": "https://i.ytimg.com/vi/889-iYem_o8/mqdefault.jpg",
+          "postUrl": "https://www.youtube.com/watch?v=889-iYem_o8"
         }
       ],
       "fingerprint": {
@@ -2697,7 +3087,7 @@
         },
         "upload_cadence": {
           "avg_duration_sec": 474.321,
-          "channel_age_days": 89.451,
+          "channel_age_days": 89.494,
           "duration_cv": 0.155,
           "max_dormancy_gap_days": 0,
           "output_minutes_per_week": 6.439,

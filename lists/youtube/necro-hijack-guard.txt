@@ -1,0 +1,4 @@
+! SlopTrap Public Rule Matched Accounts
+! Rule: necro-hijack-guard (Necro-Hijack & Dormancy Guard)
+! Site: youtube
+! Entries: 0

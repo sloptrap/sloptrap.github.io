@@ -125,6 +125,11 @@ verdict, err := eng.Evaluate(ctx, fingerprint)</code></pre>
           <div style="margin:10px 0 4px;">
             <sloptrap-rules-panel site="youtube" verified-only registry-url=".."></sloptrap-rules-panel>
           </div>
+
+          <h3>Mode C — Pre-matched public rule lists (<code>lists/&lt;site&gt;/&lt;rule_id&gt;.txt</code>)</h3>
+          <p>
+            Every public rule has an associated matched-account list indexed by <code>lists/manifest.json</code> (with SHA-256 digests for delta sync). Browser extensions and SDK clients (<code>SlopTrapClient</code> in JS and <code>ManagedClient</code> in Go) check enabled rule lists in <code>O(1)</code> before spinning up WASM, and users can opt in (<code>contributeMatchedAccounts: true</code>) to automatically submit newly matched unlisted accounts while duplicates are silently dropped.
+          </p>
         </section>
 
         <section class="docs-section" id="adapters">

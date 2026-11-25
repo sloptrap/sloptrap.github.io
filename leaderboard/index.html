@@ -263,8 +263,11 @@
              </a>`
           : `<span class="mono">${e.likes || 0}</span>`;
 
+        const targetRule = (new URLSearchParams(window.location.search).get('rule') || window.location.hash.replace(/^#rule-/, '')).trim().toLowerCase();
+        const isHighlighted = targetRule && e.rule_id.toLowerCase() === targetRule;
+
         return `
-          <tr>
+          <tr id="rule-${esc(e.rule_id)}" style="${isHighlighted ? 'background:rgba(255,190,92,0.12);outline:1px solid var(--g-color-line-brand);' : ''}">
             <td class="mono" style="color:var(--g-color-text-secondary);">${e.rank || (idx + 1)}</td>
             <td>
               <div class="rule-name">${esc(e.name)} <span class="mono" style="color:var(--g-color-text-hint);font-weight:400;">v${esc(e.version)}</span></div>
@@ -407,6 +410,10 @@
         document.getElementById('stat-epoch').textContent = `${data.corpus_count || 0} holdout · ${data.epoch_id || ''}`;
         if (Number(data.active_window_days) > 0) syncWindowLabels(Number(data.active_window_days));
         render();
+        const targetRule = (new URLSearchParams(window.location.search).get('rule') || window.location.hash.replace(/^#rule-/, '')).trim();
+        if (targetRule) {
+          document.getElementById(`rule-${targetRule}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
         await overlayLiveMetrics(docData);
         render();
       } catch (err) {

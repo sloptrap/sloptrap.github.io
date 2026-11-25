@@ -1,0 +1,5 @@
+! SlopTrap Public Rule Matched Accounts
+! Rule: tiktok-tts-clip-farm (TTS Voiceover & Split-Screen Clip Mill)
+! Site: tiktok
+! Entries: 1
+@redditstories-q9x

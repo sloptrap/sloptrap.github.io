@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-11-25T02:19:51Z",
+  "lists": {
+    "youtube/llm-prosody-deep": {
+      "site": "youtube",
+      "rule_id": "llm-prosody-deep",
+      "path": "lists/youtube/llm-prosody-deep.txt",
+      "count": 6,
+      "sha256": "4b587fb7bb2021365f2b230698636c50ec7489cb991b0a72a73cad9e6795c47f"
+    },
+    "youtube/clone-farm-sentinel": {
+      "site": "youtube",
+      "rule_id": "clone-farm-sentinel",
+      "path": "lists/youtube/clone-farm-sentinel.txt",
+      "count": 0,
+      "sha256": "637231626b603305a4e07ed8cc697784cf1a757695740b48ad069b2a5e8106a2"
+    },
+    "youtube/necro-hijack-guard": {
+      "site": "youtube",
+      "rule_id": "necro-hijack-guard",
+      "path": "lists/youtube/necro-hijack-guard.txt",
+      "count": 0,
+      "sha256": "ab7e6886fb966be1140f2a50f9a338d90d8ddf0a9088f2d39ee0ce922c247bba"
+    },
+    "tiktok/tiktok-dormant-repost-ring": {
+      "site": "tiktok",
+      "rule_id": "tiktok-dormant-repost-ring",
+      "path": "lists/tiktok/tiktok-dormant-repost-ring.txt",
+      "count": 1,
+      "sha256": "39d5593bca9a7d61c474c1e70b137295cb1d2a7b2003672b768605966b8b88d1"
+    },
+    "tiktok/tiktok-tts-clip-farm": {
+      "site": "tiktok",
+      "rule_id": "tiktok-tts-clip-farm",
+      "path": "lists/tiktok/tiktok-tts-clip-farm.txt",
+      "count": 1,
+      "sha256": "77b319a063dc4368e356e653009d53484c57224f1b7423c058db3617fc32cc47"
+    },
+    "pinterest/pinterest-affiliate-domain-ring": {
+      "site": "pinterest",
+      "rule_id": "pinterest-affiliate-domain-ring",
+      "path": "lists/pinterest/pinterest-affiliate-domain-ring.txt",
+      "count": 1,
+      "sha256": "0b912726be4f78a09df5c01953fea55223c0efdc35862c587535fd60ab435d72"
+    },
+    "pinterest/pinterest-ai-pin-mill": {
+      "site": "pinterest",
+      "rule_id": "pinterest-ai-pin-mill",
+      "path": "lists/pinterest/pinterest-ai-pin-mill.txt",
+      "count": 1,
+      "sha256": "ba34c3832111ffc7960232240f6870afcd36c844ab566f27fa6a5918ab34370b"
+    }
+  }
+}

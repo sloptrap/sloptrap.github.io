@@ -164,13 +164,17 @@ export async function verifyAndUnpackBundle(bundle, scoringSeed = DEFAULT_SCORIN
   return wasmBytes;
 }
 
-async function runCompiledModule(compiledModule, manifest, fpBytes) {
+function runPooledInstance(instance, manifest, fpBytes) {
   const t0 = performance.now();
-  const instance = await WebAssembly.instantiate(compiledModule, {});
   const exports = instance.exports;
   const mem = exports.memory;
   if (!mem || typeof exports.st_evaluate !== "function") {
     throw new Error(`Invalid WASM ABI in ${manifest.rule_id}`);
+  }
+
+  // Reset linear memory scratch bump pointer to 16384 so pooled instance never fragments or grows memory
+  if (mem.buffer.byteLength >= 4) {
+    new DataView(mem.buffer).setInt32(0, 16384, true);
   }
 
   let inPtr = 16384;
@@ -221,6 +225,24 @@ async function runCompiledModule(compiledModule, manifest, fpBytes) {
     reason,
     exec_micros: elapsedUs,
   };
+}
+
+export function normalizeAccountKey(raw) {
+  const s = String(raw || "").trim();
+  if (!s) return "";
+  if (s.startsWith("UC") && s.length >= 20 && !s.includes("/")) return s;
+  return (s.startsWith("@") ? s : `@${s}`).toLowerCase();
+}
+
+export function parseAccountListText(txt) {
+  const set = new Set();
+  for (const rawLine of String(txt || "").split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith("!")) continue;
+    const norm = normalizeAccountKey(line);
+    if (norm) set.add(norm);
+  }
+  return set;
 }
 
 // Pluggable Site Adapter Registry
@@ -322,10 +344,12 @@ export class SlopTrapStaticEngine {
   constructor(options = {}) {
     this.site = String(options.site || "youtube").toLowerCase();
     this.verifiedOnly = Boolean(options.verifiedOnly);
+    this.usePreMatchedLists = options.usePreMatchedLists !== false;
     this.warnThreshold = Number(options.warnThreshold || 45);
     this.blockThreshold = Number(options.blockThreshold || 68);
     this.scoringSeed = options.scoringSeed || DEFAULT_SCORING_SEED;
     this.rules = new Map();
+    this.ruleMatchedSets = new Map(); // ruleId -> Set<normalizedAccountKey>
   }
 
   async loadBundle(bundle, enabled = true) {
@@ -339,13 +363,29 @@ export class SlopTrapStaticEngine {
     }
     const wasmBytes = await verifyAndUnpackBundle(bundle, this.scoringSeed);
     const compiled = await WebAssembly.compile(wasmBytes);
+    const instance = await WebAssembly.instantiate(compiled, {});
     this.rules.set(bundle.manifest.rule_id, {
       manifest: bundle.manifest,
       provenance: prov,
       compiled,
+      instance,
       enabled,
     });
     return true;
+  }
+
+  loadRuleList(ruleId, textOrIterable) {
+    const set =
+      typeof textOrIterable === "string"
+        ? parseAccountListText(textOrIterable)
+        : new Set(Array.from(textOrIterable || [], k => normalizeAccountKey(k)).filter(Boolean));
+    this.ruleMatchedSets.set(ruleId, set);
+    return set.size;
+  }
+
+  hasRuleListMatch(ruleId, accountKey) {
+    const set = this.ruleMatchedSets.get(ruleId);
+    return Boolean(set && set.has(normalizeAccountKey(accountKey)));
   }
 
   async loadBundles(bundles) {
@@ -359,6 +399,7 @@ export class SlopTrapStaticEngine {
       manifest: r.manifest,
       provenance: r.provenance,
       enabled: r.enabled,
+      listCount: this.ruleMatchedSets.get(r.manifest.rule_id)?.size || 0,
     }));
   }
 
@@ -370,8 +411,38 @@ export class SlopTrapStaticEngine {
   }
 
   async evaluate(fingerprint) {
+    const rawHandle = fingerprint?.channel?.handle || fingerprint?.channel?.channel_id || "";
+    const accountKey = normalizeAccountKey(rawHandle);
+
+    // O(1) Pre-Matched Public Rule List Fast-Path (skips JSON serialization & WASM execution)
+    if (this.usePreMatchedLists && accountKey) {
+      const listHitRules = [];
+      for (const r of this.rules.values()) {
+        if (!r.enabled) continue;
+        if (this.verifiedOnly && !r.provenance.verified) continue;
+        const set = this.ruleMatchedSets.get(r.manifest.rule_id);
+        if (set && set.has(accountKey)) {
+          listHitRules.push(r.manifest.rule_id);
+        }
+      }
+      if (listHitRules.length > 0) {
+        return {
+          site: this.site,
+          score: 85,
+          action: "block",
+          fast_path_list: true,
+          matched_rule_ids: listHitRules,
+          newly_matched_rules: [],
+          verified_rules: listHitRules.length,
+          outputs: [],
+          total_micros: 0,
+        };
+      }
+    }
+
     const fpBytes = enc.encode(JSON.stringify({ schema_version: 1, site: this.site, ...fingerprint }));
     const outputs = [];
+    const newlyMatchedRules = [];
     let weightedSum = 0;
     let weightTotal = 0;
     let totalMicros = 0;
@@ -380,18 +451,39 @@ export class SlopTrapStaticEngine {
     for (const r of this.rules.values()) {
       if (!r.enabled) continue;
       if (this.verifiedOnly && !r.provenance.verified) continue;
-      const out = await runCompiledModule(r.compiled, r.manifest, fpBytes);
+      const out = runPooledInstance(r.instance, r.manifest, fpBytes);
       outputs.push(out);
       totalMicros += out.exec_micros;
       if (out.verified) verifiedRules++;
       const w = out.weight * (out.confidence || 1);
       weightedSum += out.score * w;
       weightTotal += w;
+
+      if (accountKey && out.score >= this.warnThreshold) {
+        const set = this.ruleMatchedSets.get(r.manifest.rule_id);
+        if (!set || !set.has(accountKey)) {
+          newlyMatchedRules.push({
+            site: this.site,
+            rule_id: r.manifest.rule_id,
+            account_key: accountKey,
+            action: out.score >= this.blockThreshold ? "block" : "warn",
+          });
+        }
+      }
     }
 
     const score = weightTotal > 0 ? Math.round(Math.min(100, Math.max(0, weightedSum / weightTotal))) : 0;
     const action = score >= this.blockThreshold ? "block" : score >= this.warnThreshold ? "warn" : "allow";
-    return { site: this.site, score, action, verified_rules: verifiedRules, outputs, total_micros: totalMicros };
+    return {
+      site: this.site,
+      score,
+      action,
+      fast_path_list: false,
+      newly_matched_rules: newlyMatchedRules,
+      verified_rules: verifiedRules,
+      outputs,
+      total_micros: totalMicros,
+    };
   }
 }
 
@@ -401,8 +493,10 @@ export class SlopTrapClient {
     this.rankingsEndpoint = String(options.rankingsEndpoint || DEFAULT_RANKINGS_ENDPOINT).replace(/\/$/, "");
     this.storagePrefix = options.storagePrefix || "sloptrap_sdk_v1";
     this.anonymousRuleRankings = Boolean(options.anonymousRuleRankings);
+    this.contributeMatchedAccounts = Boolean(options.contributeMatchedAccounts);
     this.engine = new SlopTrapStaticEngine(options);
     this.availableSites = ["youtube", "tiktok", "pinterest"];
+    this._submittedMatches = new Set();
   }
 
   get site() { return this.engine.site; }
@@ -475,6 +569,21 @@ export class SlopTrapClient {
       if (await this.engine.loadBundle(bundle, true)) loaded++;
     }
 
+    // Sync pre-matched public rule lists (`lists/manifest.json`) for O(1) lookup
+    try {
+      const lmResp = await fetch(`${this.registryBaseUrl}/lists/manifest.json`);
+      if (lmResp.ok) {
+        const lm = await lmResp.json();
+        for (const info of Object.values(lm.lists || {})) {
+          if (info.site !== this.site) continue;
+          const txtResp = await fetch(`${this.registryBaseUrl}/${info.path}`);
+          if (txtResp.ok) {
+            this.engine.loadRuleList(info.rule_id, await txtResp.text());
+          }
+        }
+      }
+    } catch (_) {}
+
     if (this.anonymousRuleRankings && this.rankingsEndpoint) {
       const activeRules = this.engine
         .listRules()
@@ -494,5 +603,24 @@ export class SlopTrapClient {
 
   listRules() { return this.engine.listRules(); }
   toggleRule(id, state) { return this.engine.toggleRule(id, state); }
-  evaluate(fp) { return this.engine.evaluate(fp); }
+
+  async evaluate(fp) {
+    const res = await this.engine.evaluate(fp);
+    if (this.contributeMatchedAccounts && this.rankingsEndpoint && res.newly_matched_rules?.length > 0) {
+      const fresh = res.newly_matched_rules.filter(m => {
+        const k = `${m.site}|${m.rule_id}|${m.account_key}`;
+        if (this._submittedMatches.has(k)) return false;
+        this._submittedMatches.add(k);
+        return true;
+      });
+      if (fresh.length > 0) {
+        fetch(`${this.rankingsEndpoint}/api/v1/lists/report-matches`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ site: this.site, matches: fresh }),
+        }).catch(() => {});
+      }
+    }
+    return res;
+  }
 }

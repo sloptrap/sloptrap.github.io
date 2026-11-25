@@ -305,7 +305,7 @@
     }
 
     async function overlayLiveMetrics(data) {
-      const ep = (data.rankings_endpoint || 'https://sloptrap-rankings.assimilat.workers.dev').replace(/\/$/, '');
+      const ep = (data.rankings_endpoint || 'https://sloptrap-worker.fablestre.am').replace(/\/$/, '');
       const repo = data.registry_repo || 'sloptrap/sloptrap.github.io';
 
       if (!cachedWorkerStats || !cachedReleases || !cachedIssues) {

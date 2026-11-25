@@ -12,7 +12,7 @@
 
 export const DEFAULT_SCORING_SEED = "sloptrap-public-scoring-v1:9f84c2e0a1b74d6e8f3c5a2b1d9e0f4a";
 export const DEFAULT_REGISTRY_BASE = "https://sloptrap.github.io";
-export const DEFAULT_RANKINGS_ENDPOINT = "https://sloptrap-rankings.assimilat.workers.dev";
+export const DEFAULT_RANKINGS_ENDPOINT = "https://sloptrap-worker.fablestre.am";
 
 export const OFFICIAL_MAINTAINER_KEYS = new Set([
   "eb85cbf507e27e2c0f94ad723385db3138af32670ea37ca337f0c1866eae02cc",

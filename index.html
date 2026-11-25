@@ -317,7 +317,7 @@ decide "Block high-suspicion accounts"
         const data = await fetch(`./leaderboard/${encodeURIComponent(site)}/leaderboard.json`).then(r => r.json());
         let winDays = Number(data.active_window_days || 30);
         if (!workerStats) {
-          const ep = (data.rankings_endpoint || 'https://sloptrap-rankings.assimilat.workers.dev').replace(/\/$/, '');
+          const ep = (data.rankings_endpoint || 'https://sloptrap-worker.fablestre.am').replace(/\/$/, '');
           workerStats = await fetch(`${ep}/api/v1/rules/stats`).then(r => r.ok ? r.json() : {}).catch(() => ({}));
         }
         if (Number(workerStats?.window_days) > 0) winDays = Number(workerStats.window_days);

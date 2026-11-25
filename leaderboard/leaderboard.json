@@ -4,8 +4,8 @@
   "site_display_name": "YouTube",
   "registry_repo": "sloptrap/sloptrap.github.io",
   "rankings_endpoint": "https://sloptrap-rankings.assimilat.workers.dev",
-  "active_window_days": 14,
-  "generated_at": "2026-11-24T21:18:26Z",
+  "active_window_days": 30,
+  "generated_at": "2026-11-25T08:42:26Z",
   "epoch_id": "2026-Q4",
   "corpus_count": 6,
   "corpus_hashes": [
@@ -28,7 +28,7 @@
         "tier": "official",
         "source_repo": "https://github.com/sloptrap/rule-llm-prosody-deep"
       },
-      "name": "LLM Script \u0026 Synthetic Voice Deep Scan",
+      "name": "LLM Script & Synthetic Voice Deep Scan",
       "description": "Scores uncontracted formal LLM prose, antithesis/tricolon hooks, omniscient pronoun absence, and metronomic TTS pacing.",
       "version": "1.4.1",
       "author": "@sloptrap-core",
@@ -71,7 +71,7 @@
         "tier": "official",
         "source_repo": "https://github.com/sloptrap/rule-clone-farm-sentinel"
       },
-      "name": "Clone-Farm \u0026 Velocity Sentinel",
+      "name": "Clone-Farm & Velocity Sentinel",
       "description": "Ultra-fast metadata, bot-handle suffix, AiSList sibling stem, and cookie-cutter upload cadence rule for low-overhead TV browsing.",
       "version": "1.1.0",
       "author": "@sloptrap-core",
@@ -113,7 +113,7 @@
         "tier": "official",
         "source_repo": "https://github.com/sloptrap/rule-necro-hijack-guard"
       },
-      "name": "Necro-Hijack \u0026 Dormancy Guard",
+      "name": "Necro-Hijack & Dormancy Guard",
       "description": "Detects aged/bought YouTube accounts with multi-year dormancy gaps, silent phone-clip origins, and sudden upload floods.",
       "version": "1.2.0",
       "author": "@sloptrap-core",

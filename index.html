@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SlopTrap — Rule Definition Studio, Sandboxed WASM Rules &amp; SDK</title>
+  <title>SlopTrap — Svelte 5 + Tauri Rule Studio, Cross-Site Rule Language &amp; WASM SDK</title>
   <link rel="stylesheet" href="./assets/gravity-uikit.css" />
   <link rel="stylesheet" href="./assets/style.css" />
 </head>
@@ -46,86 +46,136 @@
     <section class="overview-split" style="border-bottom:0;padding-bottom:8px;">
       <div class="text-card" style="padding:22px 24px;">
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <span class="g-label g-label_theme_info">Svelte 5 + Tauri v2 Studio</span>
-          <span class="g-label g-label_theme_positive">Tokenized WASM Rules</span>
-          <span class="g-label g-label_theme_normal">Pluggable Platforms</span>
+          <span class="g-label g-label_theme_info">Svelte 5 + Tauri v2 App</span>
+          <span class="g-label g-label_theme_positive">Common Cross-Site Syntax</span>
+          <span class="g-label g-label_theme_normal">Browser &amp; Desktop</span>
         </div>
-        <h1>Define, tokenize, and compile WebAssembly slop rules across platforms</h1>
+        <h1>Build, test, and share cross-site slop rules in a clean visual studio</h1>
         <p class="overview-lead">
-          <strong>SlopTrap</strong> is a rule definition studio and sandboxed WebAssembly (<code>.strule</code>) runtime for <strong>YouTube</strong>, <strong>TikTok</strong>, <strong>Pinterest</strong>, and custom platforms. Load known slop samples alongside clean controls, derive matching clauses, promote thresholds and patterns into reusable <code>$tokens</code>, and export cryptographically signed WASM bundles.
+          <strong>SlopTrap</strong> is a <strong>Svelte 5 + Tauri v2</strong> rule definition app (runnable in any browser or as a native desktop app) paired with a sandboxed WebAssembly (<code>.strule</code>) runtime. Write or click together rules using a <strong>common cross-site language</strong> (<code>post.frequency</code>, <code>account.dormancy_days</code>, <code>text.formal_prose</code>), accumulate shared variables across rules, check them against thresholds, and export signed WASM bundles for <strong>YouTube</strong>, <strong>TikTok</strong>, <strong>Pinterest</strong>, and custom sites.
         </p>
         <div class="btn-row">
-          <a class="g-btn g-btn_view_action g-btn_size_l" href="./studio/">Open Rule Studio (Browser)</a>
-          <a class="g-btn g-btn_view_outlined g-btn_size_l" href="./docs/#sdk">Integrate Library &amp; UI</a>
+          <a class="g-btn g-btn_view_action g-btn_size_l" href="./studio/">Launch Rule Studio (Browser)</a>
+          <a class="g-btn g-btn_view_outlined g-btn_size_l" href="./docs/#sdk">Integrate SDK &amp; UI</a>
           <a class="g-btn g-btn_view_normal g-btn_size_l" href="./leaderboard/">Site Leaderboards</a>
         </div>
       </div>
 
       <div class="text-card" style="padding:16px 18px;">
         <div style="font-size:12px;font-weight:600;color:var(--g-color-text-secondary);margin-bottom:6px;">
-          Run Studio in Browser or Desktop (Svelte 5 + Tauri v2)
+          Common Cross-Site Rule Syntax (Works on YouTube, TikTok &amp; Pinterest)
         </div>
-        <pre style="margin:0;"><code>git clone git@github.com:sloptrap/sloptrap.git
-cd sloptrap
-npm install
+        <pre style="margin:0;"><code>token high_post_rate = 0.9
+token block_cutoff   = 60
+var suspicion = 0
 
-# Run in any web browser (Vite + WebAssembly)
-npm run dev
+rule "High daily post frequency"
+  when post.frequency &gt;= $high_post_rate ramp 1.5
+  then add 36 to suspicion
 
-# Or launch native desktop app (Tauri v2 + live URL scraper)
-npm run tauri dev</code></pre>
+decide "Block high-suspicion accounts"
+  when suspicion &gt;= $block_cutoff
+  then block</code></pre>
       </div>
     </section>
 
     <div class="section-bar">
       <div>
-        <h2 class="section-title">Corpus-driven workflow &amp; forensic dimensions</h2>
-        <p class="section-sub">Load known slop content, derive clauses that match each sample, tokenize parameters, and compile portable WASM.</p>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <h2 class="section-title">SlopTrap Rule Studio (Svelte 5 + Tauri v2)</h2>
+          <span class="g-label g-label_theme_positive">Main Application</span>
+        </div>
+        <p class="section-sub">
+          Guided 4-step workflow with importable templates, sentence-style visual rules, two-way readable syntax, and live <code>$token</code> sliders.
+        </p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <a class="g-btn g-btn_view_action g-btn_size_s" href="./studio/">Open in Browser</a>
+        <a class="g-btn g-btn_view_outlined g-btn_size_s" href="https://github.com/sloptrap/sloptrap" target="_blank" rel="noopener">Desktop &amp; Source</a>
+      </div>
+    </div>
+
+    <div class="preview-panel" style="background:var(--st-card-bg);">
+      <div class="preview-panel__toolbar" style="background:var(--st-card-bg);">
+        <div class="g-segmented" role="tablist" aria-label="SlopTrap Studio Views">
+          <button class="g-segmented__btn shot-tab active" type="button"
+            data-src="./assets/screenshots/studio-rules.png"
+            data-caption="Step 2: Visual Rule Builder — Sentence-style rules ('When Post frequency >= $high_post_rate -> Then Add 36 points to suspicion') and threshold outcomes.">
+            Visual Rule Builder
+          </button>
+          <button class="g-segmented__btn shot-tab" type="button"
+            data-src="./assets/screenshots/studio-syntax.png"
+            data-caption="Readable Cross-Site Syntax — Two-way human-readable language sharing signals like post.frequency and multi-variable thresholds across sites.">
+            Readable Syntax
+          </button>
+          <button class="g-segmented__btn shot-tab" type="button"
+            data-src="./assets/screenshots/studio-templates.png"
+            data-caption="Step 1: Templates &amp; Known Samples — 8 importable official &amp; cross-site templates plus auto-fit rule generation from slop vs. human examples.">
+            Templates &amp; Samples
+          </button>
+          <button class="g-segmented__btn shot-tab" type="button"
+            data-src="./assets/screenshots/studio-test.png"
+            data-caption="Step 3: Tune &amp; Test — Live $token sliders recompile WebAssembly in microseconds and display shared variables (script_risk, voice_risk) per sample.">
+            Token Sliders &amp; Test
+          </button>
+        </div>
+        <span class="mono" style="color:var(--g-color-text-hint);font-size:12px;">Svelte 5 + Tauri v2 · Browser &amp; Desktop</span>
+      </div>
+      <img id="studio-showcase-img" src="./assets/screenshots/studio-rules.png" alt="SlopTrap Studio — Visual Rule Builder" />
+      <div id="studio-showcase-caption" class="preview-panel__caption">
+        Step 2: Visual Rule Builder — Sentence-style rules ('When Post frequency &gt;= $high_post_rate -&gt; Then Add 36 points to suspicion') and threshold outcomes.
+      </div>
+    </div>
+
+    <div class="section-bar">
+      <div>
+        <h2 class="section-title">Studio capabilities &amp; rule architecture</h2>
+        <p class="section-sub">Intuitive building blocks capable of expressing every official cross-site and platform-specific rule.</p>
       </div>
     </div>
 
     <div class="grid-3">
       <div class="g-card">
         <div class="signal-head">
-          <h3>Known content corpus</h3>
-          <span class="g-label g-label_theme_info mono">step 1</span>
+          <h3>Common cross-site language</h3>
+          <span class="g-label g-label_theme_info mono">syntax</span>
         </div>
-        <p>Load known slop accounts, clip farms, or synthetic pinboards alongside clean human controls to verify true-positive and false-positive separation live.</p>
+        <p>Unified signals such as <code>post.frequency</code>, <code>account.dormancy_days</code>, and <code>post.title_reuse</code> work identically across YouTube, TikTok, Pinterest, and custom site adapters.</p>
       </div>
       <div class="g-card">
         <div class="signal-head">
-          <h3>Value &amp; pattern tokenization</h3>
+          <h3>Shared variables &amp; actions</h3>
+          <span class="g-label g-label_theme_positive mono">variables</span>
+        </div>
+        <p>Triggered rules can add or set values on shared variables (e.g. <code>suspicion</code>, <code>script_risk</code>, <code>voice_risk</code>) that are checked against thresholds to <code>block</code>, <code>hide</code>, <code>dim</code>, or <code>warn</code>.</p>
+      </div>
+      <div class="g-card">
+        <div class="signal-head">
+          <h3>Importable templates &amp; auto-fit</h3>
+          <span class="g-label g-label_theme_info mono">8 templates</span>
+        </div>
+        <p>Start from 8 ready-to-use official templates or load known slop examples and click <strong>Auto-Generate Rules from Examples</strong> to derive tokenized conditions automatically.</p>
+      </div>
+      <div class="g-card">
+        <div class="signal-head">
+          <h3>Value &amp; phrase tokenization</h3>
           <span class="g-label g-label_theme_warning mono">$tokens</span>
         </div>
-        <p>Promote any numeric threshold, ramp span, weight, or phrase list into a named <code>$token</code> so sliders recompile and re-score the entire corpus in microseconds.</p>
+        <p>Promote any threshold, variable weight, or phrase list into a named <code>$token</code> so sliders recompile WASM and re-score all test accounts in microseconds.</p>
       </div>
       <div class="g-card">
         <div class="signal-head">
-          <h3>Verified build provenance</h3>
+          <h3>Browser + Tauri v2 desktop</h3>
+          <span class="g-label g-label_theme_normal mono">svelte 5</span>
+        </div>
+        <p>Run zero-install in the browser or launch the native Tauri v2 desktop app (<code>npm run tauri dev</code>) with built-in Rust live account URL inspection.</p>
+      </div>
+      <div class="g-card">
+        <div class="signal-head">
+          <h3>Verified WebAssembly bundles</h3>
           <span class="g-label g-label_theme_positive mono">verified</span>
         </div>
-        <p>Official maintainer keys and community rules pinned to an inspected source repository commit and GitHub Actions build earn <strong>Verified</strong> badges.</p>
-      </div>
-      <div class="g-card">
-        <div class="signal-head">
-          <h3>Dormancy &amp; cadence signals</h3>
-          <span class="g-label g-label_theme_normal mono">cadence</span>
-        </div>
-        <p>Captures multi-year account dormancy hijacks, post-pivot catalog shares, daily upload/pin bursts, and cookie-cutter duration or aspect-ratio locks.</p>
-      </div>
-      <div class="g-card">
-        <div class="signal-head">
-          <h3>LLM prose &amp; SEO stuffing</h3>
-          <span class="g-label g-label_theme_normal mono">text</span>
-        </div>
-        <p>Scores uncontracted written prose, contrastive antithesis, formulaic retention hooks, and hashtag/keyword-stuffed captions or pin descriptions.</p>
-      </div>
-      <div class="g-card">
-        <div class="signal-head">
-          <h3>TTS prosody &amp; synthetic visuals</h3>
-          <span class="g-label g-label_theme_normal mono">media</span>
-        </div>
-        <p>Measures metronomic TTS word-pacing CV, <code>-65dBFS</code> dead-air floors, diffusion image signatures, repost watermarks, and outbound domain funnels.</p>
+        <p>Exports zero-import WebAssembly 1.0 (<code>.strule</code>) bundles checked by a 4-layer capability &amp; anti-poisoning audit and signed with Ed25519.</p>
       </div>
     </div>
 
@@ -164,62 +214,73 @@ npm run tauri dev</code></pre>
       </table>
     </div>
 
-    <div class="section-bar">
-      <div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-          <h2 class="section-title">Example Application: <code>sloptrap-tube-tui</code></h2>
-          <span class="g-label g-label_theme_info">YouTube Reference App</span>
+    <section id="example-apps" style="margin-top:28px;">
+      <div class="section-bar">
+        <div>
+          <h2 class="section-title">Example Integrations</h2>
+          <p class="section-sub">Reference applications consuming <code>.strule</code> WebAssembly bundles built in SlopTrap Studio.</p>
         </div>
-        <p class="section-sub">
-          Standalone terminal workspace and LAN daemon (<a href="https://github.com/sloptrap/sloptrap-tube-tui" target="_blank" rel="noopener"><code>sloptrap/sloptrap-tube-tui</code></a>) demonstrating how a YouTube client integrates SlopTrap <code>.strule</code> bundles alongside transcript and acoustic extractors.
-        </p>
       </div>
-      <a class="g-btn g-btn_view_outlined g-btn_size_s" href="https://github.com/sloptrap/sloptrap-tube-tui" target="_blank" rel="noopener">
-        View sloptrap-tube-tui
-      </a>
-    </div>
 
-    <div class="preview-panel" style="background:var(--st-card-bg);">
-      <div class="preview-panel__toolbar" style="background:var(--st-card-bg);">
-        <div class="g-segmented" role="tablist" aria-label="Example YouTube TUI Views">
-          <button class="g-segmented__btn shot-tab active" type="button"
-            data-src="./assets/screenshots/tui-overview.png"
-            data-caption="1:Overview — Example YouTube app combining channel extractors with Verified .strule WASM evaluation.">
-            1: Overview
-          </button>
-          <button class="g-segmented__btn shot-tab" type="button"
-            data-src="./assets/screenshots/tui-timeline.png"
-            data-caption="2:Timeline — Aged-account dormancy gap comparison between earliest and latest YouTube uploads.">
-            2: Timeline
-          </button>
-          <button class="g-segmented__btn shot-tab" type="button"
-            data-src="./assets/screenshots/tui-script-voice.png"
-            data-caption="3:Script &amp; Voice — Contrastive LLM phrasing, WPM pacing CV, and 45s ffmpeg EBU R128 dead-air probe.">
-            3: Script &amp; Voice
-          </button>
-          <button class="g-segmented__btn shot-tab" type="button"
-            data-src="./assets/screenshots/tui-wasm-rules.png"
-            data-caption="5:WASM Rules — Loaded .strule bundles executing inside zero-import WebAssembly sandboxes.">
-            5: WASM Rules
-          </button>
-          <button class="g-segmented__btn shot-tab" type="button"
-            data-src="./assets/screenshots/tui-discovery.png"
-            data-caption="Discovery [d] — Niche presets and automated YouTube search queue harvesting.">
-            Discovery [d]
-          </button>
+      <div class="text-card" style="padding:18px 20px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+          <div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <h3 style="margin:0;font-size:16px;">YouTube TUI Subsection — <code>sloptrap-tube-tui</code></h3>
+              <span class="g-label g-label_theme_info">Example YouTube App</span>
+            </div>
+            <p style="margin:6px 0 0;color:var(--g-color-text-secondary);font-size:13px;">
+              Terminal forensic inspector, autonomous discovery crawler, and Go SDK (<a href="https://github.com/sloptrap/sloptrap-tube-tui" target="_blank" rel="noopener"><code>sloptrap/sloptrap-tube-tui</code></a>) evaluating Studio-compiled <code>.strule</code> bundles against live YouTube channels.
+            </p>
+          </div>
+          <a class="g-btn g-btn_view_outlined g-btn_size_s" href="https://github.com/sloptrap/sloptrap-tube-tui" target="_blank" rel="noopener">
+            View sloptrap-tube-tui
+          </a>
         </div>
-        <span class="mono" style="color:var(--g-color-text-hint);font-size:12px;">Example App · sloptrap-tube-tui</span>
+
+        <div class="preview-panel" style="margin:0;">
+          <div class="preview-panel__toolbar">
+            <div class="g-segmented" role="tablist" aria-label="Example YouTube TUI Views">
+              <button class="g-segmented__btn shot-tab active" type="button"
+                data-src="./assets/screenshots/tui-overview.png"
+                data-caption="1:Overview — Example YouTube TUI combining channel extractors with Verified .strule WASM evaluation.">
+                1: Overview
+              </button>
+              <button class="g-segmented__btn shot-tab" type="button"
+                data-src="./assets/screenshots/tui-timeline.png"
+                data-caption="2:Timeline — Aged-account dormancy gap comparison between earliest and latest YouTube uploads.">
+                2: Timeline
+              </button>
+              <button class="g-segmented__btn shot-tab" type="button"
+                data-src="./assets/screenshots/tui-script-voice.png"
+                data-caption="3:Script &amp; Voice — Contrastive LLM phrasing, WPM pacing CV, and 45s ffmpeg EBU R128 dead-air probe.">
+                3: Script &amp; Voice
+              </button>
+              <button class="g-segmented__btn shot-tab" type="button"
+                data-src="./assets/screenshots/tui-wasm-rules.png"
+                data-caption="5:WASM Rules — Loaded .strule bundles executing inside zero-import WebAssembly sandboxes.">
+                5: WASM Rules
+              </button>
+              <button class="g-segmented__btn shot-tab" type="button"
+                data-src="./assets/screenshots/tui-discovery.png"
+                data-caption="Discovery [d] — Niche presets and automated YouTube search queue harvesting.">
+                Discovery [d]
+              </button>
+            </div>
+            <span class="mono" style="color:var(--g-color-text-hint);font-size:12px;">Example App · sloptrap-tube-tui</span>
+          </div>
+          <img id="tui-showcase-img" src="./assets/screenshots/tui-overview.png" alt="Example App: sloptrap-tube-tui Overview" />
+          <div id="tui-showcase-caption" class="preview-panel__caption">
+            1:Overview — Example YouTube TUI combining channel extractors with Verified .strule WASM evaluation.
+          </div>
+        </div>
       </div>
-      <img id="tui-showcase-img" src="./assets/screenshots/tui-overview.png" alt="Example App: sloptrap-tube-tui Overview" />
-      <div id="tui-showcase-caption" class="preview-panel__caption">
-        1:Overview — Example YouTube app combining channel extractors with Verified .strule WASM evaluation.
-      </div>
-    </div>
+    </section>
   </main>
 
   <footer class="g-footer">
     <div class="g-footer__inner">
-      <div>SlopTrap — Rule Definition Studio, sandboxed WebAssembly rules &amp; multi-platform SDK</div>
+      <div>SlopTrap — Svelte 5 + Tauri Rule Studio, common cross-site rule language &amp; WASM SDK</div>
       <div class="g-footer__links">
         <a href="./studio/">Rule Studio</a>
         <a href="./docs/">Documentation &amp; SDK</a>

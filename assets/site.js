@@ -46,13 +46,15 @@
       pre.appendChild(btn);
     });
 
-    // Segmented TUI view switcher on Overview page
-    const shotImg = document.getElementById('tui-showcase-img');
-    const shotCaption = document.getElementById('tui-showcase-caption');
-    if (shotImg) {
-      document.querySelectorAll('.shot-tab').forEach(tab => {
+    // Scoped screenshot view switchers (Studio showcase + Example YouTube TUI subsection)
+    document.querySelectorAll('.preview-panel').forEach(panel => {
+      const shotImg = panel.querySelector('img');
+      const shotCaption = panel.querySelector('.preview-panel__caption');
+      const tabs = panel.querySelectorAll('.shot-tab');
+      if (!shotImg || !tabs.length) return;
+      tabs.forEach(tab => {
         tab.addEventListener('click', () => {
-          document.querySelectorAll('.shot-tab').forEach(t => t.classList.remove('active'));
+          tabs.forEach(t => t.classList.remove('active'));
           tab.classList.add('active');
           shotImg.src = tab.dataset.src;
           shotImg.alt = tab.dataset.caption || '';
@@ -61,6 +63,6 @@
           }
         });
       });
-    }
+    });
   });
 })();

@@ -63,10 +63,23 @@
             The core <a href="https://github.com/sloptrap/sloptrap" target="_blank" rel="noopener"><code>sloptrap/sloptrap</code></a> repository provides the <strong>Svelte 5 + Tauri v2 Rule Definition Studio</strong>, which runs either directly in the browser (<a href="../studio/">launch hosted Studio</a>) or as a native desktop app:
           </p>
           <ul>
-            <li><strong>Load Known Slop &amp; Controls:</strong> Import known slop channels, short-form clip farms, or synthetic pinboards alongside clean human control accounts for any target site (<code>youtube</code>, <code>tiktok</code>, <code>pinterest</code>, or custom).</li>
-            <li><strong>Derive &amp; Tokenize Rules:</strong> Inspect extracted signals and phrases on each sample, click <em>+ Match</em> or <em>Auto-Fit &amp; Tokenize from Slop</em>, and promote literal thresholds, ramp spans, weights, or pattern lists into reusable <code>$tokens</code> (<code>.struledef.json</code>).</li>
-            <li><strong>Compile &amp; Audit <code>.strule</code>:</strong> Tune <code>$token</code> sliders with live microsecond WebAssembly recompilation, verify the 4-layer capability and anti-poisoning security audit, and export Ed25519-signed <code>.strule</code> bundles.</li>
+            <li><strong>Importable Templates &amp; Known Samples:</strong> Start from any of the 8 built-in cross-site and platform-specific templates, or load known slop vs. normal examples across <code>youtube</code>, <code>tiktok</code>, <code>pinterest</code>, or custom sites.</li>
+            <li><strong>Common Cross-Site Rule Syntax:</strong> Switch freely between the clean sentence-style Visual Builder and a readable cross-site DSL sharing signals such as <code>post.frequency</code>, <code>account.dormancy_days</code>, <code>post.title_reuse</code>, <code>text.formal_prose</code>, <code>voice.pacing_variance</code>, and <code>media.synthetic_ratio</code>.</li>
+            <li><strong>Shared Variables &amp; Threshold Actions:</strong> Rules can add or set values on shared variables (e.g. <code>suspicion</code>, <code>script_risk</code>, <code>voice_risk</code>) accumulated across multiple rules and checked against thresholds (<code>block</code>, <code>hide</code>, <code>dim</code>, <code>warn</code>).</li>
+            <li><strong>Token Sliders &amp; <code>.strule</code> Export:</strong> Tune <code>$token</code> sliders with live microsecond WebAssembly recompilation, verify the 4-layer capability and anti-poisoning security audit, and export Ed25519-signed <code>.strule</code> bundles.</li>
           </ul>
+          <pre><code># Example Common Cross-Site Syntax
+token high_post_rate = 0.9
+token block_cutoff   = 60
+var suspicion = 0
+
+rule "High daily post frequency"
+  when post.frequency &gt;= $high_post_rate ramp 1.5
+  then add 36 to suspicion
+
+decide "Block high-suspicion accounts"
+  when suspicion &gt;= $block_cutoff
+  then block</code></pre>
           <pre><code>git clone git@github.com:sloptrap/sloptrap.git
 cd sloptrap
 npm install

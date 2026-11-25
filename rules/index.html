@@ -60,13 +60,14 @@
 
       <article class="docs-article">
         <section class="docs-section" id="overview">
-          <h1>1. Architecture &amp; Tokenized Rule Definitions</h1>
+          <h1>1. Architecture, Common Syntax &amp; Shared Variables</h1>
           <p>
             SlopTrap decouples platform-specific extraction (<code>youtube</code>, <code>tiktok</code>, <code>pinterest</code>, or custom site adapters) from portable, cryptographically signed WebAssembly 1.0 rule bundles (<code>.strule</code>).
           </p>
           <ul>
-            <li><strong>Tokenized authoring (<code>.struledef.json</code>):</strong> In <a href="../studio/">Rule Studio</a>, authors load known slop content, derive numeric ramp and case-insensitive substring clauses, and bind values to typed <code>$tokens</code> before compiling down to flattened WebAssembly bytecode.</li>
-            <li><strong>Target-site scoping:</strong> Every rule declares <code>target_site</code> and publishes to its corresponding site leaderboard (<code>/leaderboard/&lt;site&gt;/leaderboard.json</code>).</li>
+            <li><strong>Common cross-site vocabulary:</strong> Readable rules use shared dotted signal names (<code>post.frequency</code>, <code>account.dormancy_days</code>, <code>post.title_reuse</code>, <code>text.formal_prose</code>, <code>voice.pacing_variance</code>, <code>media.synthetic_ratio</code>, <code>link.domain_concentration</code>) mapped cleanly onto the Multi-Site <code>Fingerprint</code> v1 JSON schema.</li>
+            <li><strong>Shared variables &amp; threshold actions:</strong> In <a href="../studio/">Rule Studio</a>, rules declare one or more typed WASM <code>f64</code> locals (<code>var suspicion = 0</code>, <code>var script_risk = 0</code>, <code>var voice_risk = 0</code>), accumulate or set values when conditions match, and evaluate <code>decide</code> threshold blocks into action codes (<code>block</code>, <code>hide</code>, <code>dim</code>, <code>warn</code>, <code>allow</code>).</li>
+            <li><strong>Target-site scoping:</strong> Every rule declares <code>target_site</code> (or cross-site <code>all</code>) and publishes to its corresponding site leaderboard (<code>/leaderboard/&lt;site&gt;/leaderboard.json</code>).</li>
             <li><strong>Zero host imports:</strong> Any WASM binary declaring an Import (<code>2</code>), Custom (<code>0</code>), or Start (<code>8</code>) section is rejected prior to execution.</li>
           </ul>
         </section>

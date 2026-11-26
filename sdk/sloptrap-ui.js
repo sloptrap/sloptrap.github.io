@@ -191,7 +191,8 @@ export class SlopTrapRulesPanel extends HTMLElement {
           <button class="btn" id="sync-btn" type="button">Check Updates</button>
         </div>
         <div class="opts">
-          <label><input type="checkbox" id="opt-verified" ${this.client.verifiedOnly ? "checked" : ""}/> Verified rules only</label>
+          <label><input type="checkbox" id="opt-verified" ${this.client.verifiedOnly ? "checked" : ""}/> Verified (official) rules only</label>
+          <label title="Anonymous rules signed by the community pipeline; not reviewed by maintainers"><input type="checkbox" id="opt-community" ${this.client.communityRules ? "checked" : ""} ${this.client.verifiedOnly ? "disabled" : ""}/> Community rules</label>
           <label><input type="checkbox" id="opt-anon" ${this.client.anonymousRuleRankings ? "checked" : ""}/> Anonymous rule rankings</label>
         </div>
         <div>
@@ -201,8 +202,8 @@ export class SlopTrapRulesPanel extends HTMLElement {
               : rules
                   .map(r => {
                     const m = r.manifest;
-                    // Tier comes from the SDK's key check (never from manifest fields).
-                    const tier = r.tier ?? r.provenance?.tier ?? "unverified";
+                    // Tier comes from the SDK's pinned-key check (never from manifest fields).
+                    const tier = r.tier === "official" || r.tier === "community" ? r.tier : "unverified";
                     const vBadge =
                       tier === "official"
                         ? `<span class="badge badge-ok" title="Signed by the pinned SlopTrap official key">Official</span>`
@@ -245,6 +246,11 @@ export class SlopTrapRulesPanel extends HTMLElement {
     this.shadowRoot.getElementById("opt-verified")?.addEventListener("change", ev => {
       this.client.setVerifiedOnly(ev.target.checked);
       this.render();
+    });
+
+    this.shadowRoot.getElementById("opt-community")?.addEventListener("change", ev => {
+      this.client.setCommunityRules(ev.target.checked);
+      this.sync();  // community bundles are fetched at the next registry sync
     });
 
     this.shadowRoot.getElementById("opt-anon")?.addEventListener("change", ev => {

@@ -1,39 +1,76 @@
 name: Deploy SlopTrap Site to GitHub Pages
 
+# Runs on pushes to main, by hand, and as a reusable workflow from sync-leaderboard.yml
+# (pushes made with GITHUB_TOKEN do not trigger other workflows, so the sync deploys
+# through this workflow itself; INFO-04).
 on:
   push:
-    branches: ["master", "main"]
+    branches: [main]
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      ref:
+        description: Commit to deploy (the sync workflow passes the commit it pushed)
+        type: string
+        required: false
+        default: ""
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
+permissions: {}
 
 jobs:
   build:
+    name: Assemble curated site
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Upload site artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          path: "."
+          ref: ${{ inputs.ref || github.sha }}
+          persist-credentials: false
+
+      # Publish an allowlist of site content only: never scripts/, tests/, .github/ or
+      # anything else that happens to be in the repository (INFO-04).
+      - name: Build _site from the published allowlist
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          mkdir -p _site/rules
+          cp index.html .nojekyll leaderboard.json _site/
+          for d in assets docs sdk studio leaderboard bundles lists; do
+            cp -R "$d" _site/
+          done
+          cp rules/index.html _site/rules/
+          find _site \( -name '__pycache__' -o -name '*.pyc' -o -name '.DS_Store' \) -prune -exec rm -rf {} +
+          if find _site -type l | grep -q .; then
+            echo "::error::symbolic links are not published"
+            find _site -type l
+            exit 1
+          fi
+          find _site -type f | sort
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: _site
 
   deploy:
+    name: Deploy to GitHub Pages
     needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Deploy
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

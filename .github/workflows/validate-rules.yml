@@ -6,7 +6,10 @@ on:
       - "bundles/**"
       - "leaderboard/**"
       - "leaderboard.json"
-      - "scripts/audit_bundles.py"
+      - "lists/**"
+      - "scripts/**"
+      - "tests/**"
+      - ".github/requirements-ci.txt"
       - ".github/workflows/validate-rules.yml"
   push:
     branches: [main]
@@ -14,28 +17,43 @@ on:
       - "bundles/**"
       - "leaderboard/**"
       - "leaderboard.json"
-      - "scripts/audit_bundles.py"
+      - "lists/**"
+      - "scripts/**"
+      - "tests/**"
+      - ".github/requirements-ci.txt"
+      - ".github/workflows/validate-rules.yml"
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
-  audit-wasm-rules:
-    name: Cryptographic, WASM Capability & Sandbox Audit
+  audit:
+    name: v2 signature, static WASM and sandboxed execution audit
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
 
-      - name: Install Ed25519/AES-GCM & Wasmtime sandbox dependencies
-        run: pip install --disable-pip-version-check cryptography wasmtime
+      - name: Install pinned, hash-checked dependencies
+        run: |
+          python -m pip install --disable-pip-version-check --require-hashes --only-binary :all: -r .github/requirements-ci.txt
 
-      - name: Run malicious-content & capability audit on all .strule bundles
-        run: python3 scripts/audit_bundles.py --require-wasmtime
+      - name: Unit tests (v2 vectors, security-review PoCs, sync validation)
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python3 -I -m unittest discover -s tests -v
+
+      # Fails while the legacy v1 bundles are still in bundles/ (v1 support is removed);
+      # it passes once the maintainer commits the signed v2 bundles.
+      - name: Audit every bundle and the leaderboard feeds
+        run: python3 -I scripts/audit_bundles.py

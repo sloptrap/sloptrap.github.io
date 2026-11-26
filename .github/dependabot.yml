@@ -1,0 +1,16 @@
+version: 2
+updates:
+  # Keeps the SHA-pinned actions (and their "# vX" comments) current (MED-06).
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # Hash-locked CI requirements (MED-07).
+  - package-ecosystem: pip
+    directory: /.github
+    schedule:
+      interval: weekly

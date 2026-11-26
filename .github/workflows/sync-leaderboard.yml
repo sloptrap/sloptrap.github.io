@@ -1,194 +1,180 @@
-name: Sync Rule Rankings
+name: Sync Registry, Leaderboards & Lists
+
+# 1. sync    (read-only token): pull community bundles and pre-matched lists from the Worker,
+#            verify + fully audit them (untrusted wasm runs here, in wasmtime), regenerate
+#            the leaderboards, and hand the result on as a patch.
+# 2. publish (contents: write): check the patch touches only registry data, apply it,
+#            re-audit statically, commit, then pull --rebase and retry the push (LOW-08).
+# 3. deploy: GITHUB_TOKEN pushes do not trigger pages.yml, so call it here (INFO-04).
+#
+# Nothing here compiles or signs rules, and the workflow holds no secrets: the anonymous
+# compile/sign pipeline runs in a private repository.
 
 on:
   schedule:
     - cron: "17 */6 * * *"
   workflow_dispatch:
 
-permissions:
-  contents: write
+permissions: {}
+
+concurrency:
+  group: sync-leaderboard
+  cancel-in-progress: false
 
 jobs:
   sync:
-    name: Sync Multi-Site Leaderboards from Worker, Issues & Releases
+    name: Fetch, verify and audit registry data
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      issues: read
+    outputs:
+      changed: ${{ steps.diff.outputs.changed }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - name: Sync site leaderboards
+      - name: Set up Python 3.12
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned, hash-checked dependencies
+        run: |
+          python -m pip install --disable-pip-version-check --require-hashes --only-binary :all: -r .github/requirements-ci.txt
+
+      - name: Sync community bundles, lists and leaderboards
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python3 -I scripts/sync_registry.py
+
+      - name: Full audit of the result
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python3 -I scripts/audit_bundles.py
+
+      - name: Export changes as a patch
+        id: diff
         run: |
-          python3 - <<'PY'
-          import json, os, re, urllib.request
-          from datetime import datetime, timezone
-          from pathlib import Path
-
-          repo = os.environ.get("GITHUB_REPOSITORY", "sloptrap/sloptrap.github.io")
-          token = os.environ.get("GH_TOKEN", "")
-          root_lb_path = Path("leaderboard.json")
-          root_lb = json.loads(root_lb_path.read_text(encoding="utf-8"))
-
-          def gh_get(url: str):
-              req = urllib.request.Request(url, headers={
-                  "Accept": "application/vnd.github+json",
-                  "User-Agent": "sloptrap-leaderboard-sync/1.0",
-                  **({"Authorization": f"Bearer {token}"} if token else {}),
-              })
-              with urllib.request.urlopen(req, timeout=15) as r:
-                  return json.loads(r.read().decode("utf-8"))
-
-          endpoint = (root_lb.get("rankings_endpoint") or "").rstrip("/")
-          active_map, all_time_map = {}, {}
-          window_days = int(root_lb.get("active_window_days") or 30)
-          if endpoint:
-              try:
-                  req = urllib.request.Request(
-                      f"{endpoint}/api/v1/rules/stats",
-                      headers={"User-Agent": "sloptrap-leaderboard-sync/1.0"},
-                  )
-                  with urllib.request.urlopen(req, timeout=15) as r:
-                      st = json.loads(r.read().decode("utf-8"))
-                  if int(st.get("window_days") or 0) > 0:
-                      window_days = int(st["window_days"])
-                  active_map = st.get("active_installs") or {}
-                  all_time_map = st.get("all_time_installs") or {}
-              except Exception as exc:
-                  print(f"Worker stats warning: {exc}")
-
-          likes_by_rule = {}
-          try:
-              issues = gh_get(f"https://api.github.com/repos/{repo}/issues?labels=leaderboard-rule&state=open&per_page=100")
-              for iss in issues:
-                  if iss.get("pull_request"):
-                      continue
-                  m = re.search(r"\[rule:([^\]]+)\]", f"{iss.get('title', '')}\n{iss.get('body', '')}")
-                  if m:
-                      rid = m.group(1).strip()
-                      rx = iss.get("reactions") or {}
-                      likes_by_rule[rid] = (
-                          int(rx.get("+1", 0)) + int(rx.get("heart", 0)),
-                          iss.get("number"),
-                          iss.get("html_url"),
-                      )
-          except Exception as exc:
-              print(f"Issues warning: {exc}")
-
-          dl_total, dl_ver = {}, {}
-          try:
-              releases = gh_get(f"https://api.github.com/repos/{repo}/releases?per_page=100")
-              for rel in releases:
-                  tag = rel.get("tag_name") or ""
-                  for asset in rel.get("assets") or []:
-                      name = asset.get("name") or ""
-                      if name.endswith(".strule"):
-                          rid = name[:-7]
-                          cnt = int(asset.get("download_count") or 0)
-                          dl_total[rid] = dl_total.get(rid, 0) + cnt
-                          dl_ver[(rid, tag)] = cnt
-          except Exception as exc:
-              print(f"Releases warning: {exc}")
-
-          now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-          site_files = sorted(Path("leaderboard").glob("*/leaderboard.json"))
-          if not site_files:
-              site_files = [root_lb_path]
-
-          for sf in site_files:
-              lb = json.loads(sf.read_text(encoding="utf-8"))
-              lb["active_window_days"] = window_days
-              lb["generated_at"] = now_iso
-              for e in lb.get("entries", []):
-                  rid = e["rule_id"]
-                  ver = e["version"]
-                  tag = f"rule-{rid}-v{ver}"
-                  if rid in active_map:
-                      e["active_installs"] = int(active_map[rid])
-                  if rid in all_time_map:
-                      e["all_time_installs"] = max(int(all_time_map[rid]), int(e.get("active_installs", 0)))
-                  else:
-                      e["all_time_installs"] = max(int(e.get("all_time_installs", 0)), int(e.get("active_installs", 0)))
-                  if rid in likes_by_rule:
-                      e["likes"], e["issue_number"], e["issue_url"] = likes_by_rule[rid]
-                  if rid in dl_total:
-                      e["downloads_total"] = dl_total[rid]
-                  if (rid, tag) in dl_ver:
-                      e["downloads_version"] = dl_ver[(rid, tag)]
-              encoded = json.dumps(lb, indent=2) + "\n"
-              sf.write_text(encoded, encoding="utf-8")
-              if lb.get("target_site") == "youtube":
-                  root_lb_path.write_text(encoded, encoding="utf-8")
-                  Path("leaderboard/leaderboard.json").write_text(encoded, encoding="utf-8")
-
-          idx_path = Path("leaderboard/index.json")
-          if idx_path.exists():
-              idx = json.loads(idx_path.read_text(encoding="utf-8"))
-              idx["active_window_days"] = window_days
-              idx["generated_at"] = now_iso
-              idx_path.write_text(json.dumps(idx, indent=2) + "\n", encoding="utf-8")
-
-          # Sync opt-in rule-matched account lists (`lists/<site>/<rule_id>.txt` & `lists/manifest.json`)
-          if endpoint:
-              try:
-                  import hashlib
-                  req = urllib.request.Request(
-                      f"{endpoint}/api/v1/lists/entries",
-                      headers={"User-Agent": "sloptrap-leaderboard-sync/1.0"},
-                  )
-                  with urllib.request.urlopen(req, timeout=15) as r:
-                      list_doc = json.loads(r.read().decode("utf-8"))
-                  by_pair = {}
-                  for row in list_doc.get("entries") or []:
-                      s_id = str(row.get("site") or "").strip().lower()
-                      r_id = str(row.get("rule_id") or "").strip().lower()
-                      acc = str(row.get("account_key") or "").strip()
-                      if s_id and r_id and acc:
-                          by_pair.setdefault((s_id, r_id), set()).add(acc)
-
-                  manifest_path = Path("lists/manifest.json")
-                  manifest = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.exists() else {"schema_version": 1, "lists": {}}
-                  for (s_id, r_id), incoming in by_pair.items():
-                      lfile = Path("lists") / s_id / f"{r_id}.txt"
-                      lfile.parent.mkdir(parents=True, exist_ok=True)
-                      existing = set()
-                      if lfile.exists():
-                          for ln in lfile.read_text(encoding="utf-8").splitlines():
-                              ln = ln.strip()
-                              if ln and not ln.startswith("!"):
-                                  existing.add(ln if ln.startswith("UC") else ln.lower())
-                      merged = sorted(existing | {a if a.startswith("UC") else a.lower() for a in incoming})
-                      if len(merged) != len(existing) or not lfile.exists():
-                          txt = "\n".join([
-                              "! SlopTrap Public Rule Matched Accounts",
-                              f"! Rule: {r_id}",
-                              f"! Site: {s_id}",
-                              f"! Entries: {len(merged)}",
-                              *merged,
-                          ]) + "\n"
-                          lfile.write_text(txt, encoding="utf-8")
-                      raw_bytes = lfile.read_bytes()
-                      manifest["lists"][f"{s_id}/{r_id}"] = {
-                          "site": s_id,
-                          "rule_id": r_id,
-                          "path": f"lists/{s_id}/{r_id}.txt",
-                          "count": len(merged),
-                          "sha256": hashlib.sha256(raw_bytes).hexdigest(),
-                      }
-                  manifest["generated_at"] = now_iso
-                  manifest_path.parent.mkdir(parents=True, exist_ok=True)
-                  manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
-              except Exception as exc:
-                  print(f"Rule matched lists sync warning: {exc}")
-          PY
-
-      - name: Commit updated leaderboards & rule lists if changed
-        run: |
-          if ! git diff --quiet leaderboard.json leaderboard/ lists/; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add leaderboard.json leaderboard/ lists/
-            git commit -m "chore(leaderboard): sync multi-site rankings & rule-matched lists [skip ci]"
-            git push
+          set -euo pipefail
+          git add -A .
+          git diff --cached --binary --no-renames -- leaderboard.json leaderboard lists bundles/community > registry.patch
+          if [ -s registry.patch ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            git diff --cached --stat -- leaderboard.json leaderboard lists bundles/community
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No registry changes."
           fi
+
+      - name: Upload patch
+        if: steps.diff.outputs.changed == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: registry-patch
+          path: registry.patch
+          retention-days: 1
+          if-no-files-found: error
+
+  publish:
+    name: Commit and push registry data
+    needs: sync
+    if: needs.sync.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    outputs:
+      sha: ${{ steps.push.outputs.sha }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Download patch
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: registry-patch
+          path: ${{ runner.temp }}/patch
+
+      - name: Check the patch touches only registry data
+        env:
+          PATCH: ${{ runner.temp }}/patch/registry.patch
+        run: |
+          set -euo pipefail
+          allowed='^(leaderboard\.json|leaderboard/index\.json|leaderboard/leaderboard\.json|leaderboard/(youtube|tiktok|pinterest)/leaderboard\.json|lists/manifest\.json|lists/(youtube|tiktok|pinterest)/[a-z0-9][a-z0-9_-]{1,63}\.txt|bundles/community/community-[a-z0-9_-]{1,54}\.strule)$'
+          bad=0
+          while IFS=$'\t' read -r _add _del path; do
+            if ! printf '%s\n' "$path" | grep -Eq "$allowed"; then
+              echo "::error::patch touches a path outside the registry data: $path"
+              bad=1
+            fi
+          done < <(git apply --numstat -- "$PATCH")
+          if grep -E '^(new file mode|new mode|old mode|deleted file mode) ' -- "$PATCH" | grep -Ev ' 100644$'; then
+            echo "::error::patch changes file modes (symlinks/executables are not allowed)"
+            bad=1
+          fi
+          exit "$bad"
+
+      - name: Apply patch
+        env:
+          PATCH: ${{ runner.temp }}/patch/registry.patch
+        run: git apply --index -- "$PATCH"
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned, hash-checked dependencies
+        run: |
+          python -m pip install --disable-pip-version-check --require-hashes --only-binary :all: -r .github/requirements-ci.txt
+
+      # Signatures, schema, static wasm rules and leaderboard consistency, without running
+      # the wasm in this job (it ran in the read-only job above).
+      - name: Static re-audit
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python3 -I scripts/audit_bundles.py --static-only
+
+      - name: Commit and push (pull --rebase and retry)
+        id: push
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -q -m "chore(registry): sync leaderboards, community bundles and lists"
+          auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)"
+          echo "::add-mask::$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)"
+          for attempt in 1 2 3 4 5; do
+            if git -c http.https://github.com/.extraheader="$auth" pull --rebase -q origin "$BRANCH" &&
+               git -c http.https://github.com/.extraheader="$auth" push -q origin "HEAD:$BRANCH"; then
+              echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            echo "push attempt $attempt failed; retrying"
+            sleep $((attempt * 10))
+          done
+          echo "::error::could not push after 5 attempts"
+          exit 1
+
+  deploy:
+    name: Deploy Pages
+    needs: publish
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/pages.yml
+    with:
+      ref: ${{ needs.publish.outputs.sha }}

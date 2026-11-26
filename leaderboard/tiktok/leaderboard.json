@@ -22,8 +22,6 @@
       "verified": true,
       "verification_tier": "official",
       "provenance": {
-        "verified": true,
-        "tier": "official",
         "source_repo": "https://github.com/sloptrap/sloptrap"
       },
       "name": "Bought-Account & Handle-Stem Repost Ring",
@@ -63,8 +61,6 @@
       "verified": true,
       "verification_tier": "official",
       "provenance": {
-        "verified": true,
-        "tier": "official",
         "source_repo": "https://github.com/sloptrap/sloptrap"
       },
       "name": "TTS Voiceover & Split-Screen Clip Mill",
@@ -99,5 +95,6 @@
       "bundle_sha256": "c7586ff00bd87baaee5cf47a43dd5f3d60ef1fdb31930e7e9bd6e0d2abb0df2d",
       "updated_at": "2026-11-24"
     }
-  ]
+  ],
+  "community_entries": []
 }

@@ -24,8 +24,6 @@
       "verified": true,
       "verification_tier": "official",
       "provenance": {
-        "verified": true,
-        "tier": "official",
         "source_repo": "https://github.com/sloptrap/rule-llm-prosody-deep"
       },
       "name": "LLM Script & Synthetic Voice Deep Scan",
@@ -67,12 +65,10 @@
       "verified": true,
       "verification_tier": "official",
       "provenance": {
-        "verified": true,
-        "tier": "official",
         "source_repo": "https://github.com/sloptrap/rule-clone-farm-sentinel"
       },
       "name": "Clone-Farm & Velocity Sentinel",
-      "description": "Ultra-fast metadata, bot-handle suffix, AiSList sibling stem, and cookie-cutter upload cadence rule for low-overhead TV browsing.",
+      "description": "Ultra-fast metadata, bot-handle suffix, AiSList sibling stem, and cookie-cutter upload cadence rule with very low evaluation overhead.",
       "version": "1.1.0",
       "author": "@sloptrap-core",
       "author_public_key": "eb85cbf507e27e2c0f94ad723385db3138af32670ea37ca337f0c1866eae02cc",
@@ -109,8 +105,6 @@
       "verified": true,
       "verification_tier": "official",
       "provenance": {
-        "verified": true,
-        "tier": "official",
         "source_repo": "https://github.com/sloptrap/rule-necro-hijack-guard"
       },
       "name": "Necro-Hijack & Dormancy Guard",
@@ -144,5 +138,6 @@
       "bundle_sha256": "e140f8e8b38b9e39d31976d40cf4fc777e3204ffe7b8d8cc455a534e7e9cd4a8",
       "updated_at": "2026-11-24"
     }
-  ]
+  ],
+  "community_entries": []
 }

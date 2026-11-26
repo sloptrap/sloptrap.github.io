@@ -90,7 +90,7 @@ class VectorTests(unittest.TestCase):
         import hashlib
         ref = Path(A.__file__).with_name("strule_v2.py").read_bytes()
         # sha256 of the shared reference strule_v2.py (must stay byte-identical across repos)
-        self.assertEqual(hashlib.sha256(ref).hexdigest(), "c40e42c6f5d56ce3be3713243b85f8805a347aa00c8a3b4684060db24d768616")
+        self.assertEqual(hashlib.sha256(ref).hexdigest(), "9b28ab139fc7d0b5090ed19292cd544a2c81a377fcc61c1e745d81d7e218baff")
 
 
 class PocTests(unittest.TestCase):

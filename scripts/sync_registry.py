@@ -38,7 +38,6 @@ DEFAULT_ENDPOINT = "https://sloptrap-worker.fablestre.am"
 REGISTRY_REPO = "sloptrap/sloptrap.github.io"
 SITES = ("youtube", "tiktok", "pinterest")
 SITE_NAMES = {"youtube": "YouTube", "tiktok": "TikTok", "pinterest": "Pinterest"}
-ACCOUNT_KEY_RE = re.compile(r"^@[A-Za-z0-9._-]{3,100}$|^UC[A-Za-z0-9_-]{22}$")
 RULE_ID_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{1,63}$")
 MAX_RESPONSE_BYTES = 16 * 1024 * 1024
 MAX_PAGES = 1000
@@ -235,14 +234,26 @@ def sync_community(root: Path, get, official_ids: set[str]) -> list[audit.AuditR
 
 # ------------------------------------------------------------------------------ lists
 def normalize_account_key(site: str, key) -> str | None:
-    if not isinstance(key, str):
-        return None
-    key = key.strip()
-    if not ACCOUNT_KEY_RE.fullmatch(key):
-        return None
-    if key.startswith("UC"):
-        return key if site == "youtube" else None
-    return key.lower()
+    """Shared canonical account-key validator with the Worker (V3-M2)."""
+    return strule_v2.normalize_list_account_key(site, key)
+
+
+def rows_from_attested_bodies(bodies: dict) -> list[dict]:
+    """Parses atomic signed `bodies` (`{"<site>/<rule_id>": txt}`) into row dicts for `build_lists` (V3-M2)."""
+    rows: list[dict] = []
+    for list_key, txt in sorted(bodies.items()):
+        if not isinstance(list_key, str) or "/" not in list_key or not isinstance(txt, str):
+            raise SyncError(f"invalid attested list body entry {list_key!r}")
+        site, rid = list_key.split("/", 1)
+        for raw_line in txt.splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("!") or line.startswith("#"):
+                continue
+            parts = line.split("\t")
+            if len(parts) != 2 or not parts[1].isdigit():
+                raise SyncError(f"malformed attested list line in {list_key!r}")
+            rows.append({"site": site, "rule_id": rid, "account_key": parts[0], "count": int(parts[1])})
+    return rows
 
 
 def build_lists(rows: list[dict], rule_sites: dict[str, str]) -> tuple[dict[tuple[str, str], dict[str, int]], int]:
@@ -299,8 +310,17 @@ def write_lists(root: Path, lists: dict[tuple[str, str], dict[str, int]], _names
         })
 
     if signed_manifest is not None:
+        prev_gen = 0
+        prev_manifest_path = ldir / "manifest.json"
+        if prev_manifest_path.exists():
+            try:
+                prev_doc = json.loads(prev_manifest_path.read_text(encoding="utf-8"))
+                strule_v2.verify_list_manifest(prev_doc)
+                prev_gen = strule_v2.parse_list_generated_at(prev_doc["generated_at"])
+            except Exception:  # noqa: BLE001
+                prev_gen = 0
         try:
-            strule_v2.verify_list_manifest(signed_manifest)
+            strule_v2.verify_list_manifest(signed_manifest, min_generated_at=prev_gen)
         except Exception as e:  # noqa: BLE001
             raise SyncError(f"invalid list attestation signature: {e}") from e
         att_lists = signed_manifest.get("lists") or {}
@@ -344,11 +364,14 @@ def sync_lists(root: Path, get, audited_all: list[audit.AuditResult], now_iso: s
     last_err: Exception | None = None
     for _attempt in range(2):
         try:
-            rows = fetch_paged(get, "/api/v1/lists/entries", "entries", "updated_at",
-                               lambda r: (r.get("site"), r.get("rule_id"), r.get("account_key")))
-            att = get("/api/v1/lists/attestations")
+            att = get("/api/v1/lists/attestations?include_bodies=1")
             if not isinstance(att, dict) or att.get("ok") is not True:
                 raise SyncError("missing /api/v1/lists/attestations payload")
+            if isinstance(att.get("bodies"), dict):
+                rows = rows_from_attested_bodies(att["bodies"])
+            else:
+                rows = fetch_paged(get, "/api/v1/lists/entries", "entries", "updated_at",
+                                   lambda r: (r.get("site"), r.get("rule_id"), r.get("account_key")))
             lists, rejected = build_lists(rows, rule_sites)
             write_lists(root, lists, names, now_iso, signed_manifest=att)
             if rejected:

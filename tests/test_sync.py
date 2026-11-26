@@ -54,7 +54,7 @@ class FakeWorker:
         nxt = f"{chunk[-1]['updated_at']}|{chunk[-1]['site']}|{chunk[-1]['rule_id']}|{chunk[-1]['account_key']}" if has_more and chunk else None
         return {"ok": True, "entries": chunk, "has_more": has_more, "next_cursor": nxt}
 
-    def _attestations(self):
+    def _attestations(self, include_bodies=False, generated_at="2026-11-26T00:00:00Z"):
         rule_sites = dict(self.official_rules)
         for b in self.bundles:
             man = b.get("bundle", {}).get("manifest") if isinstance(b.get("bundle"), dict) else None
@@ -63,19 +63,26 @@ class FakeWorker:
                 rule_sites[b["rule_id"]] = man.get("target_site", "youtube")
         lists, _ = S.build_lists(self.entries, rule_sites)
         raw_lists = {}
+        bodies = {}
         for (site, rid) in sorted(lists):
             counts = lists[(site, rid)]
             if rid.startswith(strule_v2.COMMUNITY_PREFIX) and not counts:
                 continue
-            _txt, cnt, sha = S.format_list_text(site, rid, counts)
-            raw_lists[f"{site}/{rid}"] = {
+            txt, cnt, sha = S.format_list_text(site, rid, counts)
+            key = f"{site}/{rid}"
+            raw_lists[key] = {
                 "site": site, "rule_id": rid, "path": f"lists/{site}/{rid}.txt", "count": cnt, "sha256": sha,
             }
-        signed = strule_v2.sign_list_manifest({"generated_at": "2026-11-26T00:00:00Z", "lists": raw_lists}, TEST_SEED)
+            if include_bodies:
+                bodies[key] = txt
+        signed = strule_v2.sign_list_manifest({"generated_at": generated_at, "lists": raw_lists}, TEST_SEED)
         if self.tamper_attestation and signed["lists"]:
             first_key = next(iter(signed["lists"]))
             signed["lists"][first_key]["count"] += 999
-        return {"ok": True, **signed}
+        out = {"ok": True, **signed}
+        if include_bodies:
+            out["bodies"] = bodies
+        return out
 
     def __call__(self, path):
         self.calls.append(path)
@@ -90,7 +97,7 @@ class FakeWorker:
                 return self._cursor_entries(since, after)
             return {"ok": True, "entries": self._page(self.entries, "first_seen", since)}
         if route == "/api/v1/lists/attestations":
-            return self._attestations()
+            return self._attestations(include_bodies=(qs.get("include_bodies", ["0"])[0] == "1"))
         if route == "/api/v1/rules/stats":
             if self.stats is None:
                 raise OSError("down")
@@ -143,7 +150,7 @@ class ListTests(unittest.TestCase):
             {"site": "youtube", "rule_id": "made-up-rule", "account_key": "@abc", "count": 1},   # unaudited rule
             {"site": "youtube", "rule_id": "community-unaudited", "account_key": "@abc", "count": 1},
             {"site": "youtube", "rule_id": "tt-rule", "account_key": "@abc", "count": 1},        # rule is for tiktok
-            {"site": "youtube", "rule_id": "yt-rule", "account_key": "@ab", "count": 1},         # too short
+            {"site": "youtube", "rule_id": "yt-rule", "account_key": "@a", "count": 1},          # too short (min 2 chars)
             {"site": "youtube", "rule_id": "yt-rule", "account_key": "@a\nb\n! x", "count": 1},  # injection
             {"site": "youtube", "rule_id": "yt-rule", "account_key": "UCshort", "count": 1},
             {"site": "youtube", "rule_id": "yt-rule", "account_key": 5, "count": 1},
@@ -303,6 +310,32 @@ class EndToEndTests(unittest.TestCase):
             community = S.offline_community(root, {r.rule_id for r in official})
             with self.assertRaises(S.SyncError):
                 S.sync_lists(root, bad_worker, [*official, *community], "2026-11-26T00:00:00Z")
+
+    def test_v3_m2_two_char_handle_and_atomic_snapshot_prevent_cache_skew_freeze(self):
+        with test_keys(), tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            (root / "bundles").mkdir()
+            (root / "bundles" / "yt-rule.strule").write_bytes(bundle_bytes("yt-rule", WASM, OFFICIAL_TEST_SEED))
+            official = S.audit_official(root)
+
+            # Worker has a 2-char handle `@ab` in attestations?include_bodies=1 AND /lists/entries is completely stale!
+            w = FakeWorker(entries=[{"site": "youtube", "rule_id": "yt-rule", "account_key": "@ab", "count": 5, "first_seen": 10}])
+
+            def skewed_get(path):
+                if path.startswith("/api/v1/lists/entries"):
+                    return {"ok": True, "entries": [], "has_more": False, "next_cursor": None}
+                return w(path)
+
+            S.sync_lists(root, skewed_get, official, "2026-11-26T00:00:00Z")
+            txt = (root / "lists" / "youtube" / "yt-rule.txt").read_text(encoding="utf-8")
+            self.assertIn("@ab\t5", txt)
+
+            # V3-L1: attempting to overwrite with an older signed manifest (rollback) is rejected
+            def rollback_get(path):
+                return w._attestations(include_bodies=True, generated_at="2026-11-25T23:59:59Z")
+
+            with self.assertRaises(S.SyncError):
+                S.sync_lists(root, rollback_get, official, "2026-11-26T00:00:00Z")
 
     def test_offline_regeneration_makes_no_requests(self):
         with test_keys(), tempfile.TemporaryDirectory() as td:

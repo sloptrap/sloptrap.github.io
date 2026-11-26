@@ -1041,11 +1041,21 @@ export function parseAccountListCounts(txt) {
 
 const LIST_MANIFEST_SITES = new Set(["youtube", "tiktok", "pinterest"]);
 const ISO_Z_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
+export const DEFAULT_MAX_LIST_MANIFEST_AGE_SECONDS = 14 * 86400;
 
-export function canonicalListManifestBytes(generatedAt, listsObj) {
+export function parseListGeneratedAt(generatedAt) {
   if (typeof generatedAt !== "string" || !ISO_Z_RE.test(generatedAt)) {
     throw new BundleError("list manifest: invalid generated_at");
   }
+  const ms = Date.parse(generatedAt);
+  if (!Number.isFinite(ms)) {
+    throw new BundleError("list manifest: invalid generated_at");
+  }
+  return Math.floor(ms / 1000);
+}
+
+export function canonicalListManifestBytes(generatedAt, listsObj) {
+  parseListGeneratedAt(generatedAt);
   if (!isPlainObject(listsObj)) {
     throw new BundleError("list manifest: lists must be an object");
   }
@@ -1076,10 +1086,10 @@ export function canonicalListManifestBytes(generatedAt, listsObj) {
 }
 
 /**
- * Verifies the Ed25519 signature of `lists/manifest.json` against pinned `LIST_SIGNING_KEYS` (M4).
- * Fails closed on unsigned, tampered, or unknown-key manifests.
+ * Verifies the Ed25519 signature, freshness, and rollback monotonicity of `lists/manifest.json`
+ * against pinned `LIST_SIGNING_KEYS` (M4, V3-L1). Fails closed on unsigned, tampered, stale, or rolled-back manifests.
  */
-export async function verifyListManifest(manifestDoc, allowedKeys = PINNED_KEYRING.listSigning) {
+export async function verifyListManifest(manifestDoc, allowedKeys = PINNED_KEYRING.listSigning, opts = {}) {
   const doc = typeof manifestDoc === "string" ? JSON.parse(manifestDoc) : manifestDoc;
   if (!isPlainObject(doc) || doc.schema_version !== 2) {
     throw new BundleError("list manifest: unsupported schema_version");
@@ -1091,10 +1101,25 @@ export async function verifyListManifest(manifestDoc, allowedKeys = PINNED_KEYRI
   }
   const sig = b64ToBytes(doc.signature_b64, "list manifest signature_b64");
   if (sig.length !== 64) throw new BundleError("list manifest: signature must be 64 bytes");
+  const genSec = parseListGeneratedAt(doc.generated_at);
   const msg = canonicalListManifestBytes(doc.generated_at, doc.lists);
   const pub = hexToBytes(pubHex);
   if (!(await ed25519Verify(pub, sig, msg))) {
     throw new BundleError("list manifest: invalid Ed25519 signature");
+  }
+  const minGen = Number(opts?.minGeneratedAt || 0);
+  if (minGen > 0 && genSec < minGen) {
+    throw new BundleError(`list manifest: rollback rejected (${genSec} < ${minGen})`);
+  }
+  const nowSec = Number(opts?.nowSec || 0);
+  const maxAge = opts?.maxAgeSeconds === undefined ? DEFAULT_MAX_LIST_MANIFEST_AGE_SECONDS : Number(opts.maxAgeSeconds);
+  if (nowSec > 0) {
+    if (maxAge > 0 && (nowSec - genSec) > maxAge) {
+      throw new BundleError(`list manifest: stale manifest rejected (age ${nowSec - genSec}s > ${maxAge}s)`);
+    }
+    if (genSec > nowSec + 86400) {
+      throw new BundleError("list manifest: future-dated manifest rejected");
+    }
   }
   for (const [k, it] of Object.entries(doc.lists)) {
     if (it.signature_b64 !== undefined) {
@@ -1538,10 +1563,12 @@ export class SlopTrapStaticEngine {
           score: LIST_FAST_PATH_SCORE,
           action: "block",
           fast_path_list: true,
+          list_forced: true,
           max_list_count: maxCount,
           matched_rule_ids: blockHits,
           newly_matched_rules: [],
           verified_rules: verifiedHits,
+          verified_blocking_rules: 0,
           outputs: [],
           errors: [],
           total_micros: 0,
@@ -1552,10 +1579,12 @@ export class SlopTrapStaticEngine {
           score: LIST_FAST_PATH_WARN_SCORE,
           action: "warn",
           fast_path_list: true,
+          list_forced: true,
           max_list_count: maxCount,
           matched_rule_ids: warnHits,
           newly_matched_rules: [],
           verified_rules: verifiedHits,
+          verified_blocking_rules: 0,
           outputs: [],
           errors: [],
           total_micros: 0,
@@ -1574,6 +1603,7 @@ export class SlopTrapStaticEngine {
     let sumW = 0;
     let totalMicros = 0;
     let verifiedRules = 0;
+    let verifiedBlockingRules = 0;
 
     for (const r of active) {
       const m = r.manifest;
@@ -1590,7 +1620,10 @@ export class SlopTrapStaticEngine {
       const w = (m.weight_milli / 1000) * res.confidence;
       sumSW += res.score * w;
       sumW += w;
-      if (r.verified) verifiedRules++;
+      if (r.verified) {
+        verifiedRules++;
+        if (res.score >= this.blockThreshold) verifiedBlockingRules++;
+      }
       outputs.push({
         rule_id: m.rule_id, rule_name: m.name, version: m.version, target_site: m.target_site,
         tier: r.tier, verified: r.verified, score: res.score, confidence: res.confidence,
@@ -1615,20 +1648,24 @@ export class SlopTrapStaticEngine {
     if (!(score >= 0)) score = 0;
     if (score > 100) score = 100;
     let action = score >= this.blockThreshold ? "block" : score >= this.warnThreshold ? "warn" : "allow";
+    let listForced = false;
     if (listVerdict) {
       if (listVerdict.action === "block" && action !== "block") {
         action = "block";
         score = Math.max(score, LIST_FAST_PATH_SCORE);
+        listForced = true;
       } else if (listVerdict.action === "warn" && action === "allow") {
         action = "warn";
         score = Math.max(score, LIST_FAST_PATH_WARN_SCORE);
+        listForced = true;
       }
     }
     return {
-      site: this.site, score, action, fast_path_list: false,
+      site: this.site, score, action, fast_path_list: false, list_forced: listForced,
       ...(listVerdict ? { matched_rule_ids: listVerdict.matched_rule_ids, max_list_count: listVerdict.max_list_count } : {}),
       newly_matched_rules: newly,
-      verified_rules: verifiedRules, outputs, errors, total_micros: totalMicros,
+      verified_rules: verifiedRules, verified_blocking_rules: verifiedBlockingRules,
+      outputs, errors, total_micros: totalMicros,
     };
   }
 }
@@ -1683,6 +1720,7 @@ export class SlopTrapClient {
     this.availableSites = ["youtube", "tiktok", "pinterest"];
     this.lastSyncErrors = [];
     this._submittedMatches = new Set();
+    this._lastListGeneratedAt = 0;
   }
 
   get site() { return this.engine.site; }
@@ -1771,17 +1809,19 @@ export class SlopTrapClient {
     }
 
     try {
+      const nowSec = Math.floor(Date.now() / 1000);
       const lm = await verifyListManifest(
         JSON.parse(await fetchCapped(`${this.registryBaseUrl}/lists/manifest.json`, 1 << 20)),
-        this.engine._keyring.listSigning
+        this.engine._keyring.listSigning,
+        { nowSec, maxAgeSeconds: DEFAULT_MAX_LIST_MANIFEST_AGE_SECONDS, minGeneratedAt: this._lastListGeneratedAt }
       );
+      this._lastListGeneratedAt = parseListGeneratedAt(lm.generated_at);
       const lists = isPlainObject(lm?.lists) ? Object.values(lm.lists) : [];
       const seenRules = new Set();
       let totalBytes = 0;
       for (const info of lists) {
         if (!isPlainObject(info) || info.site !== this.site) continue;
         if (typeof info.rule_id !== "string" || !RULE_ID_RE.test(info.rule_id) || !isSafeListPath(info.path)) continue;
-        seenRules.add(info.rule_id);
         const r = this.engine.rules.get(info.rule_id);
         if (!r || (r.tier !== "official" && r.tier !== "community")) continue;
         try {
@@ -1790,6 +1830,7 @@ export class SlopTrapClient {
           if (totalBytes > 32 * 1024 * 1024) break;
           if ((await sha256HexBytes(txt)) !== info.sha256) continue;
           this.engine.loadRuleList(info.rule_id, txt);
+          seenRules.add(info.rule_id);
         } catch {}
       }
       for (const rid of [...this.engine.ruleMatchedCounts.keys()]) {

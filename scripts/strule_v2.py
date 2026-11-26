@@ -186,14 +186,39 @@ def verify_bundle(bundle) -> tuple[dict, bytes, str]:
     return m, wasm, tier
 
 
-# ---------------------------------------------------------------- signed list manifests (M4)
+# ---------------------------------------------------------------- signed list manifests (M4, V3-M2, V3-L1)
 LIST_SITES = frozenset({"youtube", "tiktok", "pinterest"})
 _ISO_Z_RE = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
+LIST_YT_CHANNEL_ID_RE = re.compile(r"^UC[0-9A-Za-z_-]{22}$")
+LIST_HANDLE_RE = re.compile(r"^@[a-z0-9._-]{2,64}$")
+DEFAULT_MAX_LIST_MANIFEST_AGE_SECONDS = 14 * 86400
+
+
+def normalize_list_account_key(site: str, raw) -> str | None:
+    """Canonical account-key validator shared with the Worker (V3-M2)."""
+    if site not in LIST_SITES or not isinstance(raw, str):
+        return None
+    s = raw.strip()
+    if site == "youtube" and LIST_YT_CHANNEL_ID_RE.fullmatch(s):
+        return s
+    h = s.lower()
+    return h if LIST_HANDLE_RE.fullmatch(h) else None
+
+
+def parse_list_generated_at(generated_at: str) -> int:
+    from datetime import datetime, timezone
+
+    if not isinstance(generated_at, str) or not _ISO_Z_RE.fullmatch(generated_at):
+        raise BundleError("list manifest: invalid generated_at")
+    try:
+        dt = datetime.strptime(generated_at, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+    except ValueError as e:
+        raise BundleError(f"list manifest: invalid generated_at {generated_at!r}") from e
+    return int(dt.timestamp())
 
 
 def canonical_list_manifest_bytes(generated_at: str, lists_obj: dict) -> bytes:
-    if not isinstance(generated_at, str) or not _ISO_Z_RE.fullmatch(generated_at):
-        raise BundleError("list manifest: invalid generated_at")
+    parse_list_generated_at(generated_at)
     if not isinstance(lists_obj, dict):
         raise BundleError("list manifest: lists must be an object")
     lines = []
@@ -248,7 +273,13 @@ def sign_list_manifest(manifest_doc: dict, seed_hex: str) -> dict:
     }
 
 
-def verify_list_manifest(manifest_doc: dict) -> dict:
+def verify_list_manifest(
+    manifest_doc: dict,
+    *,
+    now_sec: int | None = None,
+    max_age_seconds: int = DEFAULT_MAX_LIST_MANIFEST_AGE_SECONDS,
+    min_generated_at: int = 0,
+) -> dict:
     from cryptography.exceptions import InvalidSignature
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
@@ -261,6 +292,7 @@ def verify_list_manifest(manifest_doc: dict) -> dict:
     if len(sig) != 64:
         raise BundleError("list manifest: signature must be 64 bytes")
     gen = manifest_doc.get("generated_at")
+    gen_ts = parse_list_generated_at(gen)
     lists_obj = manifest_doc.get("lists")
     msg = canonical_list_manifest_bytes(gen, lists_obj)
     pub = Ed25519PublicKey.from_public_bytes(bytes.fromhex(pub_hex))
@@ -268,6 +300,13 @@ def verify_list_manifest(manifest_doc: dict) -> dict:
         pub.verify(sig, msg)
     except InvalidSignature as e:
         raise BundleError("list manifest: invalid Ed25519 signature") from e
+    if min_generated_at > 0 and gen_ts < min_generated_at:
+        raise BundleError(f"list manifest: rollback rejected ({gen_ts} < {min_generated_at})")
+    if now_sec is not None:
+        if max_age_seconds > 0 and (now_sec - gen_ts) > max_age_seconds:
+            raise BundleError(f"list manifest: stale manifest rejected (age {now_sec - gen_ts}s > {max_age_seconds}s)")
+        if gen_ts > now_sec + 86400:
+            raise BundleError("list manifest: future-dated manifest rejected")
     for k, it in lists_obj.items():
         if "signature_b64" in it:
             isig = _b64(it.get("signature_b64"), f"{k}.signature_b64")

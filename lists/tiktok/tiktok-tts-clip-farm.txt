@@ -1,4 +1,4 @@
-! SlopTrap Public Rule Matched Accounts
+! SlopTrap Public Rule Matched Accounts (v2: account_key<TAB>count)
 ! Rule: tiktok-tts-clip-farm (TTS Voiceover & Split-Screen Clip Mill)
 ! Site: tiktok
 ! Entries: 0

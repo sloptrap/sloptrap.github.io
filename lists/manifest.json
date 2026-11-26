@@ -1,55 +1,55 @@
 {
-  "schema_version": 1,
-  "generated_at": "2026-11-26T20:02:19Z",
+  "schema_version": 2,
+  "generated_at": "2026-11-26T21:38:23Z",
   "lists": {
     "pinterest/pinterest-affiliate-domain-ring": {
       "site": "pinterest",
       "rule_id": "pinterest-affiliate-domain-ring",
       "path": "lists/pinterest/pinterest-affiliate-domain-ring.txt",
       "count": 0,
-      "sha256": "2efb26cc41490bbd5a3a1e508fecd27a058b19e43e680f9d2a07fb8aa8938be0"
+      "sha256": "943c8b39ed2b2f964c399fbe5c09f75303e20642992e5cca8e661cc9ca818e67"
     },
     "pinterest/pinterest-ai-pin-mill": {
       "site": "pinterest",
       "rule_id": "pinterest-ai-pin-mill",
       "path": "lists/pinterest/pinterest-ai-pin-mill.txt",
       "count": 0,
-      "sha256": "b030afaaa69cbdea92455f32ae73aba472346c3ea37504dd89128eaa770d0716"
+      "sha256": "7ff6fc733e51400e6d8144fe14be7a4b5e3d4e528e27aed7622951521397bdb3"
     },
     "tiktok/tiktok-dormant-repost-ring": {
       "site": "tiktok",
       "rule_id": "tiktok-dormant-repost-ring",
       "path": "lists/tiktok/tiktok-dormant-repost-ring.txt",
       "count": 0,
-      "sha256": "5f9e41c6fddf4866bf929a236499fcdb0f3cb7d0f23c01f3f54e8c1a278bafa9"
+      "sha256": "d67616d680714590d2019a21b5ab4f0f5f28f7698c1c73789379f10cec76aa8e"
     },
     "tiktok/tiktok-tts-clip-farm": {
       "site": "tiktok",
       "rule_id": "tiktok-tts-clip-farm",
       "path": "lists/tiktok/tiktok-tts-clip-farm.txt",
       "count": 0,
-      "sha256": "15ec115337d3f9c62179d0987ab46a72f7d28546563346f66c32773fad0dd43e"
+      "sha256": "56c1c088d0b771d1103c809a04e66139891432b52fa8e81ef5a0ceec837b47b5"
     },
     "youtube/clone-farm-sentinel": {
       "site": "youtube",
       "rule_id": "clone-farm-sentinel",
       "path": "lists/youtube/clone-farm-sentinel.txt",
       "count": 0,
-      "sha256": "637231626b603305a4e07ed8cc697784cf1a757695740b48ad069b2a5e8106a2"
+      "sha256": "aaad1e8abf68ddbef7b71120d5166485301aab8f7db3c5e2d5a6dbc45f4b2fe3"
     },
     "youtube/llm-prosody-deep": {
       "site": "youtube",
       "rule_id": "llm-prosody-deep",
       "path": "lists/youtube/llm-prosody-deep.txt",
       "count": 0,
-      "sha256": "8880c0acac95ca48e61c3f4943b26089b19b6febbf0aab789908033a0f410bdb"
+      "sha256": "2909fcf3778927f83db680600a9951d381c5368c2e2044e0b9d4d478cf5bc200"
     },
     "youtube/necro-hijack-guard": {
       "site": "youtube",
       "rule_id": "necro-hijack-guard",
       "path": "lists/youtube/necro-hijack-guard.txt",
       "count": 0,
-      "sha256": "ab7e6886fb966be1140f2a50f9a338d90d8ddf0a9088f2d39ee0ce922c247bba"
+      "sha256": "d8b27f76678619f9ba1a6be8d85e7e1900ac94caf137bf140bb09fb6d9f2c0d6"
     }
   }
 }

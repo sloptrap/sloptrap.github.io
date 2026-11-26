@@ -382,8 +382,9 @@ def make_entry(res: audit.AuditResult, local_path: str, prev: dict, today: str, 
         for k in METRIC_KEYS:
             if k in prev:
                 e[k] = prev[k]
-    for k in ("likes", "active_installs", "all_time_installs", "downloads_total", "downloads_version"):
+    for k in ("likes", "active_installs", "all_time_installs"):
         e[k] = _count(prev.get(k)) or 0
+    e["downloads_total"] = e["downloads_version"] = 0  # only from current GitHub release data
     if rid in active:
         e["active_installs"] = active[rid]
     e["all_time_installs"] = max(alltime.get(rid, e["all_time_installs"]), e["active_installs"])
@@ -394,8 +395,7 @@ def make_entry(res: audit.AuditResult, local_path: str, prev: dict, today: str, 
     if (rid, f"rule-{rid}-v{res.version}") in dl_ver:
         e["downloads_version"] = dl_ver[(rid, f"rule-{rid}-v{res.version}")]
     e["composite_score"] = composite(e)
-    e["bundle_url"] = local_path
-    e["local_bundle_path"] = local_path
+    e["local_bundle_path"] = local_path  # bundles are served from this site only (no release URLs)
     e["bundle_sha256"] = res.sha256
     e["updated_at"] = prev.get("updated_at") if prev.get("bundle_sha256") == res.sha256 and isinstance(
         prev.get("updated_at"), str) else today
@@ -420,8 +420,7 @@ def write_leaderboards(root: Path, official: list[audit.AuditResult], community:
     for site in SITES:
         path = root / "leaderboard" / site / "leaderboard.json"
         old = _load(path)
-        prev = {e.get("rule_id"): e for key in ("entries", "community_entries")
-                for e in (old.get(key) or []) if isinstance(e, dict)}
+        prev = {e.get("rule_id"): e for e in (old.get("entries") or []) if isinstance(e, dict)}
         doc = {k: old[k] for k in ("epoch_id", "corpus_count", "corpus_hashes") if k in old}
         doc = {
             "schema_version": 2,
@@ -433,13 +432,17 @@ def write_leaderboards(root: Path, official: list[audit.AuditResult], community:
             "generated_at": now_iso,
             **doc,
         }
-        for key, results, base in (("entries", official, "bundles"), ("community_entries", community, "bundles/community")):
+        # One `entries` array (the SDK reads only `entries`): official rules first, then
+        # community rules. Each entry's tier is the audit's, from the signing key; clients
+        # skip community entries unless the user enables community rules.
+        doc["entries"] = []
+        for results, base in ((official, "bundles"), (community, "bundles/community")):
             rows = [make_entry(r, f"{base}/{r.rule_id}.strule", prev.get(r.rule_id) or {}, today, stats, gh)
                     for r in results if r.target_site in (site, "*")]
             rows.sort(key=lambda e: (-e["composite_score"], -e["active_installs"], e["overhead"], e["rule_id"]))
             for i, e in enumerate(rows, 1):
                 e["rank"] = i
-            doc[key] = rows
+            doc["entries"] += rows
         path.parent.mkdir(parents=True, exist_ok=True)
         encoded = json.dumps(doc, indent=2, ensure_ascii=False) + "\n"
         path.write_text(encoded, encoding="utf-8")
@@ -448,8 +451,10 @@ def write_leaderboards(root: Path, official: list[audit.AuditResult], community:
             (root / "leaderboard" / "leaderboard.json").write_text(encoded, encoding="utf-8")
         idx_sites.append({
             "site_id": site, "display_name": SITE_NAMES[site], "feed_path": f"leaderboard/{site}/leaderboard.json",
-            "rule_count": len(doc["entries"]), "official_count": len(doc["entries"]),
-            "community_count": len(doc["community_entries"]), "corpus_count": doc.get("corpus_count", 0)})
+            "rule_count": len(doc["entries"]),
+            "official_count": sum(e["verification_tier"] == "official" for e in doc["entries"]),
+            "community_count": sum(e["verification_tier"] == "community" for e in doc["entries"]),
+            "corpus_count": doc.get("corpus_count", 0)})
     idx = {"schema_version": 2, "default_site": "youtube", "registry_repo": REGISTRY_REPO,
            "rankings_endpoint": endpoint, "active_window_days": window or idx.get("active_window_days") or 30,
            "generated_at": now_iso, "sites": idx_sites}
@@ -457,9 +462,24 @@ def write_leaderboards(root: Path, official: list[audit.AuditResult], community:
 
 
 # ------------------------------------------------------------------------------- main
-def run(root: Path, get, gh_fetch, endpoint: str, now_iso: str) -> int:
+def offline_community(root: Path, official_ids: set[str]) -> list[audit.AuditResult]:
+    paths = sorted((root / "bundles" / "community").glob("*.strule"))
+    ok, failed = audit.audit_paths(paths, root, execute=True)
+    if failed:
+        raise SyncError(f"community bundles fail the audit: {failed}")
+    return [r for r in ok if r.rule_id not in official_ids]
+
+
+def run(root: Path, get, gh_fetch, endpoint: str, now_iso: str, offline: bool = False) -> int:
+    """offline=True regenerates the leaderboards from the local bundles only: no Worker or
+    GitHub requests, lists untouched, install/upvote counts carried over from the old feeds."""
     official = audit_official(root)
     official_ids = {r.rule_id for r in official}
+    if offline:
+        community = offline_community(root, official_ids)
+        write_leaderboards(root, official, community, (None, {}, {}), ({}, {}, {}), now_iso, endpoint)
+        print(f"offline: regenerated leaderboards for {len(official)} official and {len(community)} community rule(s)")
+        return 0
     community = sync_community(root, get, official_ids)
 
     try:
@@ -491,7 +511,7 @@ def main() -> int:
         token = os.environ.get("GH_TOKEN", "")
         now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         return run(REPO_ROOT, lambda p: http_get_json(endpoint + p), lambda: fetch_github(repo, token),
-                   endpoint, now_iso)
+                   endpoint, now_iso, offline="--offline" in sys.argv[1:])
     except SyncError as e:
         print(f"SYNC FAILED: {e}", file=sys.stderr)
         return 1

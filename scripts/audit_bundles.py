@@ -681,14 +681,14 @@ def required_tier_for(path: Path, root: Path) -> str | None:
     rel = path.resolve().relative_to(root.resolve()).as_posix()
     if rel.startswith("bundles/community/"):
         return "community"
-    if rel.startswith("bundles/") or rel.startswith("leaderboard/bundles/"):
+    if rel.startswith("bundles/"):
         return "official"
     return None
 
 
 def discover_bundles(root: Path) -> list[Path]:
     out = []
-    for base in ("bundles", "leaderboard/bundles"):
+    for base in ("bundles",):
         d = root / base
         if d.is_dir():
             out += sorted(p for p in d.rglob("*.strule") if p.is_file())
@@ -737,28 +737,32 @@ def check_leaderboards(root: Path, results: list[AuditResult]) -> list[str]:
         except Exception as e:  # noqa: BLE001
             errs.append(f"{rel}: invalid JSON: {e}")
             continue
-        for key, want_tier in (("entries", "official"), ("community_entries", "community")):
-            for e in lb.get(key) or []:
-                rid = e.get("rule_id")
-                local = e.get("local_bundle_path") or ""
-                res = by_path.get(local)
-                if res is None:
-                    errs.append(f"{rel}: {key} {rid!r} has no audited bundle at {local!r}")
-                    continue
-                if res.rule_id != rid or res.tier != want_tier:
-                    errs.append(f"{rel}: {rid!r} does not match its bundle (tier {res.tier})")
-                if e.get("verification_tier") != res.tier or bool(e.get("verified")) != (res.tier == "official"):
-                    errs.append(f"{rel}: {rid!r} declares a tier/verified flag that the key does not give")
-                if e.get("author_public_key") != res.manifest["author_public_key"]:
-                    errs.append(f"{rel}: {rid!r} author_public_key differs from the bundle")
-                if e.get("bundle_sha256") and e["bundle_sha256"] != res.sha256:
-                    errs.append(f"{rel}: {rid!r} bundle_sha256 mismatch")
+        if "community_entries" in lb:
+            errs.append(f"{rel}: community rules belong in 'entries' (the SDK reads only 'entries')")
+        for e in lb.get("entries") or []:
+            rid = e.get("rule_id")
+            local = e.get("local_bundle_path") or ""
+            res = by_path.get(local)
+            want = f"bundles/community/{rid}.strule" if str(rid).startswith("community-") else f"bundles/{rid}.strule"
+            if res is None or local != want:
+                errs.append(f"{rel}: entry {rid!r} has no audited bundle at {want!r}")
+                continue
+            if res.rule_id != rid:
+                errs.append(f"{rel}: {rid!r} does not match its bundle")
+            if "bundle_url" in e:
+                errs.append(f"{rel}: {rid!r} has a bundle_url; bundles are served from local_bundle_path only")
+            if e.get("verification_tier") != res.tier or bool(e.get("verified")) != (res.tier == "official"):
+                errs.append(f"{rel}: {rid!r} declares a tier/verified flag that the key does not give")
+            if e.get("author_public_key") != res.manifest["author_public_key"]:
+                errs.append(f"{rel}: {rid!r} author_public_key differs from the bundle")
+            if e.get("bundle_sha256") and e["bundle_sha256"] != res.sha256:
+                errs.append(f"{rel}: {rid!r} bundle_sha256 mismatch")
     return errs
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("paths", nargs="*", type=Path, help="bundles to audit (default: bundles/ and leaderboard/bundles/)")
+    ap.add_argument("paths", nargs="*", type=Path, help="bundles to audit (default: everything under bundles/)")
     ap.add_argument("--root", type=Path, default=REPO_ROOT)
     ap.add_argument("--allow-empty", action="store_true", help="exit 0 when there are no bundles to audit")
     ap.add_argument("--static-only", action="store_true",

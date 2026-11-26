@@ -180,13 +180,16 @@ class EndToEndTests(unittest.TestCase):
             self.assertFalse((root / "bundles" / "community" / "community-evil.strule").exists())
             for site in S.SITES:
                 lb = json.loads((root / "leaderboard" / site / "leaderboard.json").read_text(encoding="utf-8"))
-                self.assertEqual([e["rule_id"] for e in lb["community_entries"]], ["community-new"])
-                ce = lb["community_entries"][0]
+                self.assertNotIn("community_entries", lb)
+                com = [e for e in lb["entries"] if e["rule_id"].startswith("community-")]
+                self.assertEqual([e["rule_id"] for e in com], ["community-new"])
+                self.assertTrue(all("bundle_url" not in e for e in lb["entries"]))
+                ce = com[0]
                 self.assertEqual((ce["verification_tier"], ce["verified"]), ("community", False))
                 self.assertEqual(ce["active_installs"], 0)  # "9" is not an int
                 self.assertNotIn("band", ce)
             yt = json.loads((root / "leaderboard" / "youtube" / "leaderboard.json").read_text(encoding="utf-8"))
-            self.assertEqual([e["rule_id"] for e in yt["entries"]], ["yt-rule"])
+            self.assertEqual([e["rule_id"] for e in yt["entries"]], ["yt-rule", "community-new"])
             e = yt["entries"][0]
             self.assertEqual((e["verification_tier"], e["verified"], e["band"], e["likes"]), ("official", True, "S", 4))
             self.assertEqual((e["active_installs"], e["all_time_installs"]), (7, 7))
@@ -203,6 +206,24 @@ class EndToEndTests(unittest.TestCase):
             import audit_bundles as A
             self.assertEqual(A.main(["--root", str(root)]), 0)
             self.assertNotEqual(COM_PUB, OFF_PUB)
+
+    def test_offline_regeneration_makes_no_requests(self):
+        with test_keys(), tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            (root / "bundles").mkdir()
+            (root / "bundles" / "yt-rule.strule").write_bytes(bundle_bytes("yt-rule", WASM, OFFICIAL_TEST_SEED))
+            (root / "leaderboard" / "youtube").mkdir(parents=True)
+            (root / "leaderboard" / "youtube" / "leaderboard.json").write_text(json.dumps({"entries": [
+                {"rule_id": "yt-rule", "active_installs": 3, "band": "A",
+                 "bundle_url": "https://github.com/sloptrap/sloptrap.github.io/releases/download/x/yt-rule.strule"}]}))
+
+            def no_net(*_a):
+                raise AssertionError("network used in offline mode")
+            self.assertEqual(S.run(root, no_net, no_net, "https://w.example", "2026-11-26T00:00:00Z", offline=True), 0)
+            e = json.loads((root / "leaderboard" / "youtube" / "leaderboard.json").read_text())["entries"][0]
+            self.assertEqual((e["active_installs"], e["band"], e["local_bundle_path"]), (3, "A", "bundles/yt-rule.strule"))
+            self.assertNotIn("bundle_url", e)
+            self.assertFalse((root / "lists").exists())
 
     def test_failing_official_bundle_aborts_without_writing(self):
         with test_keys(), tempfile.TemporaryDirectory() as td:

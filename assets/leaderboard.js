@@ -132,11 +132,8 @@
 
   function currentEntries() {
     if (!docData) return [];
-    const official = (Array.isArray(docData.entries) ? docData.entries : []).filter(e => U.tierOf(e) === 'official');
-    const community = includeCommunity
-      ? (Array.isArray(docData.community_entries) ? docData.community_entries : []).filter(e => U.tierOf(e) === 'community')
-      : [];
-    return official.concat(community);
+    const all = Array.isArray(docData.entries) ? docData.entries : [];
+    return all.filter(e => U.tierOf(e) === 'official' || (includeCommunity && U.tierOf(e) === 'community'));
   }
 
   function render() {
@@ -186,8 +183,9 @@
       const disp = U.SITE_NAMES[currentSite];
       setText('lb-heading', `${disp} Rule Leaderboard`);
       setText('stat-site', disp);
-      const off = (docData.entries || []).filter(e => U.tierOf(e) === 'official').length;
-      const com = (docData.community_entries || []).filter(e => U.tierOf(e) === 'community').length;
+      const all = Array.isArray(docData.entries) ? docData.entries : [];
+      const off = all.filter(e => U.tierOf(e) === 'official').length;
+      const com = all.filter(e => U.tierOf(e) === 'community').length;
       setText('stat-rules', `${off} official · ${com} community`);
       setText('stat-epoch', `${U.count(docData.corpus_count)} holdout · ${U.str(docData.epoch_id)}`);
       const wd = U.count(docData.active_window_days);
@@ -197,8 +195,9 @@
       if (!liveStats) liveStats = await U.fetchStats();
       if (liveStats) {
         if (liveStats.windowDays) syncWindowLabels(liveStats.windowDays);
-        U.applyStats([...(docData.entries || []), ...(docData.community_entries || [])], liveStats);
-        for (const e of [...(docData.entries || []), ...(docData.community_entries || [])]) e.composite_score = U.composite(e);
+        const all = Array.isArray(docData.entries) ? docData.entries : [];
+        U.applyStats(all, liveStats);
+        for (const e of all) e.composite_score = U.composite(e);
         render();
       }
     } catch (err) {

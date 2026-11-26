@@ -221,47 +221,55 @@ def normalize_account_key(site: str, key) -> str | None:
     return key.lower()
 
 
-def build_lists(rows: list[dict], official_sites: dict[str, str]) -> tuple[dict[tuple[str, str], set[str]], int]:
-    """official_sites maps official rule_id -> target_site. Returns ({(site, rule): keys}, rejected)."""
-    out: dict[tuple[str, str], set[str]] = {}
-    for rid, tsite in official_sites.items():
+def build_lists(rows: list[dict], rule_sites: dict[str, str]) -> tuple[dict[tuple[str, str], dict[str, int]], int]:
+    """rule_sites maps audited (official + community) rule_id -> target_site.
+    Returns ({(site, rule): {account_key: count}}, rejected)."""
+    out: dict[tuple[str, str], dict[str, int]] = {}
+    for rid, tsite in rule_sites.items():
         for s in (SITES if tsite == "*" else (tsite,)):
-            out[(s, rid)] = set()
+            out[(s, rid)] = {}
     rejected = 0
     for row in rows:
         site, rid = row.get("site"), row.get("rule_id")
         key = normalize_account_key(site, row.get("account_key")) if site in SITES else None
-        if key is None or not isinstance(rid, str) or (site, rid) not in out:
+        raw_cnt = row.get("count", 1)
+        cnt = raw_cnt if type(raw_cnt) is int and 1 <= raw_cnt <= MAX_COUNT else None
+        if key is None or cnt is None or not isinstance(rid, str) or (site, rid) not in out:
             rejected += 1
             continue
-        if len(out[(site, rid)]) >= MAX_LIST_ENTRIES_PER_RULE:
+        bucket = out[(site, rid)]
+        if key not in bucket and len(bucket) >= MAX_LIST_ENTRIES_PER_RULE:
             rejected += 1
             continue
-        out[(site, rid)].add(key)
+        bucket[key] = max(bucket.get(key, 0), cnt)
     return out, rejected
 
 
-def write_lists(root: Path, lists: dict[tuple[str, str], set[str]], names: dict[str, str], now_iso: str) -> None:
+def write_lists(root: Path, lists: dict[tuple[str, str], dict[str, int]], names: dict[str, str], now_iso: str) -> None:
     ldir = root / "lists"
-    manifest = {"schema_version": 1, "generated_at": now_iso, "lists": {}}
+    manifest = {"schema_version": 2, "generated_at": now_iso, "lists": {}}
     wanted = set()
     for (site, rid) in sorted(lists):
-        keys = sorted(lists[(site, rid)])
+        counts = lists[(site, rid)]
+        if rid.startswith(strule_v2.COMMUNITY_PREFIX) and not counts:
+            continue
+        ordered = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
+        lines = [f"{k}\t{c}" for k, c in ordered]
         path = ldir / site / f"{rid}.txt"
         wanted.add(path)
         path.parent.mkdir(parents=True, exist_ok=True)
-        text = "\n".join(["! SlopTrap Public Rule Matched Accounts",
+        text = "\n".join(["! SlopTrap Public Rule Matched Accounts (v2: account_key<TAB>count)",
                           f"! Rule: {rid} ({names.get(rid, rid)})",
                           f"! Site: {site}",
-                          f"! Entries: {len(keys)}", *keys]) + "\n"
+                          f"! Entries: {len(lines)}", *lines]) + "\n"
         if not path.exists() or path.read_text(encoding="utf-8") != text:
             path.write_text(text, encoding="utf-8")
         manifest["lists"][f"{site}/{rid}"] = {
-            "site": site, "rule_id": rid, "path": f"lists/{site}/{rid}.txt", "count": len(keys),
+            "site": site, "rule_id": rid, "path": f"lists/{site}/{rid}.txt", "count": len(lines),
             "sha256": hashlib.sha256(text.encode("utf-8")).hexdigest()}
-    for p in ldir.glob("*/*.txt"):  # lists for unknown sites or non-official rules are removed
+    for p in ldir.glob("*/*.txt"):  # lists for unknown sites or removed/unaudited rules are pruned
         if p not in wanted:
-            print(f"removing list for a non-official rule or unknown site: {p.relative_to(root)}")
+            print(f"removing list for a removed/unaudited rule or unknown site: {p.relative_to(root)}")
             p.unlink()
     (ldir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
@@ -489,10 +497,11 @@ def run(root: Path, get, gh_fetch, endpoint: str, now_iso: str, offline: bool = 
         print(f"list fetch failed, keeping existing list files: {e}", file=sys.stderr)
         rows = None
     if rows is not None:
-        lists, rejected = build_lists(rows, {r.rule_id: r.target_site for r in official})
+        audited_all = [*official, *community]
+        lists, rejected = build_lists(rows, {r.rule_id: r.target_site for r in audited_all})
         if rejected:
-            print(f"rejected {rejected} list row(s) (unknown site, non-official rule, or bad account key)")
-        write_lists(root, lists, {r.rule_id: r.manifest["name"] for r in official}, now_iso)
+            print(f"rejected {rejected} list row(s) (unknown site, unaudited rule, bad count, or bad account key)")
+        write_lists(root, lists, {r.rule_id: r.manifest["name"] for r in audited_all}, now_iso)
 
     write_leaderboards(root, official, community, fetch_stats(get), gh_fetch(), now_iso, endpoint)
     print(f"synced {len(official)} official and {len(community)} community rule(s)")

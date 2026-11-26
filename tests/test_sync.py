@@ -66,28 +66,32 @@ class PagingTests(unittest.TestCase):
 
 
 class ListTests(unittest.TestCase):
-    official = {"yt-rule": "youtube", "tt-rule": "tiktok", "any-rule": "*"}
+    rules = {"yt-rule": "youtube", "tt-rule": "tiktok", "any-rule": "*", "community-ok": "youtube"}
 
     def test_validation(self):
         rows = [
-            {"site": "youtube", "rule_id": "yt-rule", "account_key": "@Good.Handle"},
-            {"site": "youtube", "rule_id": "yt-rule", "account_key": UC},
-            {"site": "tiktok", "rule_id": "tt-rule", "account_key": UC},            # UC ids are YouTube only
-            {"site": "anything-site", "rule_id": "yt-rule", "account_key": "@abc"},  # unknown site
-            {"site": "youtube", "rule_id": "made-up-rule", "account_key": "@abc"},   # not official
-            {"site": "youtube", "rule_id": "community-x", "account_key": "@abc"},    # community: never listed
-            {"site": "youtube", "rule_id": "tt-rule", "account_key": "@abc"},        # rule is for tiktok
-            {"site": "youtube", "rule_id": "yt-rule", "account_key": "@ab"},         # too short
-            {"site": "youtube", "rule_id": "yt-rule", "account_key": "@a\nb\n! x"},  # injection
-            {"site": "youtube", "rule_id": "yt-rule", "account_key": "UCshort"},
-            {"site": "youtube", "rule_id": "yt-rule", "account_key": 5},
-            {"site": "pinterest", "rule_id": "any-rule", "account_key": "@pinner"},
+            {"site": "youtube", "rule_id": "yt-rule", "account_key": "@Good.Handle", "count": 7},
+            {"site": "youtube", "rule_id": "yt-rule", "account_key": UC, "count": 2},
+            {"site": "youtube", "rule_id": "community-ok", "account_key": "@comm.hit", "count": 4},
+            {"site": "tiktok", "rule_id": "tt-rule", "account_key": UC, "count": 1},            # UC ids are YouTube only
+            {"site": "anything-site", "rule_id": "yt-rule", "account_key": "@abc", "count": 1},  # unknown site
+            {"site": "youtube", "rule_id": "made-up-rule", "account_key": "@abc", "count": 1},   # unaudited rule
+            {"site": "youtube", "rule_id": "community-unaudited", "account_key": "@abc", "count": 1},
+            {"site": "youtube", "rule_id": "tt-rule", "account_key": "@abc", "count": 1},        # rule is for tiktok
+            {"site": "youtube", "rule_id": "yt-rule", "account_key": "@ab", "count": 1},         # too short
+            {"site": "youtube", "rule_id": "yt-rule", "account_key": "@a\nb\n! x", "count": 1},  # injection
+            {"site": "youtube", "rule_id": "yt-rule", "account_key": "UCshort", "count": 1},
+            {"site": "youtube", "rule_id": "yt-rule", "account_key": 5, "count": 1},
+            {"site": "youtube", "rule_id": "yt-rule", "account_key": "@zero", "count": 0},       # zero count rejected
+            {"site": "youtube", "rule_id": "yt-rule", "account_key": "@strcnt", "count": "3"},   # non-int count rejected
+            {"site": "pinterest", "rule_id": "any-rule", "account_key": "@pinner", "count": 3},
         ]
-        lists, rejected = S.build_lists(rows, self.official)
-        self.assertEqual(lists[("youtube", "yt-rule")], {"@good.handle", UC})
-        self.assertEqual(lists[("tiktok", "tt-rule")], set())
-        self.assertEqual(lists[("pinterest", "any-rule")], {"@pinner"})
-        self.assertEqual(rejected, 9)
+        lists, rejected = S.build_lists(rows, self.rules)
+        self.assertEqual(lists[("youtube", "yt-rule")], {"@good.handle": 7, UC: 2})
+        self.assertEqual(lists[("youtube", "community-ok")], {"@comm.hit": 4})
+        self.assertEqual(lists[("tiktok", "tt-rule")], {})
+        self.assertEqual(lists[("pinterest", "any-rule")], {"@pinner": 3})
+        self.assertEqual(rejected, 11)
         self.assertNotIn(("youtube", "made-up-rule"), lists)
 
     def test_write_lists_rebuilds_and_prunes(self):
@@ -95,16 +99,28 @@ class ListTests(unittest.TestCase):
             root = Path(td)
             stale = root / "lists" / "youtube" / "made-up-rule.txt"
             stale.parent.mkdir(parents=True)
-            stale.write_text("@victim\n", encoding="utf-8")
+            stale.write_text("@victim\t1\n", encoding="utf-8")
             old = root / "lists" / "youtube" / "yt-rule.txt"
-            old.write_text("! old\n@single-report-victim\n", encoding="utf-8")
-            S.write_lists(root, {("youtube", "yt-rule"): {"@a.b.c"}}, {"yt-rule": "YT"}, "2026-01-01T00:00:00Z")
+            old.write_text("! old\n@revoked-victim\t5\n", encoding="utf-8")
+            S.write_lists(
+                root,
+                {
+                    ("youtube", "yt-rule"): {"@a.b.c": 2, "@top.slop": 9},
+                    ("youtube", "community-empty"): {},
+                    ("youtube", "community-active"): {"@c.hit": 3},
+                },
+                {"yt-rule": "YT", "community-empty": "CE", "community-active": "CA"},
+                "2026-01-01T00:00:00Z",
+            )
             self.assertFalse(stale.exists())
+            self.assertFalse((root / "lists" / "youtube" / "community-empty.txt").exists())
+            self.assertTrue((root / "lists" / "youtube" / "community-active.txt").exists())
             text = old.read_text(encoding="utf-8")
             self.assertNotIn("victim", text)
-            self.assertIn("@a.b.c", text)
+            self.assertIn("@top.slop\t9\n@a.b.c\t2\n", text)
             man = json.loads((root / "lists" / "manifest.json").read_text(encoding="utf-8"))
-            self.assertEqual(man["lists"]["youtube/yt-rule"]["count"], 1)
+            self.assertEqual(man["schema_version"], 2)
+            self.assertEqual(man["lists"]["youtube/yt-rule"]["count"], 2)
 
 
 @unittest.skipUnless(HAVE_WASMTIME, "wasmtime not installed")
@@ -168,8 +184,9 @@ class EndToEndTests(unittest.TestCase):
                           "verified": True, "tier": "official"},
                          {"rule_id": "community-evil", "version": "1.0.0", "accepted_at": 6,
                           "bundle": {**bundle("community-evil", WASM, COMMUNITY_TEST_SEED), "verified": True}}],  # extra key
-                entries=[{"site": "youtube", "rule_id": "yt-rule", "account_key": "@Slop.Farm", "first_seen": 1},
-                         {"site": "youtube", "rule_id": "community-new", "account_key": "@x.y.z", "first_seen": 2}],
+                entries=[{"site": "youtube", "rule_id": "yt-rule", "account_key": "@Slop.Farm", "count": 6, "first_seen": 1},
+                         {"site": "youtube", "rule_id": "community-new", "account_key": "@x.y.z", "count": 3, "first_seen": 2},
+                         {"site": "youtube", "rule_id": "community-evil", "account_key": "@evil.hit", "count": 9, "first_seen": 3}],
                 stats={"window_days": 30, "active_installs": {"yt-rule": 7, "community-new": "9"},
                        "all_time_installs": {"yt-rule": 5}})
             gh = lambda: ({"yt-rule": (4, 12, "https://github.com/sloptrap/sloptrap.github.io/issues/12")}, {}, {})  # noqa: E731
@@ -197,8 +214,10 @@ class EndToEndTests(unittest.TestCase):
             self.assertEqual(yt["epoch_id"], "E1")
             self.assertEqual((root / "leaderboard.json").read_text(), (root / "leaderboard" / "leaderboard.json").read_text())
             lst = (root / "lists" / "youtube" / "yt-rule.txt").read_text(encoding="utf-8")
-            self.assertIn("@slop.farm", lst)
-            self.assertFalse((root / "lists" / "youtube" / "community-new.txt").exists())
+            self.assertIn("@slop.farm\t6", lst)
+            clst = (root / "lists" / "youtube" / "community-new.txt").read_text(encoding="utf-8")
+            self.assertIn("@x.y.z\t3", clst)
+            self.assertFalse((root / "lists" / "youtube" / "community-evil.txt").exists())
             idx = json.loads((root / "leaderboard" / "index.json").read_text(encoding="utf-8"))
             self.assertEqual(idx["sites"][0]["community_count"], 1)
 

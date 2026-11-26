@@ -38,7 +38,11 @@ export const MAX_WASM_BYTES = 256 * 1024;
 export const FUEL_BUDGET = 20_000_000;
 export const DEFAULT_WARN_THRESHOLD = 45;
 export const DEFAULT_BLOCK_THRESHOLD = 68;
+export const DEFAULT_LIST_WARN_THRESHOLD = 2;
+export const DEFAULT_LIST_BLOCK_THRESHOLD = 5;
+export const DEFAULT_LIST_SATURATION_CAP = 25;
 export const LIST_FAST_PATH_SCORE = 85;
+export const LIST_FAST_PATH_WARN_SCORE = 56;
 export const MAX_LIST_ENTRIES = 200_000;
 export const MAX_LIST_BYTES = 8 * 1024 * 1024;
 
@@ -996,18 +1000,35 @@ export function normalizeAccountKey(raw) {
   return (s.startsWith("@") ? s : `@${s}`).toLowerCase();
 }
 
-export function parseAccountListText(txt) {
-  const set = new Set();
+/**
+ * Parses v2 `<account_key>\t<count>` (or legacy bare `<account_key>`) list files into
+ * `Map<normalizedAccountKey, count>`. Bare legacy entries default to `DEFAULT_LIST_BLOCK_THRESHOLD`.
+ */
+export function parseAccountListCounts(txt) {
+  const map = new Map();
   const text = String(txt ?? "");
-  if (text.length > MAX_LIST_BYTES) return set;
+  if (text.length > MAX_LIST_BYTES) return map;
   for (const rawLine of text.split(/\r?\n/)) {
     const line = rawLine.trim();
     if (!line || line.startsWith("!") || line.startsWith("#")) continue;
-    const norm = normalizeAccountKey(line);
-    if (norm && norm.length <= 101) set.add(norm);
-    if (set.size >= MAX_LIST_ENTRIES) break;
+    const parts = line.split(/\s+/);
+    const norm = normalizeAccountKey(parts[0]);
+    if (!norm || norm.length > 101) continue;
+    let cnt = DEFAULT_LIST_BLOCK_THRESHOLD;
+    if (parts.length >= 2) {
+      if (!/^\d{1,10}$/.test(parts[1])) continue;
+      cnt = Number(parts[1]);
+      if (!Number.isSafeInteger(cnt) || cnt < 1) continue;
+    }
+    const prev = map.get(norm) || 0;
+    if (cnt > prev) map.set(norm, cnt);
+    if (map.size >= MAX_LIST_ENTRIES) break;
   }
-  return set;
+  return map;
+}
+
+export function parseAccountListText(txt) {
+  return new Set(parseAccountListCounts(txt).keys());
 }
 
 const siteAdapters = new Map();
@@ -1203,12 +1224,17 @@ function clampThreshold(v, dflt) {
   return typeof v === "number" && Number.isInteger(v) && v >= 0 && v <= 100 ? v : dflt;
 }
 
+function clampListThreshold(v, dflt, max = 100000) {
+  return typeof v === "number" && Number.isInteger(v) && v >= 0 && v <= max ? v : dflt;
+}
+
 /**
  * Static engine: load signed bundles, evaluate canonical fingerprints.
  *
  * Options: site ("youtube" | "tiktok" | "pinterest" | "*"), verifiedOnly (official rules only),
  * communityRules (default false; enables community-tier rules), usePreMatchedLists (default true),
- * warnThreshold (45), blockThreshold (68).
+ * warnThreshold (45), blockThreshold (68), listWarnThreshold (2), listBlockThreshold (5),
+ * listSaturationCap (25), contributorMode (false).
  */
 export class SlopTrapStaticEngine {
   constructor(options = {}) {
@@ -1216,12 +1242,16 @@ export class SlopTrapStaticEngine {
     this.verifiedOnly = Boolean(options.verifiedOnly);
     this.communityRules = options.communityRules === true;
     this.usePreMatchedLists = options.usePreMatchedLists !== false;
+    this.contributorMode = options.contributorMode === true;
     this.warnThreshold = clampThreshold(options.warnThreshold, DEFAULT_WARN_THRESHOLD);
     this.blockThreshold = clampThreshold(options.blockThreshold, DEFAULT_BLOCK_THRESHOLD);
     if (this.warnThreshold > this.blockThreshold) {
       this.warnThreshold = DEFAULT_WARN_THRESHOLD;
       this.blockThreshold = DEFAULT_BLOCK_THRESHOLD;
     }
+    this.listWarnThreshold = clampListThreshold(options.listWarnThreshold, DEFAULT_LIST_WARN_THRESHOLD);
+    this.listBlockThreshold = clampListThreshold(options.listBlockThreshold, DEFAULT_LIST_BLOCK_THRESHOLD);
+    this.listSaturationCap = Math.max(1, clampListThreshold(options.listSaturationCap, DEFAULT_LIST_SATURATION_CAP));
     let keyring = PINNED_KEYRING;
     if (options.testKeys !== undefined && keyring === PINNED_KEYRING) {
       throw new Error("testKeys is only accepted in test builds");
@@ -1229,7 +1259,7 @@ export class SlopTrapStaticEngine {
     Object.defineProperty(this, "_keyring", { value: keyring, enumerable: false, writable: false });
     this.rules = new Map(); // rule_id -> rule record
     this.owners = new Map(); // rule_id -> author_public_key
-    this.ruleMatchedSets = new Map(); // rule_id -> Set<normalized account key>
+    this.ruleMatchedCounts = new Map(); // rule_id -> Map<normalized account key, count>
   }
 
   setVerifiedOnly(v) {
@@ -1238,6 +1268,11 @@ export class SlopTrapStaticEngine {
 
   setCommunityRules(v) {
     this.communityRules = v === true;
+  }
+
+  setListThresholds({ warn, block } = {}) {
+    if (warn !== undefined) this.listWarnThreshold = clampListThreshold(warn, this.listWarnThreshold);
+    if (block !== undefined) this.listBlockThreshold = clampListThreshold(block, this.listBlockThreshold);
   }
 
   _isOfficialKey(pub) {
@@ -1316,30 +1351,46 @@ export class SlopTrapStaticEngine {
   }
 
   unloadRule(ruleId) {
-    this.ruleMatchedSets.delete(ruleId);
+    this.ruleMatchedCounts.delete(ruleId);
     return this.rules.delete(ruleId);
   }
 
   loadRuleList(ruleId, textOrIterable) {
     if (typeof ruleId !== "string" || !RULE_ID_RE.test(ruleId)) return 0;
-    let set;
+    let map;
     if (typeof textOrIterable === "string") {
-      set = parseAccountListText(textOrIterable);
-    } else {
-      set = new Set();
-      for (const k of textOrIterable || []) {
+      map = parseAccountListCounts(textOrIterable);
+    } else if (textOrIterable instanceof Map) {
+      map = new Map();
+      for (const [k, rawCnt] of textOrIterable.entries()) {
         const n = normalizeAccountKey(k);
-        if (n) set.add(n);
-        if (set.size >= MAX_LIST_ENTRIES) break;
+        const cnt = Number(rawCnt);
+        if (n && Number.isSafeInteger(cnt) && cnt >= 1) map.set(n, cnt);
+        if (map.size >= MAX_LIST_ENTRIES) break;
+      }
+    } else {
+      map = new Map();
+      for (const item of textOrIterable || []) {
+        const [rawKey, rawCnt] = Array.isArray(item) ? item : [item, DEFAULT_LIST_BLOCK_THRESHOLD];
+        const n = normalizeAccountKey(rawKey);
+        const cnt = Number(rawCnt);
+        if (n && Number.isSafeInteger(cnt) && cnt >= 1) map.set(n, cnt);
+        if (map.size >= MAX_LIST_ENTRIES) break;
       }
     }
-    this.ruleMatchedSets.set(ruleId, set);
-    return set.size;
+    this.ruleMatchedCounts.set(ruleId, map);
+    return map.size;
+  }
+
+  getRuleListCount(ruleId, accountKey) {
+    const map = this.ruleMatchedCounts.get(ruleId);
+    return map ? map.get(normalizeAccountKey(accountKey)) || 0 : 0;
   }
 
   hasRuleListMatch(ruleId, accountKey) {
-    const set = this.ruleMatchedSets.get(ruleId);
-    return Boolean(set && set.has(normalizeAccountKey(accountKey)));
+    const cnt = this.getRuleListCount(ruleId, accountKey);
+    const thr = this.listBlockThreshold > 0 ? this.listBlockThreshold : 1;
+    return cnt >= thr;
   }
 
   listRules() {
@@ -1350,7 +1401,7 @@ export class SlopTrapStaticEngine {
       provenance: { tier: r.tier, verified: r.verified },
       enabled: r.enabled,
       active: this._isActive(r),
-      listCount: this.ruleMatchedSets.get(r.manifest.rule_id)?.size || 0,
+      listCount: this.ruleMatchedCounts.get(r.manifest.rule_id)?.size || 0,
     }));
   }
 
@@ -1378,16 +1429,57 @@ export class SlopTrapStaticEngine {
     const accountKey = normalizeAccountKey(fp.channel.handle || fp.channel.channel_id);
     const active = [...this.rules.values()].filter(r => this._isActive(r));
 
+    let listVerdict = null;
+    let allListRulesSaturated = true;
     if (this.usePreMatchedLists && accountKey) {
-      const hits = active
-        .filter(r => r.tier === "official" && this.ruleMatchedSets.get(r.manifest.rule_id)?.has(accountKey))
-        .map(r => r.manifest.rule_id);
-      if (hits.length > 0) {
-        return {
-          site: this.site, score: LIST_FAST_PATH_SCORE, action: "block", fast_path_list: true,
-          matched_rule_ids: hits, newly_matched_rules: [], verified_rules: hits.length,
-          outputs: [], errors: [], total_micros: 0,
+      const blockHits = [];
+      const warnHits = [];
+      let maxCount = 0;
+      let verifiedHits = 0;
+      for (const r of active) {
+        if (r.tier !== "official" && r.tier !== "community") continue;
+        const cnt = this.ruleMatchedCounts.get(r.manifest.rule_id)?.get(accountKey) || 0;
+        if (cnt < this.listSaturationCap) allListRulesSaturated = false;
+        if (cnt > maxCount) maxCount = cnt;
+        if (this.listBlockThreshold > 0 && cnt >= this.listBlockThreshold) {
+          blockHits.push(r.manifest.rule_id);
+          if (r.verified) verifiedHits++;
+        } else if (this.listWarnThreshold > 0 && cnt >= this.listWarnThreshold) {
+          warnHits.push(r.manifest.rule_id);
+          if (r.verified) verifiedHits++;
+        }
+      }
+      if (blockHits.length > 0) {
+        listVerdict = {
+          site: this.site,
+          score: LIST_FAST_PATH_SCORE,
+          action: "block",
+          fast_path_list: true,
+          max_list_count: maxCount,
+          matched_rule_ids: blockHits,
+          newly_matched_rules: [],
+          verified_rules: verifiedHits,
+          outputs: [],
+          errors: [],
+          total_micros: 0,
         };
+      } else if (warnHits.length > 0) {
+        listVerdict = {
+          site: this.site,
+          score: LIST_FAST_PATH_WARN_SCORE,
+          action: "warn",
+          fast_path_list: true,
+          max_list_count: maxCount,
+          matched_rule_ids: warnHits,
+          newly_matched_rules: [],
+          verified_rules: verifiedHits,
+          outputs: [],
+          errors: [],
+          total_micros: 0,
+        };
+      }
+      if (listVerdict && (!this.contributorMode || allListRulesSaturated)) {
+        return listVerdict;
       }
     }
 
@@ -1422,21 +1514,37 @@ export class SlopTrapStaticEngine {
         weight: m.weight_milli / 1000, weight_milli: m.weight_milli, overhead: m.overhead,
         reason: res.reason, exec_micros: execMicros,
       });
-      if (accountKey && r.tier === "official" && res.score >= this.warnThreshold &&
-          !this.ruleMatchedSets.get(m.rule_id)?.has(accountKey)) {
-        newly.push({
-          site: this.site, rule_id: m.rule_id, account_key: accountKey,
-          action: res.score >= this.blockThreshold ? "block" : "warn",
-        });
+      if (accountKey && (r.tier === "official" || r.tier === "community") && res.score >= this.warnThreshold) {
+        const existingCnt = this.ruleMatchedCounts.get(m.rule_id)?.get(accountKey) || 0;
+        if (existingCnt < this.listSaturationCap) {
+          newly.push({
+            site: this.site,
+            rule_id: m.rule_id,
+            rule_version: m.version,
+            account_key: accountKey,
+            action: res.score >= this.blockThreshold ? "block" : "warn",
+          });
+        }
       }
     }
 
     let score = sumW > 0 ? Math.floor(sumSW / sumW + 0.5) : 0;
     if (!(score >= 0)) score = 0;
     if (score > 100) score = 100;
-    const action = score >= this.blockThreshold ? "block" : score >= this.warnThreshold ? "warn" : "allow";
+    let action = score >= this.blockThreshold ? "block" : score >= this.warnThreshold ? "warn" : "allow";
+    if (listVerdict) {
+      if (listVerdict.action === "block" && action !== "block") {
+        action = "block";
+        score = Math.max(score, LIST_FAST_PATH_SCORE);
+      } else if (listVerdict.action === "warn" && action === "allow") {
+        action = "warn";
+        score = Math.max(score, LIST_FAST_PATH_WARN_SCORE);
+      }
+    }
     return {
-      site: this.site, score, action, fast_path_list: false, newly_matched_rules: newly,
+      site: this.site, score, action, fast_path_list: false,
+      ...(listVerdict ? { matched_rule_ids: listVerdict.matched_rule_ids, max_list_count: listVerdict.max_list_count } : {}),
+      newly_matched_rules: newly,
       verified_rules: verifiedRules, outputs, errors, total_micros: totalMicros,
     };
   }
@@ -1486,8 +1594,9 @@ export class SlopTrapClient {
     this.storagePrefix = options.storagePrefix || "sloptrap_sdk_v2";
     this.anonymousRuleRankings = Boolean(options.anonymousRuleRankings);
     this.contributeMatchedAccounts = Boolean(options.contributeMatchedAccounts);
-    this._engineOptions = { ...options };
-    this.engine = new SlopTrapStaticEngine(options);
+    this.contributorToken = typeof options.contributorToken === "string" ? options.contributorToken.trim() : "";
+    this._engineOptions = { ...options, contributorMode: Boolean(options.contributeMatchedAccounts && this.contributorToken) };
+    this.engine = new SlopTrapStaticEngine(this._engineOptions);
     this.availableSites = ["youtube", "tiktok", "pinterest"];
     this.lastSyncErrors = [];
     this._submittedMatches = new Set();
@@ -1510,6 +1619,11 @@ export class SlopTrapClient {
     this.anonymousRuleRankings = Boolean(val);
   }
 
+  setContributorToken(tok) {
+    this.contributorToken = typeof tok === "string" ? tok.trim() : "";
+    this.engine.contributorMode = Boolean(this.contributeMatchedAccounts && this.contributorToken);
+  }
+
   async switchSite(site) {
     this.engine = new SlopTrapStaticEngine({
       ...this._engineOptions,
@@ -1518,6 +1632,9 @@ export class SlopTrapClient {
       communityRules: this.engine.communityRules,
       warnThreshold: this.engine.warnThreshold,
       blockThreshold: this.engine.blockThreshold,
+      listWarnThreshold: this.engine.listWarnThreshold,
+      listBlockThreshold: this.engine.listBlockThreshold,
+      contributorMode: Boolean(this.contributeMatchedAccounts && this.contributorToken),
     });
     return this.syncRegistry();
   }
@@ -1577,7 +1694,7 @@ export class SlopTrapClient {
         if (!isPlainObject(info) || info.site !== this.site) continue;
         if (typeof info.rule_id !== "string" || !RULE_ID_RE.test(info.rule_id) || !isSafeListPath(info.path)) continue;
         const r = this.engine.rules.get(info.rule_id);
-        if (!r || r.tier !== "official") continue;
+        if (!r || (r.tier !== "official" && r.tier !== "community")) continue;
         try {
           this.engine.loadRuleList(info.rule_id, await fetchCapped(`${this.registryBaseUrl}/${info.path}`, MAX_LIST_BYTES));
         } catch {}
@@ -1604,8 +1721,9 @@ export class SlopTrapClient {
 
   async evaluate(fp) {
     const res = await this.engine.evaluate(fp);
-    if (this.contributeMatchedAccounts && this.rankingsEndpoint && res.newly_matched_rules?.length > 0) {
+    if (this.contributeMatchedAccounts && this.contributorToken && this.rankingsEndpoint && res.newly_matched_rules?.length > 0) {
       const fresh = res.newly_matched_rules.filter(m => {
+        if (m.action !== "block") return false;
         const k = `${m.site}|${m.rule_id}|${m.account_key}`;
         if (this._submittedMatches.has(k)) return false;
         this._submittedMatches.add(k);
@@ -1616,7 +1734,10 @@ export class SlopTrapClient {
         fetch(`${this.rankingsEndpoint}/api/v1/lists/report-matches`, {
           method: "POST",
           credentials: "omit",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${this.contributorToken}`,
+          },
           body: JSON.stringify({ site: this.site, matches: fresh }),
         }).catch(() => {});
       }

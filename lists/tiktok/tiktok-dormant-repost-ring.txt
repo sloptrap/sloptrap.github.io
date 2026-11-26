@@ -1,5 +1,4 @@
 ! SlopTrap Public Rule Matched Accounts
 ! Rule: tiktok-dormant-repost-ring (Bought-Account & Handle-Stem Repost Ring)
 ! Site: tiktok
-! Entries: 1
-@redditstories-q9x
+! Entries: 0

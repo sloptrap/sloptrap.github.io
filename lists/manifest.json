@@ -1,13 +1,34 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-26T08:27:10Z",
+  "generated_at": "2026-11-26T20:02:19Z",
   "lists": {
-    "youtube/llm-prosody-deep": {
-      "site": "youtube",
-      "rule_id": "llm-prosody-deep",
-      "path": "lists/youtube/llm-prosody-deep.txt",
-      "count": 6,
-      "sha256": "4b587fb7bb2021365f2b230698636c50ec7489cb991b0a72a73cad9e6795c47f"
+    "pinterest/pinterest-affiliate-domain-ring": {
+      "site": "pinterest",
+      "rule_id": "pinterest-affiliate-domain-ring",
+      "path": "lists/pinterest/pinterest-affiliate-domain-ring.txt",
+      "count": 0,
+      "sha256": "2efb26cc41490bbd5a3a1e508fecd27a058b19e43e680f9d2a07fb8aa8938be0"
+    },
+    "pinterest/pinterest-ai-pin-mill": {
+      "site": "pinterest",
+      "rule_id": "pinterest-ai-pin-mill",
+      "path": "lists/pinterest/pinterest-ai-pin-mill.txt",
+      "count": 0,
+      "sha256": "b030afaaa69cbdea92455f32ae73aba472346c3ea37504dd89128eaa770d0716"
+    },
+    "tiktok/tiktok-dormant-repost-ring": {
+      "site": "tiktok",
+      "rule_id": "tiktok-dormant-repost-ring",
+      "path": "lists/tiktok/tiktok-dormant-repost-ring.txt",
+      "count": 0,
+      "sha256": "5f9e41c6fddf4866bf929a236499fcdb0f3cb7d0f23c01f3f54e8c1a278bafa9"
+    },
+    "tiktok/tiktok-tts-clip-farm": {
+      "site": "tiktok",
+      "rule_id": "tiktok-tts-clip-farm",
+      "path": "lists/tiktok/tiktok-tts-clip-farm.txt",
+      "count": 0,
+      "sha256": "15ec115337d3f9c62179d0987ab46a72f7d28546563346f66c32773fad0dd43e"
     },
     "youtube/clone-farm-sentinel": {
       "site": "youtube",
@@ -16,40 +37,19 @@
       "count": 0,
       "sha256": "637231626b603305a4e07ed8cc697784cf1a757695740b48ad069b2a5e8106a2"
     },
+    "youtube/llm-prosody-deep": {
+      "site": "youtube",
+      "rule_id": "llm-prosody-deep",
+      "path": "lists/youtube/llm-prosody-deep.txt",
+      "count": 0,
+      "sha256": "8880c0acac95ca48e61c3f4943b26089b19b6febbf0aab789908033a0f410bdb"
+    },
     "youtube/necro-hijack-guard": {
       "site": "youtube",
       "rule_id": "necro-hijack-guard",
       "path": "lists/youtube/necro-hijack-guard.txt",
       "count": 0,
       "sha256": "ab7e6886fb966be1140f2a50f9a338d90d8ddf0a9088f2d39ee0ce922c247bba"
-    },
-    "tiktok/tiktok-dormant-repost-ring": {
-      "site": "tiktok",
-      "rule_id": "tiktok-dormant-repost-ring",
-      "path": "lists/tiktok/tiktok-dormant-repost-ring.txt",
-      "count": 1,
-      "sha256": "39d5593bca9a7d61c474c1e70b137295cb1d2a7b2003672b768605966b8b88d1"
-    },
-    "tiktok/tiktok-tts-clip-farm": {
-      "site": "tiktok",
-      "rule_id": "tiktok-tts-clip-farm",
-      "path": "lists/tiktok/tiktok-tts-clip-farm.txt",
-      "count": 1,
-      "sha256": "77b319a063dc4368e356e653009d53484c57224f1b7423c058db3617fc32cc47"
-    },
-    "pinterest/pinterest-affiliate-domain-ring": {
-      "site": "pinterest",
-      "rule_id": "pinterest-affiliate-domain-ring",
-      "path": "lists/pinterest/pinterest-affiliate-domain-ring.txt",
-      "count": 1,
-      "sha256": "0b912726be4f78a09df5c01953fea55223c0efdc35862c587535fd60ab435d72"
-    },
-    "pinterest/pinterest-ai-pin-mill": {
-      "site": "pinterest",
-      "rule_id": "pinterest-ai-pin-mill",
-      "path": "lists/pinterest/pinterest-ai-pin-mill.txt",
-      "count": 1,
-      "sha256": "ba34c3832111ffc7960232240f6870afcd36c844ab566f27fa6a5918ab34370b"
     }
   }
 }

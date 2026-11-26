@@ -1,10 +1,4 @@
 ! SlopTrap Public Rule Matched Accounts
 ! Rule: llm-prosody-deep (LLM Script & Synthetic Voice Deep Scan)
 ! Site: youtube
-! Entries: 6
-@blackoutsurvival_guide
-@boringhistorysecrets
-@britaininbattle-u4n
-@canadianww2tales
-@starfortunedesk-k8h
-@theverdictroom-z1b
+! Entries: 0

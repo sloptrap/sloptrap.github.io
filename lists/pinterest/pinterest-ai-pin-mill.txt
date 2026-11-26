@@ -1,5 +1,4 @@
 ! SlopTrap Public Rule Matched Accounts
 ! Rule: pinterest-ai-pin-mill (Synthetic Image & SEO Pin Mill)
 ! Site: pinterest
-! Entries: 1
-@cozydecor-z4k
+! Entries: 0

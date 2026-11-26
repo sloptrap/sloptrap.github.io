@@ -1,5 +1,4 @@
 ! SlopTrap Public Rule Matched Accounts
 ! Rule: pinterest-affiliate-domain-ring (Affiliate Domain Funnel & Board Hijack Guard)
 ! Site: pinterest
-! Entries: 1
-@cozydecor-z4k
+! Entries: 0

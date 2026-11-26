@@ -1,0 +1,740 @@
+{
+ "valid": {
+  "test_seed_hex": "0101010101010101010101010101010101010101010101010101010101010101",
+  "test_public_key_hex": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+  "manifest": {
+   "rule_id": "test-rule",
+   "name": "Ünïcode \"quoted\" \\ name ✓",
+   "version": "1.2.3",
+   "author": "@tester",
+   "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+   "target_site": "youtube",
+   "description": "desc with <b>html</b> & emoji 🎉",
+   "repo_url": "https://github.com/sloptrap/sloptrap",
+   "interpreter": "wasm-v1",
+   "inputs": [
+    "metadata",
+    "transcript"
+   ],
+   "weight_milli": 1300,
+   "overhead": 4,
+   "provenance": {
+    "source_repo": "",
+    "source_commit": "",
+    "build_run_url": "",
+    "submission_id": ""
+   }
+  },
+  "wasm_hex": "0061736d01000000",
+  "canon_utf8": "sloptrap-manifest-v2\n{\"author\":\"@tester\",\"author_public_key\":\"8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c\",\"description\":\"desc with <b>html</b> & emoji 🎉\",\"inputs\":[\"metadata\",\"transcript\"],\"interpreter\":\"wasm-v1\",\"name\":\"Ünïcode \\\"quoted\\\" \\\\ name ✓\",\"overhead\":4,\"provenance\":{\"build_run_url\":\"\",\"source_commit\":\"\",\"source_repo\":\"\",\"submission_id\":\"\"},\"repo_url\":\"https://github.com/sloptrap/sloptrap\",\"rule_id\":\"test-rule\",\"target_site\":\"youtube\",\"version\":\"1.2.3\",\"weight_milli\":1300}",
+  "canon_hex": "736c6f70747261702d6d616e69666573742d76320a7b22617574686f72223a2240746573746572222c22617574686f725f7075626c69635f6b6579223a2238613838653364643734303966313935666435326462326433636261356437326361363730396266316439343132316266333734383830316234306636663563222c226465736372697074696f6e223a22646573632077697468203c623e68746d6c3c2f623e202620656d6f6a6920f09f8e89222c22696e70757473223a5b226d65746164617461222c227472616e736372697074225d2c22696e746572707265746572223a227761736d2d7631222c226e616d65223a22c39c6ec3af636f6465205c2271756f7465645c22205c5c206e616d6520e29c93222c226f76657268656164223a342c2270726f76656e616e6365223a7b226275696c645f72756e5f75726c223a22222c22736f757263655f636f6d6d6974223a22222c22736f757263655f7265706f223a22222c227375626d697373696f6e5f6964223a22227d2c227265706f5f75726c223a2268747470733a2f2f6769746875622e636f6d2f736c6f70747261702f736c6f7074726170222c2272756c655f6964223a22746573742d72756c65222c227461726765745f73697465223a22796f7574756265222c2276657273696f6e223a22312e322e33222c227765696768745f6d696c6c69223a313330307d",
+  "digest_hex": "29bce6460a8784da03a12c1f1ca003f44815b39fc871717cabefb924b351a7e1",
+  "signature_b64": "5ifiwVaR/E2VuZfb1JJOhzS8WEUseovqDhYeeWzWXxp5xE8+S4FMoIb31DNXkWM3X5Ljgx+dwEyPusBMFQM3Bg==",
+  "bundle": {
+   "format": "sloptrap-bundle-v2",
+   "manifest": {
+    "rule_id": "test-rule",
+    "name": "Ünïcode \"quoted\" \\ name ✓",
+    "version": "1.2.3",
+    "author": "@tester",
+    "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+    "target_site": "youtube",
+    "description": "desc with <b>html</b> & emoji 🎉",
+    "repo_url": "https://github.com/sloptrap/sloptrap",
+    "interpreter": "wasm-v1",
+    "inputs": [
+     "metadata",
+     "transcript"
+    ],
+    "weight_milli": 1300,
+    "overhead": 4,
+    "provenance": {
+     "source_repo": "",
+     "source_commit": "",
+     "build_run_url": "",
+     "submission_id": ""
+    }
+   },
+   "payload_b64": "AGFzbQEAAAA=",
+   "signature_b64": "5ifiwVaR/E2VuZfb1JJOhzS8WEUseovqDhYeeWzWXxp5xE8+S4FMoIb31DNXkWM3X5Ljgx+dwEyPusBMFQM3Bg=="
+  },
+  "expected_tier": "unverified"
+ },
+ "invalid_manifests": [
+  {
+   "case": "extra key",
+   "manifest": {
+    "rule_id": "test-rule",
+    "name": "Ünïcode \"quoted\" \\ name ✓",
+    "version": "1.2.3",
+    "author": "@tester",
+    "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+    "target_site": "youtube",
+    "description": "desc with <b>html</b> & emoji 🎉",
+    "repo_url": "https://github.com/sloptrap/sloptrap",
+    "interpreter": "wasm-v1",
+    "inputs": [
+     "metadata",
+     "transcript"
+    ],
+    "weight_milli": 1300,
+    "overhead": 4,
+    "provenance": {
+     "source_repo": "",
+     "source_commit": "",
+     "build_run_url": "",
+     "submission_id": ""
+    },
+    "extra": 1
+   },
+   "error_contains": "manifest"
+  },
+  {
+   "case": "missing provenance",
+   "manifest": {
+    "rule_id": "test-rule",
+    "name": "Ünïcode \"quoted\" \\ name ✓",
+    "version": "1.2.3",
+    "author": "@tester",
+    "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+    "target_site": "youtube",
+    "description": "desc with <b>html</b> & emoji 🎉",
+    "repo_url": "https://github.com/sloptrap/sloptrap",
+    "interpreter": "wasm-v1",
+    "inputs": [
+     "metadata",
+     "transcript"
+    ],
+    "weight_milli": 1300,
+    "overhead": 4
+   },
+   "error_contains": "manifest"
+  },
+  {
+   "case": "float weight",
+   "manifest": {
+    "rule_id": "test-rule",
+    "name": "Ünïcode \"quoted\" \\ name ✓",
+    "version": "1.2.3",
+    "author": "@tester",
+    "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+    "target_site": "youtube",
+    "description": "desc with <b>html</b> & emoji 🎉",
+    "repo_url": "https://github.com/sloptrap/sloptrap",
+    "interpreter": "wasm-v1",
+    "inputs": [
+     "metadata",
+     "transcript"
+    ],
+    "weight_milli": 1300.0,
+    "overhead": 4,
+    "provenance": {
+     "source_repo": "",
+     "source_commit": "",
+     "build_run_url": "",
+     "submission_id": ""
+    }
+   },
+   "error_contains": "weight_milli"
+  },
+  {
+   "case": "bool overhead",
+   "manifest": {
+    "rule_id": "test-rule",
+    "name": "Ünïcode \"quoted\" \\ name ✓",
+    "version": "1.2.3",
+    "author": "@tester",
+    "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+    "target_site": "youtube",
+    "description": "desc with <b>html</b> & emoji 🎉",
+    "repo_url": "https://github.com/sloptrap/sloptrap",
+    "interpreter": "wasm-v1",
+    "inputs": [
+     "metadata",
+     "transcript"
+    ],
+    "weight_milli": 1300,
+    "overhead": true,
+    "provenance": {
+     "source_repo": "",
+     "source_commit": "",
+     "build_run_url": "",
+     "submission_id": ""
+    }
+   },
+   "error_contains": "overhead"
+  },
+  {
+   "case": "weight too big",
+   "manifest": {
+    "rule_id": "test-rule",
+    "name": "Ünïcode \"quoted\" \\ name ✓",
+    "version": "1.2.3",
+    "author": "@tester",
+    "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+    "target_site": "youtube",
+    "description": "desc with <b>html</b> & emoji 🎉",
+    "repo_url": "https://github.com/sloptrap/sloptrap",
+    "interpreter": "wasm-v1",
+    "inputs": [
+     "metadata",
+     "transcript"
+    ],
+    "weight_milli": 10001,
+    "overhead": 4,
+    "provenance": {
+     "source_repo": "",
+     "source_commit": "",
+     "build_run_url": "",
+     "submission_id": ""
+    }
+   },
+   "error_contains": "weight_milli"
+  },
+  {
+   "case": "bad version",
+   "manifest": {
+    "rule_id": "test-rule",
+    "name": "Ünïcode \"quoted\" \\ name ✓",
+    "version": "1.0.0\nrule_id=x",
+    "author": "@tester",
+    "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+    "target_site": "youtube",
+    "description": "desc with <b>html</b> & emoji 🎉",
+    "repo_url": "https://github.com/sloptrap/sloptrap",
+    "interpreter": "wasm-v1",
+    "inputs": [
+     "metadata",
+     "transcript"
+    ],
+    "weight_milli": 1300,
+    "overhead": 4,
+    "provenance": {
+     "source_repo": "",
+     "source_commit": "",
+     "build_run_url": "",
+     "submission_id": ""
+    }
+   },
+   "error_contains": "version"
+  },
+  {
+   "case": "control char in name",
+   "manifest": {
+    "rule_id": "test-rule",
+    "name": "a\tb",
+    "version": "1.2.3",
+    "author": "@tester",
+    "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+    "target_site": "youtube",
+    "description": "desc with <b>html</b> & emoji 🎉",
+    "repo_url": "https://github.com/sloptrap/sloptrap",
+    "interpreter": "wasm-v1",
+    "inputs": [
+     "metadata",
+     "transcript"
+    ],
+    "weight_milli": 1300,
+    "overhead": 4,
+    "provenance": {
+     "source_repo": "",
+     "source_commit": "",
+     "build_run_url": "",
+     "submission_id": ""
+    }
+   },
+   "error_contains": "name"
+  },
+  {
+   "case": "U+2028 in description",
+   "manifest": {
+    "rule_id": "test-rule",
+    "name": "Ünïcode \"quoted\" \\ name ✓",
+    "version": "1.2.3",
+    "author": "@tester",
+    "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+    "target_site": "youtube",
+    "description": "a b",
+    "repo_url": "https://github.com/sloptrap/sloptrap",
+    "interpreter": "wasm-v1",
+    "inputs": [
+     "metadata",
+     "transcript"
+    ],
+    "weight_milli": 1300,
+    "overhead": 4,
+    "provenance": {
+     "source_repo": "",
+     "source_commit": "",
+     "build_run_url": "",
+     "submission_id": ""
+    }
+   },
+   "error_contains": "description"
+  },
+  {
+   "case": "uppercase key",
+   "manifest": {
+    "rule_id": "test-rule",
+    "name": "Ünïcode \"quoted\" \\ name ✓",
+    "version": "1.2.3",
+    "author": "@tester",
+    "author_public_key": "8A88E3DD7409F195FD52DB2D3CBA5D72CA6709BF1D94121BF3748801B40F6F5C",
+    "target_site": "youtube",
+    "description": "desc with <b>html</b> & emoji 🎉",
+    "repo_url": "https://github.com/sloptrap/sloptrap",
+    "interpreter": "wasm-v1",
+    "inputs": [
+     "metadata",
+     "transcript"
+    ],
+    "weight_milli": 1300,
+    "overhead": 4,
+    "provenance": {
+     "source_repo": "",
+     "source_commit": "",
+     "build_run_url": "",
+     "submission_id": ""
+    }
+   },
+   "error_contains": "author_public_key"
+  },
+  {
+   "case": "bad site",
+   "manifest": {
+    "rule_id": "test-rule",
+    "name": "Ünïcode \"quoted\" \\ name ✓",
+    "version": "1.2.3",
+    "author": "@tester",
+    "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+    "target_site": "../x",
+    "description": "desc with <b>html</b> & emoji 🎉",
+    "repo_url": "https://github.com/sloptrap/sloptrap",
+    "interpreter": "wasm-v1",
+    "inputs": [
+     "metadata",
+     "transcript"
+    ],
+    "weight_milli": 1300,
+    "overhead": 4,
+    "provenance": {
+     "source_repo": "",
+     "source_commit": "",
+     "build_run_url": "",
+     "submission_id": ""
+    }
+   },
+   "error_contains": "target_site"
+  },
+  {
+   "case": "bad repo",
+   "manifest": {
+    "rule_id": "test-rule",
+    "name": "Ünïcode \"quoted\" \\ name ✓",
+    "version": "1.2.3",
+    "author": "@tester",
+    "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+    "target_site": "youtube",
+    "description": "desc with <b>html</b> & emoji 🎉",
+    "repo_url": "javascript:alert(1)",
+    "interpreter": "wasm-v1",
+    "inputs": [
+     "metadata",
+     "transcript"
+    ],
+    "weight_milli": 1300,
+    "overhead": 4,
+    "provenance": {
+     "source_repo": "",
+     "source_commit": "",
+     "build_run_url": "",
+     "submission_id": ""
+    }
+   },
+   "error_contains": "repo_url"
+  },
+  {
+   "case": "dup inputs",
+   "manifest": {
+    "rule_id": "test-rule",
+    "name": "Ünïcode \"quoted\" \\ name ✓",
+    "version": "1.2.3",
+    "author": "@tester",
+    "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+    "target_site": "youtube",
+    "description": "desc with <b>html</b> & emoji 🎉",
+    "repo_url": "https://github.com/sloptrap/sloptrap",
+    "interpreter": "wasm-v1",
+    "inputs": [
+     "metadata",
+     "metadata"
+    ],
+    "weight_milli": 1300,
+    "overhead": 4,
+    "provenance": {
+     "source_repo": "",
+     "source_commit": "",
+     "build_run_url": "",
+     "submission_id": ""
+    }
+   },
+   "error_contains": "inputs"
+  },
+  {
+   "case": "unknown input",
+   "manifest": {
+    "rule_id": "test-rule",
+    "name": "Ünïcode \"quoted\" \\ name ✓",
+    "version": "1.2.3",
+    "author": "@tester",
+    "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+    "target_site": "youtube",
+    "description": "desc with <b>html</b> & emoji 🎉",
+    "repo_url": "https://github.com/sloptrap/sloptrap",
+    "interpreter": "wasm-v1",
+    "inputs": [
+     "metadata",
+     "x"
+    ],
+    "weight_milli": 1300,
+    "overhead": 4,
+    "provenance": {
+     "source_repo": "",
+     "source_commit": "",
+     "build_run_url": "",
+     "submission_id": ""
+    }
+   },
+   "error_contains": "inputs"
+  },
+  {
+   "case": "rule id traversal",
+   "manifest": {
+    "rule_id": "../../escaped",
+    "name": "Ünïcode \"quoted\" \\ name ✓",
+    "version": "1.2.3",
+    "author": "@tester",
+    "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+    "target_site": "youtube",
+    "description": "desc with <b>html</b> & emoji 🎉",
+    "repo_url": "https://github.com/sloptrap/sloptrap",
+    "interpreter": "wasm-v1",
+    "inputs": [
+     "metadata",
+     "transcript"
+    ],
+    "weight_milli": 1300,
+    "overhead": 4,
+    "provenance": {
+     "source_repo": "",
+     "source_commit": "",
+     "build_run_url": "",
+     "submission_id": ""
+    }
+   },
+   "error_contains": "rule_id"
+  },
+  {
+   "case": "long name",
+   "manifest": {
+    "rule_id": "test-rule",
+    "name": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "version": "1.2.3",
+    "author": "@tester",
+    "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+    "target_site": "youtube",
+    "description": "desc with <b>html</b> & emoji 🎉",
+    "repo_url": "https://github.com/sloptrap/sloptrap",
+    "interpreter": "wasm-v1",
+    "inputs": [
+     "metadata",
+     "transcript"
+    ],
+    "weight_milli": 1300,
+    "overhead": 4,
+    "provenance": {
+     "source_repo": "",
+     "source_commit": "",
+     "build_run_url": "",
+     "submission_id": ""
+    }
+   },
+   "error_contains": "name"
+  },
+  {
+   "case": "provenance extra",
+   "manifest": {
+    "rule_id": "test-rule",
+    "name": "Ünïcode \"quoted\" \\ name ✓",
+    "version": "1.2.3",
+    "author": "@tester",
+    "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+    "target_site": "youtube",
+    "description": "desc with <b>html</b> & emoji 🎉",
+    "repo_url": "https://github.com/sloptrap/sloptrap",
+    "interpreter": "wasm-v1",
+    "inputs": [
+     "metadata",
+     "transcript"
+    ],
+    "weight_milli": 1300,
+    "overhead": 4,
+    "provenance": {
+     "source_repo": "",
+     "source_commit": "",
+     "build_run_url": "",
+     "submission_id": "",
+     "verified": true
+    }
+   },
+   "error_contains": "provenance"
+  },
+  {
+   "case": "bad commit",
+   "manifest": {
+    "rule_id": "test-rule",
+    "name": "Ünïcode \"quoted\" \\ name ✓",
+    "version": "1.2.3",
+    "author": "@tester",
+    "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+    "target_site": "youtube",
+    "description": "desc with <b>html</b> & emoji 🎉",
+    "repo_url": "https://github.com/sloptrap/sloptrap",
+    "interpreter": "wasm-v1",
+    "inputs": [
+     "metadata",
+     "transcript"
+    ],
+    "weight_milli": 1300,
+    "overhead": 4,
+    "provenance": {
+     "source_repo": "",
+     "source_commit": "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+     "build_run_url": "",
+     "submission_id": ""
+    }
+   },
+   "error_contains": "provenance.source_commit"
+  }
+ ],
+ "tampered_bundles": [
+  {
+   "case": "description changed",
+   "bundle": {
+    "format": "sloptrap-bundle-v2",
+    "manifest": {
+     "rule_id": "test-rule",
+     "name": "Ünïcode \"quoted\" \\ name ✓",
+     "version": "1.2.3",
+     "author": "@tester",
+     "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+     "target_site": "youtube",
+     "description": "other",
+     "repo_url": "https://github.com/sloptrap/sloptrap",
+     "interpreter": "wasm-v1",
+     "inputs": [
+      "metadata",
+      "transcript"
+     ],
+     "weight_milli": 1300,
+     "overhead": 4,
+     "provenance": {
+      "source_repo": "",
+      "source_commit": "",
+      "build_run_url": "",
+      "submission_id": ""
+     }
+    },
+    "payload_b64": "AGFzbQEAAAA=",
+    "signature_b64": "5ifiwVaR/E2VuZfb1JJOhzS8WEUseovqDhYeeWzWXxp5xE8+S4FMoIb31DNXkWM3X5Ljgx+dwEyPusBMFQM3Bg=="
+   }
+  },
+  {
+   "case": "target_site changed",
+   "bundle": {
+    "format": "sloptrap-bundle-v2",
+    "manifest": {
+     "rule_id": "test-rule",
+     "name": "Ünïcode \"quoted\" \\ name ✓",
+     "version": "1.2.3",
+     "author": "@tester",
+     "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+     "target_site": "tiktok",
+     "description": "desc with <b>html</b> & emoji 🎉",
+     "repo_url": "https://github.com/sloptrap/sloptrap",
+     "interpreter": "wasm-v1",
+     "inputs": [
+      "metadata",
+      "transcript"
+     ],
+     "weight_milli": 1300,
+     "overhead": 4,
+     "provenance": {
+      "source_repo": "",
+      "source_commit": "",
+      "build_run_url": "",
+      "submission_id": ""
+     }
+    },
+    "payload_b64": "AGFzbQEAAAA=",
+    "signature_b64": "5ifiwVaR/E2VuZfb1JJOhzS8WEUseovqDhYeeWzWXxp5xE8+S4FMoIb31DNXkWM3X5Ljgx+dwEyPusBMFQM3Bg=="
+   }
+  },
+  {
+   "case": "payload trailing byte",
+   "bundle": {
+    "format": "sloptrap-bundle-v2",
+    "manifest": {
+     "rule_id": "test-rule",
+     "name": "Ünïcode \"quoted\" \\ name ✓",
+     "version": "1.2.3",
+     "author": "@tester",
+     "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+     "target_site": "youtube",
+     "description": "desc with <b>html</b> & emoji 🎉",
+     "repo_url": "https://github.com/sloptrap/sloptrap",
+     "interpreter": "wasm-v1",
+     "inputs": [
+      "metadata",
+      "transcript"
+     ],
+     "weight_milli": 1300,
+     "overhead": 4,
+     "provenance": {
+      "source_repo": "",
+      "source_commit": "",
+      "build_run_url": "",
+      "submission_id": ""
+     }
+    },
+    "payload_b64": "AGFzbQEAAAAA",
+    "signature_b64": "5ifiwVaR/E2VuZfb1JJOhzS8WEUseovqDhYeeWzWXxp5xE8+S4FMoIb31DNXkWM3X5Ljgx+dwEyPusBMFQM3Bg=="
+   }
+  },
+  {
+   "case": "empty key",
+   "bundle": {
+    "format": "sloptrap-bundle-v2",
+    "manifest": {
+     "rule_id": "test-rule",
+     "name": "Ünïcode \"quoted\" \\ name ✓",
+     "version": "1.2.3",
+     "author": "@tester",
+     "author_public_key": "",
+     "target_site": "youtube",
+     "description": "desc with <b>html</b> & emoji 🎉",
+     "repo_url": "https://github.com/sloptrap/sloptrap",
+     "interpreter": "wasm-v1",
+     "inputs": [
+      "metadata",
+      "transcript"
+     ],
+     "weight_milli": 1300,
+     "overhead": 4,
+     "provenance": {
+      "source_repo": "",
+      "source_commit": "",
+      "build_run_url": "",
+      "submission_id": ""
+     }
+    },
+    "payload_b64": "AGFzbQEAAAA=",
+    "signature_b64": "5ifiwVaR/E2VuZfb1JJOhzS8WEUseovqDhYeeWzWXxp5xE8+S4FMoIb31DNXkWM3X5Ljgx+dwEyPusBMFQM3Bg=="
+   }
+  },
+  {
+   "case": "short signature",
+   "bundle": {
+    "format": "sloptrap-bundle-v2",
+    "manifest": {
+     "rule_id": "test-rule",
+     "name": "Ünïcode \"quoted\" \\ name ✓",
+     "version": "1.2.3",
+     "author": "@tester",
+     "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+     "target_site": "youtube",
+     "description": "desc with <b>html</b> & emoji 🎉",
+     "repo_url": "https://github.com/sloptrap/sloptrap",
+     "interpreter": "wasm-v1",
+     "inputs": [
+      "metadata",
+      "transcript"
+     ],
+     "weight_milli": 1300,
+     "overhead": 4,
+     "provenance": {
+      "source_repo": "",
+      "source_commit": "",
+      "build_run_url": "",
+      "submission_id": ""
+     }
+    },
+    "payload_b64": "AGFzbQEAAAA=",
+    "signature_b64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+   }
+  },
+  {
+   "case": "v1 format",
+   "bundle": {
+    "format": "sloptrap-bundle-v1",
+    "manifest": {
+     "rule_id": "test-rule",
+     "name": "Ünïcode \"quoted\" \\ name ✓",
+     "version": "1.2.3",
+     "author": "@tester",
+     "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+     "target_site": "youtube",
+     "description": "desc with <b>html</b> & emoji 🎉",
+     "repo_url": "https://github.com/sloptrap/sloptrap",
+     "interpreter": "wasm-v1",
+     "inputs": [
+      "metadata",
+      "transcript"
+     ],
+     "weight_milli": 1300,
+     "overhead": 4,
+     "provenance": {
+      "source_repo": "",
+      "source_commit": "",
+      "build_run_url": "",
+      "submission_id": ""
+     }
+    },
+    "payload_b64": "AGFzbQEAAAA=",
+    "signature_b64": "5ifiwVaR/E2VuZfb1JJOhzS8WEUseovqDhYeeWzWXxp5xE8+S4FMoIb31DNXkWM3X5Ljgx+dwEyPusBMFQM3Bg=="
+   }
+  },
+  {
+   "case": "extra top-level",
+   "bundle": {
+    "format": "sloptrap-bundle-v2",
+    "manifest": {
+     "rule_id": "test-rule",
+     "name": "Ünïcode \"quoted\" \\ name ✓",
+     "version": "1.2.3",
+     "author": "@tester",
+     "author_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+     "target_site": "youtube",
+     "description": "desc with <b>html</b> & emoji 🎉",
+     "repo_url": "https://github.com/sloptrap/sloptrap",
+     "interpreter": "wasm-v1",
+     "inputs": [
+      "metadata",
+      "transcript"
+     ],
+     "weight_milli": 1300,
+     "overhead": 4,
+     "provenance": {
+      "source_repo": "",
+      "source_commit": "",
+      "build_run_url": "",
+      "submission_id": ""
+     }
+    },
+    "payload_b64": "AGFzbQEAAAA=",
+    "signature_b64": "5ifiwVaR/E2VuZfb1JJOhzS8WEUseovqDhYeeWzWXxp5xE8+S4FMoIb31DNXkWM3X5Ljgx+dwEyPusBMFQM3Bg==",
+    "extra": "y"
+   }
+  }
+ ]
+}

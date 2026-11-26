@@ -12,6 +12,8 @@ from decimal import Decimal
 FORMAT = "sloptrap-bundle-v2"
 OFFICIAL_KEYS = frozenset({"0540a396ece8ab0f9670a25e03b02e345450a1373b86a7d400dcad79ceec5cc1"})
 COMMUNITY_KEYS = frozenset({"34c3c2ee0d51ae18fbf669dc441a51faa06bbfcbf5efa6adf73702d644c5c69e"})
+LIST_SIGNING_PUBLIC_KEY = "303607bb2fc5bdebbb50021d3480d59da127d5c40122785ff4b6e228be54b3e1"
+LIST_SIGNING_KEYS = frozenset({LIST_SIGNING_PUBLIC_KEY})
 COMMUNITY_PREFIX = "community-"
 MAX_BUNDLE_BYTES = 512 * 1024
 MAX_WASM_BYTES = 256 * 1024
@@ -182,6 +184,103 @@ def verify_bundle(bundle) -> tuple[dict, bytes, str]:
     if (tier == "community") != is_comm_id:
         raise BundleError("bundle: community rule ids must start with 'community-' and only community bundles may use it")
     return m, wasm, tier
+
+
+# ---------------------------------------------------------------- signed list manifests (M4)
+LIST_SITES = frozenset({"youtube", "tiktok", "pinterest"})
+_ISO_Z_RE = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
+
+
+def canonical_list_manifest_bytes(generated_at: str, lists_obj: dict) -> bytes:
+    if not isinstance(generated_at, str) or not _ISO_Z_RE.fullmatch(generated_at):
+        raise BundleError("list manifest: invalid generated_at")
+    if not isinstance(lists_obj, dict):
+        raise BundleError("list manifest: lists must be an object")
+    lines = []
+    for k in sorted(lists_obj.keys()):
+        it = lists_obj[k]
+        if not isinstance(it, dict):
+            raise BundleError(f"list manifest: {k!r} must be an object")
+        site = it.get("site")
+        rid = it.get("rule_id")
+        path = it.get("path")
+        cnt = it.get("count")
+        sha = it.get("sha256")
+        if site not in LIST_SITES:
+            raise BundleError(f"list manifest: invalid site {site!r}")
+        _match(rid, "list.rule_id", _RE["rule_id"])
+        if k != f"{site}/{rid}" or path != f"lists/{site}/{rid}.txt":
+            raise BundleError(f"list manifest: mismatched key or path for {k!r}")
+        _int(cnt, "list.count", 0, 1_000_000_000)
+        _match(sha, "list.sha256", _RE["key"])
+        lines.append(f"{site}\t{rid}\t{path}\t{cnt}\t{sha}")
+    return ("sloptrap-list-manifest-v2\n" + generated_at + "\n" + "\n".join(lines)).encode("utf-8")
+
+
+def sign_list_manifest(manifest_doc: dict, seed_hex: str) -> dict:
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+    from cryptography.hazmat.primitives import serialization as ser
+
+    seed = bytes.fromhex(seed_hex.strip())
+    if len(seed) != 32:
+        raise BundleError("list seed must be 32 bytes hex")
+    sk = Ed25519PrivateKey.from_private_bytes(seed)
+    pub = sk.public_key().public_bytes(ser.Encoding.Raw, ser.PublicFormat.Raw).hex()
+    if pub not in LIST_SIGNING_KEYS:
+        raise BundleError("list signing seed does not match LIST_SIGNING_KEYS")
+    gen = manifest_doc.get("generated_at")
+    lists_in = manifest_doc.get("lists")
+    msg = canonical_list_manifest_bytes(gen, lists_in)
+    out_lists = {}
+    for k in sorted(lists_in.keys()):
+        it = dict(lists_in[k])
+        item_msg = (
+            f"sloptrap-list-item-v2\n{it['site']}\t{it['rule_id']}\t{it['path']}\t{it['count']}\t{it['sha256']}\t{gen}"
+        ).encode("utf-8")
+        it["signature_b64"] = base64.b64encode(sk.sign(item_msg)).decode("ascii")
+        out_lists[k] = it
+    return {
+        "schema_version": 2,
+        "generated_at": gen,
+        "public_key": pub,
+        "signature_b64": base64.b64encode(sk.sign(msg)).decode("ascii"),
+        "lists": out_lists,
+    }
+
+
+def verify_list_manifest(manifest_doc: dict) -> dict:
+    from cryptography.exceptions import InvalidSignature
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+
+    if not isinstance(manifest_doc, dict) or manifest_doc.get("schema_version") != 2:
+        raise BundleError("list manifest: unsupported schema_version")
+    pub_hex = manifest_doc.get("public_key")
+    if not isinstance(pub_hex, str) or pub_hex not in LIST_SIGNING_KEYS:
+        raise BundleError("list manifest: untrusted or missing public_key")
+    sig = _b64(manifest_doc.get("signature_b64"), "list manifest signature_b64")
+    if len(sig) != 64:
+        raise BundleError("list manifest: signature must be 64 bytes")
+    gen = manifest_doc.get("generated_at")
+    lists_obj = manifest_doc.get("lists")
+    msg = canonical_list_manifest_bytes(gen, lists_obj)
+    pub = Ed25519PublicKey.from_public_bytes(bytes.fromhex(pub_hex))
+    try:
+        pub.verify(sig, msg)
+    except InvalidSignature as e:
+        raise BundleError("list manifest: invalid Ed25519 signature") from e
+    for k, it in lists_obj.items():
+        if "signature_b64" in it:
+            isig = _b64(it.get("signature_b64"), f"{k}.signature_b64")
+            if len(isig) != 64:
+                raise BundleError(f"list manifest: {k} signature must be 64 bytes")
+            imsg = (
+                f"sloptrap-list-item-v2\n{it['site']}\t{it['rule_id']}\t{it['path']}\t{it['count']}\t{it['sha256']}\t{gen}"
+            ).encode("utf-8")
+            try:
+                pub.verify(isig, imsg)
+            except InvalidSignature as e:
+                raise BundleError(f"list manifest: invalid item signature for {k}") from e
+    return manifest_doc
 
 
 # ---------------------------------------------------------------- canonical fingerprint

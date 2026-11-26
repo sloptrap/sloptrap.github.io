@@ -8,9 +8,11 @@ Run by .github/workflows/sync-leaderboard.yml as `python3 -I scripts/sync_regist
 * Community bundles: GET /api/v1/rules/community-bundles?since=<unix>, paged. Each bundle is
   verified with strule_v2 and fully audited, must be tier community (computed from the key),
   is written to bundles/community/<rule_id>.strule, and must not collide with an official id.
-* Pre-matched lists: GET /api/v1/lists/entries?since=<unix>, paged from 0 every run, and the
+* Pre-matched lists: GET /api/v1/lists/entries?since=<unix>&after=<cursor>, cursor-paged from 0
+  every run, cross-checked against Ed25519-signed GET /api/v1/lists/attestations, and the
   list files are rebuilt from that data only (no merge with older, unvalidated entries).
-  Every row is re-validated: site, official rule id for that site, account key format.
+  Every row is re-validated: site, audited official or community rule id for that site,
+  and account key format.
 * Leaderboards are regenerated from the audited bundles. `verification_tier` and `verified`
   come from the audit (the signing key), never from remote data or manifest fields.
 """
@@ -39,7 +41,7 @@ SITE_NAMES = {"youtube": "YouTube", "tiktok": "TikTok", "pinterest": "Pinterest"
 ACCOUNT_KEY_RE = re.compile(r"^@[A-Za-z0-9._-]{3,100}$|^UC[A-Za-z0-9_-]{22}$")
 RULE_ID_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{1,63}$")
 MAX_RESPONSE_BYTES = 16 * 1024 * 1024
-MAX_PAGES = 200
+MAX_PAGES = 1000
 MAX_COMMUNITY_BUNDLES = 1000
 MAX_LIST_ENTRIES_PER_RULE = 100_000
 MAX_COUNT = 1_000_000_000
@@ -77,44 +79,66 @@ def _ts(v) -> int | None:
 
 
 def fetch_paged(get, path: str, rows_key: str, ts_key: str, row_key) -> list[dict]:
-    """Page through `path?since=` from 0 until a page adds nothing new.
-
-    Works whether the Worker treats `since` as inclusive or exclusive: when a page has no
-    row at exactly `since` (exclusive, or a gap), the boundary second is read again with
-    `since-1` so rows cut off at a page boundary are not lost. Duplicates are dropped.
-    (More rows in one second than a page holds cannot be paged past with a timestamp
-    cursor; the Worker's page size must stay above its per-second insert rate.)"""
+    """Page through `path` from 0 using keyset `after=` cursors when supported (M2),
+    or timestamp `since=` paging for legacy/small feeds."""
     seen: set = set()
     rows: list[dict] = []
 
-    def take(since: int) -> tuple[int, int, bool]:
-        doc = get(f"{path}?since={since}")
+    def ingest(doc) -> tuple[int, int, bool]:
         if not isinstance(doc, dict) or doc.get("ok") is not True or not isinstance(doc.get(rows_key), list):
             raise SyncError(f"{path}: unexpected response shape")
-        new, max_ts, boundary = 0, since, False
+        new, max_ts = 0, 0
         for r in doc[rows_key]:
-            ts = _ts(r.get(ts_key)) if isinstance(r, dict) else None
+            if not isinstance(r, dict):
+                continue
+            ts = _ts(r.get(ts_key))
             if ts is None:
                 continue
             max_ts = max(max_ts, ts)
-            boundary = boundary or ts == since
             k = row_key(r)
             if k in seen:
                 continue
             seen.add(k)
             rows.append(r)
             new += 1
-        return new, max_ts, boundary
+        return new, max_ts, bool(doc.get("has_more") is True)
 
+    def take_since(since: int) -> tuple[int, int, bool, dict]:
+        doc = get(f"{path}?since={since}")
+        new, max_ts, _hm = ingest(doc)
+        boundary = any(_ts(r.get(ts_key)) == since for r in doc[rows_key] if isinstance(r, dict))
+        return new, max_ts, boundary, doc
+
+    cursor: str | None = None
     since = 0
     for _ in range(MAX_PAGES):
-        new, max_ts, boundary = take(since)
+        if cursor is not None:
+            doc = get(f"{path}?since=0&after={urllib.parse.quote(cursor, safe='')}")
+            ingest(doc)
+            if doc.get("has_more") is True:
+                nxt = doc.get("next_cursor")
+                if not isinstance(nxt, str) or not nxt or nxt == cursor:
+                    raise SyncError(f"{path}: missing or non-advancing next_cursor")
+                cursor = nxt
+                continue
+            return rows
+
+        new, max_ts, boundary, doc = take_since(since)
+        if "has_more" in doc:
+            if doc.get("has_more") is True:
+                nxt = doc.get("next_cursor")
+                if not isinstance(nxt, str) or not nxt:
+                    raise SyncError(f"{path}: has_more=true without next_cursor")
+                cursor = nxt
+                continue
+            return rows
+
         if since > 0 and not boundary:
-            n2, m2, _b = take(since - 1)
+            n2, m2, _b, _d2 = take_since(since - 1)
             new, max_ts = new + n2, max(max_ts, m2)
         if new == 0:
             return rows
-        since = max_ts
+        since = max(since, max_ts)
     raise SyncError(f"{path}: more than {MAX_PAGES} pages")
 
 
@@ -245,33 +269,94 @@ def build_lists(rows: list[dict], rule_sites: dict[str, str]) -> tuple[dict[tupl
     return out, rejected
 
 
-def write_lists(root: Path, lists: dict[tuple[str, str], dict[str, int]], names: dict[str, str], now_iso: str) -> None:
+def format_list_text(site: str, rid: str, counts: dict[str, int]) -> tuple[str, int, str]:
+    ordered = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
+    lines = [f"{k}\t{c}" for k, c in ordered]
+    text = "\n".join([
+        "! SlopTrap Public Rule Matched Accounts (v2: account_key<TAB>count)",
+        f"! Rule: {rid}",
+        f"! Site: {site}",
+        f"! Entries: {len(lines)}",
+        *lines,
+    ]) + "\n"
+    return text, len(lines), hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def write_lists(root: Path, lists: dict[tuple[str, str], dict[str, int]], _names: dict[str, str],
+                now_iso: str, signed_manifest: dict | None = None) -> None:
     ldir = root / "lists"
-    manifest = {"schema_version": 2, "generated_at": now_iso, "lists": {}}
-    wanted = set()
+    manifest: dict = {"schema_version": 2, "generated_at": now_iso, "lists": {}}
+    rendered: dict[str, tuple[Path, str, dict]] = {}
     for (site, rid) in sorted(lists):
         counts = lists[(site, rid)]
         if rid.startswith(strule_v2.COMMUNITY_PREFIX) and not counts:
             continue
-        ordered = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
-        lines = [f"{k}\t{c}" for k, c in ordered]
+        text, count, sha = format_list_text(site, rid, counts)
         path = ldir / site / f"{rid}.txt"
+        key = f"{site}/{rid}"
+        rendered[key] = (path, text, {
+            "site": site, "rule_id": rid, "path": f"lists/{site}/{rid}.txt", "count": count, "sha256": sha,
+        })
+
+    if signed_manifest is not None:
+        try:
+            strule_v2.verify_list_manifest(signed_manifest)
+        except Exception as e:  # noqa: BLE001
+            raise SyncError(f"invalid list attestation signature: {e}") from e
+        att_lists = signed_manifest.get("lists") or {}
+        if set(rendered.keys()) != set(att_lists.keys()):
+            raise SyncError(
+                f"list attestation keys {sorted(att_lists.keys())} do not match audited lists {sorted(rendered.keys())}"
+            )
+        for key, (_path, _text, local_item) in rendered.items():
+            att_item = att_lists[key]
+            if att_item.get("sha256") != local_item["sha256"] or att_item.get("count") != local_item["count"]:
+                raise SyncError(
+                    f"list attestation digest mismatch for {key}: local {local_item['sha256']} != signed {att_item.get('sha256')}"
+                )
+        manifest = {
+            "schema_version": 2,
+            "generated_at": signed_manifest["generated_at"],
+            "public_key": signed_manifest["public_key"],
+            "signature_b64": signed_manifest["signature_b64"],
+            "lists": {k: dict(att_lists[k]) for k in sorted(att_lists)},
+        }
+    else:
+        for key in sorted(rendered):
+            manifest["lists"][key] = rendered[key][2]
+
+    wanted = set()
+    for _key, (path, text, _item) in rendered.items():
         wanted.add(path)
         path.parent.mkdir(parents=True, exist_ok=True)
-        text = "\n".join(["! SlopTrap Public Rule Matched Accounts (v2: account_key<TAB>count)",
-                          f"! Rule: {rid} ({names.get(rid, rid)})",
-                          f"! Site: {site}",
-                          f"! Entries: {len(lines)}", *lines]) + "\n"
         if not path.exists() or path.read_text(encoding="utf-8") != text:
             path.write_text(text, encoding="utf-8")
-        manifest["lists"][f"{site}/{rid}"] = {
-            "site": site, "rule_id": rid, "path": f"lists/{site}/{rid}.txt", "count": len(lines),
-            "sha256": hashlib.sha256(text.encode("utf-8")).hexdigest()}
     for p in ldir.glob("*/*.txt"):  # lists for unknown sites or removed/unaudited rules are pruned
         if p not in wanted:
             print(f"removing list for a removed/unaudited rule or unknown site: {p.relative_to(root)}")
             p.unlink()
     (ldir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+
+
+def sync_lists(root: Path, get, audited_all: list[audit.AuditResult], now_iso: str) -> None:
+    rule_sites = {r.rule_id: r.target_site for r in audited_all}
+    names = {r.rule_id: r.manifest["name"] for r in audited_all}
+    last_err: Exception | None = None
+    for _attempt in range(2):
+        try:
+            rows = fetch_paged(get, "/api/v1/lists/entries", "entries", "updated_at",
+                               lambda r: (r.get("site"), r.get("rule_id"), r.get("account_key")))
+            att = get("/api/v1/lists/attestations")
+            if not isinstance(att, dict) or att.get("ok") is not True:
+                raise SyncError("missing /api/v1/lists/attestations payload")
+            lists, rejected = build_lists(rows, rule_sites)
+            write_lists(root, lists, names, now_iso, signed_manifest=att)
+            if rejected:
+                print(f"rejected {rejected} list row(s) (unknown site, unaudited rule, bad count, or bad account key)")
+            return
+        except Exception as e:  # noqa: BLE001
+            last_err = e
+    raise SyncError(str(last_err)) from last_err
 
 
 # ------------------------------------------------------------------------ leaderboards
@@ -490,18 +575,11 @@ def run(root: Path, get, gh_fetch, endpoint: str, now_iso: str, offline: bool = 
         return 0
     community = sync_community(root, get, official_ids)
 
+    audited_all = [*official, *community]
     try:
-        rows = fetch_paged(get, "/api/v1/lists/entries", "entries", "first_seen",
-                           lambda r: (r.get("site"), r.get("rule_id"), r.get("account_key")))
+        sync_lists(root, get, audited_all, now_iso)
     except Exception as e:  # noqa: BLE001
-        print(f"list fetch failed, keeping existing list files: {e}", file=sys.stderr)
-        rows = None
-    if rows is not None:
-        audited_all = [*official, *community]
-        lists, rejected = build_lists(rows, {r.rule_id: r.target_site for r in audited_all})
-        if rejected:
-            print(f"rejected {rejected} list row(s) (unknown site, unaudited rule, bad count, or bad account key)")
-        write_lists(root, lists, {r.rule_id: r.manifest["name"] for r in audited_all}, now_iso)
+        print(f"list sync failed, keeping existing list files: {e}", file=sys.stderr)
 
     write_leaderboards(root, official, community, fetch_stats(get), gh_fetch(), now_iso, endpoint)
     print(f"synced {len(official)} official and {len(community)} community rule(s)")

@@ -757,6 +757,49 @@ def check_leaderboards(root: Path, results: list[AuditResult]) -> list[str]:
                 errs.append(f"{rel}: {rid!r} author_public_key differs from the bundle")
             if e.get("bundle_sha256") and e["bundle_sha256"] != res.sha256:
                 errs.append(f"{rel}: {rid!r} bundle_sha256 mismatch")
+    errs.extend(check_lists(root, results))
+    return errs
+
+
+def check_lists(root: Path, results: list[AuditResult]) -> list[str]:
+    """Verify lists/manifest.json Ed25519 signature and per-file SHA-256 digests when lists/ exists (M4)."""
+    ldir = root / "lists"
+    man_path = ldir / "manifest.json"
+    if not ldir.exists():
+        return []
+    if not man_path.exists():
+        return ["lists/manifest.json: missing while lists/ directory exists"]
+    errs: list[str] = []
+    try:
+        man = strict_json_loads(man_path.read_bytes())
+        strule_v2.verify_list_manifest(man)
+    except Exception as e:  # noqa: BLE001
+        return [f"lists/manifest.json: {e}"]
+
+    allowed_pairs: set[tuple[str, str]] = set()
+    for r in results:
+        sites = ("youtube", "tiktok", "pinterest") if r.target_site == "*" else (r.target_site,)
+        for s in sites:
+            allowed_pairs.add((s, r.rule_id))
+
+    expected_paths: set[Path] = set()
+    for key, item in (man.get("lists") or {}).items():
+        pair = (item["site"], item["rule_id"])
+        if pair not in allowed_pairs:
+            errs.append(f"lists/manifest.json: {key!r} has no matching audited bundle")
+            continue
+        p = root / item["path"]
+        expected_paths.add(p)
+        if not p.is_file():
+            errs.append(f"{item['path']}: missing list file referenced by manifest")
+            continue
+        actual_sha = hashlib.sha256(p.read_bytes()).hexdigest()
+        if actual_sha != item["sha256"]:
+            errs.append(f"{item['path']}: sha256 mismatch (manifest {item['sha256']} != file {actual_sha})")
+
+    for p in sorted(ldir.glob("*/*.txt")):
+        if p not in expected_paths:
+            errs.append(f"{p.relative_to(root).as_posix()}: unlisted file in lists/ (not signed in manifest.json)")
     return errs
 
 

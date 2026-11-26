@@ -5,6 +5,7 @@ import json
 import sys
 import tempfile
 import unittest
+import urllib.parse
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -13,6 +14,7 @@ from wasmgen import (  # noqa: E402
     COMMUNITY_TEST_SEED, OFFICIAL_TEST_SEED, TEST_SEED, bundle, bundle_bytes, module, ret_i64,
 )
 
+import strule_v2  # noqa: E402
 import sync_registry as S  # noqa: E402
 
 UC = "UC" + "a" * 22
@@ -20,25 +22,75 @@ WASM = module(body=ret_i64(10))
 
 
 class FakeWorker:
-    """Serves the Worker routes the sync uses. `inclusive` selects since semantics."""
+    """Serves the Worker routes the sync uses. Supports both cursor (`after=`) and legacy `since=`."""
 
-    def __init__(self, bundles=(), entries=(), stats=None, page=2, inclusive=True):
+    def __init__(self, bundles=(), entries=(), stats=None, page=2, inclusive=True,
+                 official_rules=None, cursor_mode=True, tamper_attestation=False):
         self.bundles, self.entries, self.stats = list(bundles), list(entries), stats
         self.page, self.inclusive, self.calls = page, inclusive, []
+        self.official_rules = official_rules or {"yt-rule": "youtube"}
+        self.cursor_mode = cursor_mode
+        self.tamper_attestation = tamper_attestation
 
     def _page(self, rows, ts_key, since):
         rows = sorted(rows, key=lambda r: r[ts_key])
         sel = [r for r in rows if (r[ts_key] >= since if self.inclusive else r[ts_key] > since)]
         return sel[: self.page]
 
+    def _cursor_entries(self, since, after):
+        norm = []
+        for r in self.entries:
+            ts = r.get("updated_at", r.get("first_seen", 0))
+            norm.append({**r, "updated_at": ts, "first_seen": ts})
+        norm.sort(key=lambda r: (r["updated_at"], r["site"], r["rule_id"], r["account_key"]))
+        if after:
+            ts_s, site, rid, acc = after.split("|", 3)
+            cur = (int(ts_s), site, rid, acc)
+            sel = [r for r in norm if (r["updated_at"], r["site"], r["rule_id"], r["account_key"]) > cur]
+        else:
+            sel = [r for r in norm if r["updated_at"] >= since]
+        has_more = len(sel) > self.page
+        chunk = sel[: self.page]
+        nxt = f"{chunk[-1]['updated_at']}|{chunk[-1]['site']}|{chunk[-1]['rule_id']}|{chunk[-1]['account_key']}" if has_more and chunk else None
+        return {"ok": True, "entries": chunk, "has_more": has_more, "next_cursor": nxt}
+
+    def _attestations(self):
+        rule_sites = dict(self.official_rules)
+        for b in self.bundles:
+            man = b.get("bundle", {}).get("manifest") if isinstance(b.get("bundle"), dict) else None
+            # Only bundles without injected top-level junk keys match valid community bundles
+            if man and set(b["bundle"].keys()) == {"format", "manifest", "payload_b64", "signature_b64"}:
+                rule_sites[b["rule_id"]] = man.get("target_site", "youtube")
+        lists, _ = S.build_lists(self.entries, rule_sites)
+        raw_lists = {}
+        for (site, rid) in sorted(lists):
+            counts = lists[(site, rid)]
+            if rid.startswith(strule_v2.COMMUNITY_PREFIX) and not counts:
+                continue
+            _txt, cnt, sha = S.format_list_text(site, rid, counts)
+            raw_lists[f"{site}/{rid}"] = {
+                "site": site, "rule_id": rid, "path": f"lists/{site}/{rid}.txt", "count": cnt, "sha256": sha,
+            }
+        signed = strule_v2.sign_list_manifest({"generated_at": "2026-11-26T00:00:00Z", "lists": raw_lists}, TEST_SEED)
+        if self.tamper_attestation and signed["lists"]:
+            first_key = next(iter(signed["lists"]))
+            signed["lists"][first_key]["count"] += 999
+        return {"ok": True, **signed}
+
     def __call__(self, path):
         self.calls.append(path)
         route, _, q = path.partition("?")
-        since = int(q.split("=", 1)[1]) if q else 0
+        qs = urllib.parse.parse_qs(q)
+        since = int(qs.get("since", ["0"])[0])
+        after = qs.get("after", [None])[0]
         if route == "/api/v1/rules/community-bundles":
             return {"ok": True, "bundles": self._page(self.bundles, "accepted_at", since)}
         if route == "/api/v1/lists/entries":
+            if self.cursor_mode:
+                return self._cursor_entries(since, after)
             return {"ok": True, "entries": self._page(self.entries, "first_seen", since)}
+        if route == "/api/v1/lists/attestations":
+            return self._attestations()
         if route == "/api/v1/rules/stats":
             if self.stats is None:
                 raise OSError("down")
@@ -52,11 +104,24 @@ class PagingTests(unittest.TestCase):
                 for i in range(7)]
         for inclusive in (True, False):
             with self.subTest(inclusive=inclusive):
-                w = FakeWorker(entries=rows, page=3, inclusive=inclusive)
+                w = FakeWorker(entries=rows, page=3, inclusive=inclusive, cursor_mode=False)
                 got = S.fetch_paged(w, "/api/v1/lists/entries", "entries", "first_seen",
                                     lambda r: (r["site"], r["rule_id"], r["account_key"]))
                 self.assertEqual(len(got), 7)
                 self.assertTrue(w.calls[0].endswith("since=0"))
+
+    def test_cursor_paging_over_more_than_1000_rows_in_same_second(self):
+        # M2 regression: 1,250 rows with identical updated_at + 1 row an hour later
+        rows = [
+            {"site": "youtube", "rule_id": "r", "account_key": f"@same{i:04d}", "count": 5, "updated_at": 1700000000}
+            for i in range(1250)
+        ]
+        rows.append({"site": "youtube", "rule_id": "r", "account_key": "@later_target", "count": 9, "updated_at": 1700003660})
+        w = FakeWorker(entries=rows, page=1000, cursor_mode=True)
+        got = S.fetch_paged(w, "/api/v1/lists/entries", "entries", "updated_at",
+                            lambda r: (r["site"], r["rule_id"], r["account_key"]))
+        self.assertEqual(len(got), 1251)
+        self.assertIn("@later_target", {r["account_key"] for r in got})
 
     def test_bad_shape_raises(self):
         with self.assertRaises(S.SyncError):
@@ -221,10 +286,23 @@ class EndToEndTests(unittest.TestCase):
             idx = json.loads((root / "leaderboard" / "index.json").read_text(encoding="utf-8"))
             self.assertEqual(idx["sites"][0]["community_count"], 1)
 
-            # The audit agrees with the regenerated leaderboard.
+            # The audit agrees with the regenerated leaderboard and signed lists/manifest.json.
             import audit_bundles as A
             self.assertEqual(A.main(["--root", str(root)]), 0)
             self.assertNotEqual(COM_PUB, OFF_PUB)
+
+            # M4: tampering with a .txt file or list attestation is caught fail-closed
+            yt_txt = root / "lists" / "youtube" / "yt-rule.txt"
+            orig_txt = yt_txt.read_text(encoding="utf-8")
+            yt_txt.write_text(orig_txt + "@injected\t99\n", encoding="utf-8")
+            self.assertEqual(A.main(["--root", str(root)]), 1)
+            yt_txt.write_text(orig_txt, encoding="utf-8")
+
+            bad_worker = FakeWorker(entries=worker.entries, bundles=worker.bundles, tamper_attestation=True)
+            official = S.audit_official(root)
+            community = S.offline_community(root, {r.rule_id for r in official})
+            with self.assertRaises(S.SyncError):
+                S.sync_lists(root, bad_worker, [*official, *community], "2026-11-26T00:00:00Z")
 
     def test_offline_regeneration_makes_no_requests(self):
         with test_keys(), tempfile.TemporaryDirectory() as td:

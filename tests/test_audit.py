@@ -26,11 +26,17 @@ POCS = FIXTURES / "pocs"
 HAVE_WASMTIME = A.wasmtime is not None
 OFF_PUB = pubkey(OFFICIAL_TEST_SEED)
 COM_PUB = pubkey(COMMUNITY_TEST_SEED)
+LIST_PUB = pubkey(TEST_SEED)
 
 
 def test_keys():
     """Patch the pinned key sets with test keys (the real seeds are never in CI)."""
-    return mock.patch.multiple(strule_v2, OFFICIAL_KEYS=frozenset({OFF_PUB}), COMMUNITY_KEYS=frozenset({COM_PUB}))
+    return mock.patch.multiple(
+        strule_v2,
+        OFFICIAL_KEYS=frozenset({OFF_PUB}),
+        COMMUNITY_KEYS=frozenset({COM_PUB}),
+        LIST_SIGNING_KEYS=frozenset({LIST_PUB}),
+    )
 
 
 def _fp_input(v):
@@ -84,7 +90,7 @@ class VectorTests(unittest.TestCase):
         import hashlib
         ref = Path(A.__file__).with_name("strule_v2.py").read_bytes()
         # sha256 of the shared reference strule_v2.py (must stay byte-identical across repos)
-        self.assertEqual(hashlib.sha256(ref).hexdigest(), "68f75b166e163ba396fc6176e7cf2ac8d73bc8ff3f7351fc4ad0478392df0726")
+        self.assertEqual(hashlib.sha256(ref).hexdigest(), "c40e42c6f5d56ce3be3713243b85f8805a347aa00c8a3b4684060db24d768616")
 
 
 class PocTests(unittest.TestCase):

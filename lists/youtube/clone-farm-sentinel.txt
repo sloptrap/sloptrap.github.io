@@ -1,4 +1,4 @@
 ! SlopTrap Public Rule Matched Accounts (v2: account_key<TAB>count)
-! Rule: clone-farm-sentinel (Clone-Farm & Velocity Sentinel)
+! Rule: clone-farm-sentinel
 ! Site: youtube
 ! Entries: 0

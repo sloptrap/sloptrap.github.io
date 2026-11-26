@@ -31,6 +31,9 @@ export const OFFICIAL_KEYS = Object.freeze([
 export const COMMUNITY_KEYS = Object.freeze([
   "34c3c2ee0d51ae18fbf669dc441a51faa06bbfcbf5efa6adf73702d644c5c69e",
 ]);
+export const LIST_SIGNING_KEYS = Object.freeze([
+  "303607bb2fc5bdebbb50021d3480d59da127d5c40122785ff4b6e228be54b3e1",
+]);
 export const COMMUNITY_PREFIX = "community-";
 
 export const MAX_BUNDLE_BYTES = 512 * 1024;
@@ -49,6 +52,7 @@ export const MAX_LIST_BYTES = 8 * 1024 * 1024;
 const PINNED_KEYRING = Object.freeze({
   official: new Set(OFFICIAL_KEYS),
   community: new Set(COMMUNITY_KEYS),
+  listSigning: new Set(LIST_SIGNING_KEYS),
   test: false,
 });
 
@@ -189,6 +193,14 @@ function subtleOrThrow() {
 
 async function sha256(bytes) {
   return new Uint8Array(await subtleOrThrow().digest("SHA-256", bytes));
+}
+
+export async function sha256HexBytes(input) {
+  const bytes = typeof input === "string" ? enc.encode(input) : input;
+  const digest = await sha256(bytes);
+  let out = "";
+  for (const b of digest) out += b.toString(16).padStart(2, "0");
+  return out;
 }
 
 function concatBytes(...arrays) {
@@ -1002,7 +1014,7 @@ export function normalizeAccountKey(raw) {
 
 /**
  * Parses v2 `<account_key>\t<count>` (or legacy bare `<account_key>`) list files into
- * `Map<normalizedAccountKey, count>`. Bare legacy entries default to `DEFAULT_LIST_BLOCK_THRESHOLD`.
+ * `Map<normalizedAccountKey, count>`. Bare legacy entries default to count `1` (L8).
  */
 export function parseAccountListCounts(txt) {
   const map = new Map();
@@ -1014,7 +1026,7 @@ export function parseAccountListCounts(txt) {
     const parts = line.split(/\s+/);
     const norm = normalizeAccountKey(parts[0]);
     if (!norm || norm.length > 101) continue;
-    let cnt = DEFAULT_LIST_BLOCK_THRESHOLD;
+    let cnt = 1;
     if (parts.length >= 2) {
       if (!/^\d{1,10}$/.test(parts[1])) continue;
       cnt = Number(parts[1]);
@@ -1025,6 +1037,78 @@ export function parseAccountListCounts(txt) {
     if (map.size >= MAX_LIST_ENTRIES) break;
   }
   return map;
+}
+
+const LIST_MANIFEST_SITES = new Set(["youtube", "tiktok", "pinterest"]);
+const ISO_Z_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
+
+export function canonicalListManifestBytes(generatedAt, listsObj) {
+  if (typeof generatedAt !== "string" || !ISO_Z_RE.test(generatedAt)) {
+    throw new BundleError("list manifest: invalid generated_at");
+  }
+  if (!isPlainObject(listsObj)) {
+    throw new BundleError("list manifest: lists must be an object");
+  }
+  const keys = Object.keys(listsObj).sort();
+  if (keys.length > 2000) throw new BundleError("list manifest: too many list entries");
+  const lines = keys.map(k => {
+    const it = listsObj[k];
+    if (!isPlainObject(it)) throw new BundleError(`list manifest: ${k} must be an object`);
+    const { site, rule_id: rid, path, count, sha256: sha } = it;
+    if (typeof site !== "string" || !LIST_MANIFEST_SITES.has(site)) {
+      throw new BundleError(`list manifest: invalid site ${String(site)}`);
+    }
+    if (typeof rid !== "string" || !RULE_ID_RE.test(rid)) {
+      throw new BundleError(`list manifest: invalid rule_id ${String(rid)}`);
+    }
+    if (k !== `${site}/${rid}` || path !== `lists/${site}/${rid}.txt`) {
+      throw new BundleError(`list manifest: mismatched key or path for ${k}`);
+    }
+    if (typeof count !== "number" || !Number.isSafeInteger(count) || count < 0 || count > 1_000_000_000) {
+      throw new BundleError(`list manifest: invalid count for ${k}`);
+    }
+    if (typeof sha !== "string" || !RE.key.test(sha)) {
+      throw new BundleError(`list manifest: invalid sha256 for ${k}`);
+    }
+    return `${site}\t${rid}\t${path}\t${count}\t${sha}`;
+  });
+  return enc.encode(`sloptrap-list-manifest-v2\n${generatedAt}\n${lines.join("\n")}`);
+}
+
+/**
+ * Verifies the Ed25519 signature of `lists/manifest.json` against pinned `LIST_SIGNING_KEYS` (M4).
+ * Fails closed on unsigned, tampered, or unknown-key manifests.
+ */
+export async function verifyListManifest(manifestDoc, allowedKeys = PINNED_KEYRING.listSigning) {
+  const doc = typeof manifestDoc === "string" ? JSON.parse(manifestDoc) : manifestDoc;
+  if (!isPlainObject(doc) || doc.schema_version !== 2) {
+    throw new BundleError("list manifest: unsupported schema_version");
+  }
+  const pubHex = doc.public_key;
+  const keySet = allowedKeys instanceof Set ? allowedKeys : new Set(allowedKeys || LIST_SIGNING_KEYS);
+  if (typeof pubHex !== "string" || !RE.key.test(pubHex) || !keySet.has(pubHex)) {
+    throw new BundleError("list manifest: untrusted or missing public_key");
+  }
+  const sig = b64ToBytes(doc.signature_b64, "list manifest signature_b64");
+  if (sig.length !== 64) throw new BundleError("list manifest: signature must be 64 bytes");
+  const msg = canonicalListManifestBytes(doc.generated_at, doc.lists);
+  const pub = hexToBytes(pubHex);
+  if (!(await ed25519Verify(pub, sig, msg))) {
+    throw new BundleError("list manifest: invalid Ed25519 signature");
+  }
+  for (const [k, it] of Object.entries(doc.lists)) {
+    if (it.signature_b64 !== undefined) {
+      const isig = b64ToBytes(it.signature_b64, `${k}.signature_b64`);
+      if (isig.length !== 64) throw new BundleError(`list manifest: ${k} signature must be 64 bytes`);
+      const imsg = enc.encode(
+        `sloptrap-list-item-v2\n${it.site}\t${it.rule_id}\t${it.path}\t${it.count}\t${it.sha256}\t${doc.generated_at}`
+      );
+      if (!(await ed25519Verify(pub, isig, imsg))) {
+        throw new BundleError(`list manifest: invalid item signature for ${k}`);
+      }
+    }
+  }
+  return doc;
 }
 
 export function parseAccountListText(txt) {
@@ -1371,7 +1455,7 @@ export class SlopTrapStaticEngine {
     } else {
       map = new Map();
       for (const item of textOrIterable || []) {
-        const [rawKey, rawCnt] = Array.isArray(item) ? item : [item, DEFAULT_LIST_BLOCK_THRESHOLD];
+        const [rawKey, rawCnt] = Array.isArray(item) ? item : [item, 1];
         const n = normalizeAccountKey(rawKey);
         const cnt = Number(rawCnt);
         if (n && Number.isSafeInteger(cnt) && cnt >= 1) map.set(n, cnt);
@@ -1388,9 +1472,8 @@ export class SlopTrapStaticEngine {
   }
 
   hasRuleListMatch(ruleId, accountKey) {
-    const cnt = this.getRuleListCount(ruleId, accountKey);
-    const thr = this.listBlockThreshold > 0 ? this.listBlockThreshold : 1;
-    return cnt >= thr;
+    if (this.listBlockThreshold <= 0) return false;
+    return this.getRuleListCount(ruleId, accountKey) >= this.listBlockThreshold;
   }
 
   listRules() {
@@ -1688,16 +1771,29 @@ export class SlopTrapClient {
     }
 
     try {
-      const lm = JSON.parse(await fetchCapped(`${this.registryBaseUrl}/lists/manifest.json`, 1 << 20));
+      const lm = await verifyListManifest(
+        JSON.parse(await fetchCapped(`${this.registryBaseUrl}/lists/manifest.json`, 1 << 20)),
+        this.engine._keyring.listSigning
+      );
       const lists = isPlainObject(lm?.lists) ? Object.values(lm.lists) : [];
+      const seenRules = new Set();
+      let totalBytes = 0;
       for (const info of lists) {
         if (!isPlainObject(info) || info.site !== this.site) continue;
         if (typeof info.rule_id !== "string" || !RULE_ID_RE.test(info.rule_id) || !isSafeListPath(info.path)) continue;
+        seenRules.add(info.rule_id);
         const r = this.engine.rules.get(info.rule_id);
         if (!r || (r.tier !== "official" && r.tier !== "community")) continue;
         try {
-          this.engine.loadRuleList(info.rule_id, await fetchCapped(`${this.registryBaseUrl}/${info.path}`, MAX_LIST_BYTES));
+          const txt = await fetchCapped(`${this.registryBaseUrl}/${info.path}`, MAX_LIST_BYTES);
+          totalBytes += txt.length;
+          if (totalBytes > 32 * 1024 * 1024) break;
+          if ((await sha256HexBytes(txt)) !== info.sha256) continue;
+          this.engine.loadRuleList(info.rule_id, txt);
         } catch {}
+      }
+      for (const rid of [...this.engine.ruleMatchedCounts.keys()]) {
+        if (!seenRules.has(rid)) this.engine.loadRuleList(rid, "");
       }
     } catch {}
 

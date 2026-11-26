@@ -1,4 +1,4 @@
 ! SlopTrap Public Rule Matched Accounts (v2: account_key<TAB>count)
-! Rule: pinterest-affiliate-domain-ring (Affiliate Domain Funnel & Board Hijack Guard)
+! Rule: pinterest-affiliate-domain-ring
 ! Site: pinterest
 ! Entries: 0

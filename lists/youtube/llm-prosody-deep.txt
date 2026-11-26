@@ -1,4 +1,4 @@
 ! SlopTrap Public Rule Matched Accounts (v2: account_key<TAB>count)
-! Rule: llm-prosody-deep (LLM Script & Synthetic Voice Deep Scan)
+! Rule: llm-prosody-deep
 ! Site: youtube
 ! Entries: 0

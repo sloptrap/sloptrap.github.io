@@ -1,4 +1,4 @@
 ! SlopTrap Public Rule Matched Accounts (v2: account_key<TAB>count)
-! Rule: tiktok-dormant-repost-ring (Bought-Account & Handle-Stem Repost Ring)
+! Rule: tiktok-dormant-repost-ring
 ! Site: tiktok
 ! Entries: 0

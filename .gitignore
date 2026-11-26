@@ -1,2 +1,24 @@
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Build / CI scratch
+_site/
+registry.patch
+
+# OS / editors
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Never commit key material
+*.seed
+*.pem
+*.key
+.env

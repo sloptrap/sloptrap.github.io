@@ -1,8 +1,8 @@
 /**
  * <sloptrap-rules-panel> — Drop-in Gravity UI Web Component
  * ---------------------------------------------------------
- * Embed full SlopTrap rule management (pluggable target site selector, Verified badges,
- * per-rule toggles, Verified-only guard, and Anonymous rule rankings opt-in) into any
+ * Embed full SlopTrap rule management (pluggable target site selector, Official/Community
+ * tier badges, per-rule toggles, Verified-only guard, and Anonymous rule rankings opt-in) into any
  * web application, browser extension options page, or Electron/Tauri view:
  *
  *   <script type="module" src="https://sloptrap.github.io/sdk/sloptrap-ui.js"></script>
@@ -201,10 +201,14 @@ export class SlopTrapRulesPanel extends HTMLElement {
               : rules
                   .map(r => {
                     const m = r.manifest;
-                    const p = r.provenance || {};
-                    const vBadge = p.verified
-                      ? `<span class="badge badge-ok" title="${p.tier === "official" ? "Signed by official SlopTrap maintainer key" : "Source-attested GitHub build"}">Verified · ${p.tier === "official" ? "Official" : "Source"}</span>`
-                      : "";
+                    // Tier comes from the SDK's key check (never from manifest fields).
+                    const tier = r.tier ?? r.provenance?.tier ?? "unverified";
+                    const vBadge =
+                      tier === "official"
+                        ? `<span class="badge badge-ok" title="Signed by the pinned SlopTrap official key">Official</span>`
+                        : tier === "community"
+                          ? `<span class="badge badge-oh" title="Community pipeline key; not reviewed by maintainers">Community</span>`
+                          : `<span class="badge badge-oh">Unverified</span>`;
                     return `
                       <div class="row">
                         <div>
@@ -212,7 +216,7 @@ export class SlopTrapRulesPanel extends HTMLElement {
                             <span class="r-name">${this.esc(m.name)}</span>
                             <span class="r-meta">v${this.esc(m.version)}</span>
                             ${vBadge}
-                            <span class="badge badge-oh">OH ${m.overhead}/10</span>
+                            <span class="badge badge-oh">OH ${this.esc(m.overhead)}/100</span>
                           </div>
                           <div class="r-desc">${this.esc(m.description)}</div>
                         </div>

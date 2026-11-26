@@ -850,3 +850,7 @@ svg.icon-14 {
     height: 32px;
   }
 }
+
+[hidden] {
+  display: none !important;
+}

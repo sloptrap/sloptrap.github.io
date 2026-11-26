@@ -3,16 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://sloptrap-worker.fablestre.am; base-uri 'none'; form-action 'none'; object-src 'none'" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>WASM Spec &amp; Provenance — SlopTrap</title>
   <link rel="stylesheet" href="../assets/gravity-uikit.css" />
   <link rel="stylesheet" href="../assets/style.css" />
 </head>
 <body class="g-root g-root_theme_dark">
-  <script>
-    if (localStorage.getItem('st-gravity-theme') === 'light') {
-      document.body.className = 'g-root g-root_theme_light';
-    }
-  </script>
+  <script src="../assets/theme-init.js"></script>
 
   <header class="g-app-header">
     <div class="g-app-header__inner">
@@ -22,7 +20,7 @@
             <svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2.5 4.5h11M4.5 8h7M6.5 11.5h3"/></svg>
           </span>
           <span>SlopTrap</span>
-          <span class="g-label g-label_theme_utility mono">wasm-v1</span>
+          <span class="g-label g-label_theme_utility mono">bundle v2</span>
         </a>
         <nav class="g-nav" aria-label="Primary">
           <a class="g-nav__item" href="../">Overview</a>
@@ -49,10 +47,10 @@
           <div class="docs-aside__title">Specification</div>
           <ul>
             <li><a href="#overview">1. Architecture &amp; Tokens</a></li>
-            <li><a href="#provenance">2. Verified Provenance</a></li>
-            <li><a href="#fingerprint">3. Multi-Site Fingerprint v1</a></li>
+            <li><a href="#provenance">2. Trust Tiers</a></li>
+            <li><a href="#fingerprint">3. Canonical Fingerprint</a></li>
             <li><a href="#wasm-abi">4. Guest WASM ABI</a></li>
-            <li><a href="#strule-crypto">5. Container &amp; Crypto</a></li>
+            <li><a href="#strule-crypto">5. Bundle v2 &amp; Signature</a></li>
             <li><a href="#security-audit">6. Security Audit &amp; CI</a></li>
           </ul>
         </div>
@@ -62,49 +60,59 @@
         <section class="docs-section" id="overview">
           <h1>1. Architecture, Common Syntax &amp; Shared Variables</h1>
           <p>
-            SlopTrap decouples platform-specific extraction (<code>youtube</code>, <code>tiktok</code>, <code>pinterest</code>, or custom site adapters) from portable, cryptographically signed WebAssembly 1.0 rule bundles (<code>.strule</code>).
+            SlopTrap decouples platform-specific extraction (<code>youtube</code>, <code>tiktok</code>, <code>pinterest</code>, or custom site adapters) from portable, Ed25519-signed WebAssembly 1.0 rule bundles (<code>.strule</code>, format <code>sloptrap-bundle-v2</code>).
           </p>
           <ul>
             <li><strong>Common cross-site vocabulary:</strong> Readable rules use shared dotted signal names (<code>post.frequency</code>, <code>account.dormancy_days</code>, <code>post.title_reuse</code>, <code>text.formal_prose</code>, <code>voice.pacing_variance</code>, <code>media.synthetic_ratio</code>, <code>link.domain_concentration</code>) mapped cleanly onto the Multi-Site <code>Fingerprint</code> v1 JSON schema.</li>
             <li><strong>Shared variables &amp; threshold actions:</strong> In <a href="../studio/">Rule Studio</a>, rules declare one or more typed WASM <code>f64</code> locals (<code>var suspicion = 0</code>, <code>var script_risk = 0</code>, <code>var voice_risk = 0</code>), accumulate or set values when conditions match, and evaluate <code>decide</code> threshold blocks into action codes (<code>block</code>, <code>hide</code>, <code>dim</code>, <code>warn</code>, <code>allow</code>).</li>
-            <li><strong>Target-site scoping:</strong> Every rule declares <code>target_site</code> (or cross-site <code>all</code>) and publishes to its corresponding site leaderboard (<code>/leaderboard/&lt;site&gt;/leaderboard.json</code>).</li>
-            <li><strong>Zero host imports:</strong> Any WASM binary declaring an Import (<code>2</code>), Custom (<code>0</code>), or Start (<code>8</code>) section is rejected prior to execution.</li>
+            <li><strong>Target-site scoping:</strong> Every rule declares <code>target_site</code> (<code>youtube</code>, <code>tiktok</code>, <code>pinterest</code>, or cross-site <code>*</code>) and publishes to its corresponding site leaderboard (<code>/leaderboard/&lt;site&gt;/leaderboard.json</code>).</li>
+            <li><strong>Zero host imports:</strong> Any WASM module declaring an Import (<code>2</code>), Table (<code>4</code>), Start (<code>8</code>) or Element (<code>9</code>) section is rejected before it is ever instantiated (see <a href="#security-audit">section 6</a>).</li>
           </ul>
         </section>
 
         <section class="docs-section" id="provenance">
-          <h2>2. Verified Rule Provenance Tiers</h2>
+          <h2>2. Trust Tiers (computed from the signing key only)</h2>
           <p>
-            Integrators and users can enable <code>VerifiedOnly</code> to execute exclusively <strong>Verified</strong> rules:
+            A rule's tier comes only from the key that signed it. Manifest fields such as <code>provenance</code>, and any <code>verified</code> flag in a feed, carry no trust. <code>verified</code> means tier <em>official</em> and nothing else.
           </p>
           <div class="g-table-wrap">
             <table class="g-table">
               <thead>
                 <tr>
-                  <th style="width:190px;">Tier</th>
-                  <th>Verification Criteria</th>
+                  <th style="width:150px;">Tier</th>
+                  <th>Signed by</th>
+                  <th>Default</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td><span class="g-label g-label_theme_positive">Verified · Official</span></td>
-                  <td>Defined by SlopTrap maintainers and signed by a public key in <code>OfficialMaintainerKeys</code>.</td>
+                  <td><span class="g-label g-label_theme_positive">Official</span></td>
+                  <td>A SlopTrap maintainer, offline, with the pinned official key <code>0540a396ece8ab0f9670a25e03b02e345450a1373b86a7d400dcad79ceec5cc1</code>. The key is in no CI system.</td>
+                  <td>Enabled</td>
                 </tr>
                 <tr>
-                  <td><span class="g-label g-label_theme_positive">Verified · Source</span></td>
-                  <td>Submitted by an author who granted repository read access and pinned the artifact to an immutable 40-char git <code>source_commit</code> SHA and GitHub Actions <code>build_run_url</code>.</td>
+                  <td><span class="g-label g-label_theme_warning">Community</span></td>
+                  <td>The private submission pipeline's community key <code>34c3c2ee0d51ae18fbf669dc441a51faa06bbfcbf5efa6adf73702d644c5c69e</code>, after compiling the submission with the trusted compiler, the static WASM audit and a hidden-holdout false-positive check. Rule ids must start with <code>community-</code>. Not reviewed or endorsed by maintainers.</td>
+                  <td>Disabled until the user enables "Community rules"; never loaded in verified-only mode; never used for pre-matched lists</td>
                 </tr>
                 <tr>
-                  <td><span class="g-label g-label_theme_normal">Community</span></td>
-                  <td>Ed25519-signed and passing automated WASM capability, fuel-limit, and anti-poisoning checks without source-build attestation.</td>
+                  <td><span class="g-label g-label_theme_danger">Unverified</span></td>
+                  <td>Any other key (for example a bundle you exported and signed yourself in Studio).</td>
+                  <td>Never loaded from the registry; explicit local import only</td>
                 </tr>
               </tbody>
             </table>
           </div>
+          <p>
+            Rule-id ownership: once a rule id is loaded under one key, a bundle with the same id under a different key is rejected, unless the new key is official. The old v1 keys <code>eb85cbf5…</code> and <code>33fee5d9…</code> are revoked.
+          </p>
         </section>
 
         <section class="docs-section" id="fingerprint">
-          <h2>3. Multi-Site <code>Fingerprint</code> v1 Schema</h2>
+          <h2>3. Canonical Fingerprint (<code>schema_version</code> 1)</h2>
+          <p>
+            Every producer serializes the rule input through one canonical serializer: all fields, in a fixed order, compact JSON, normalized numbers (no exponents) and sanitized strings. Text conditions match only inside the values of <code>channel.handle</code>, <code>channel.title</code>, <code>channel.description</code> and <code>sample_text</code>, never against key names or numbers. A shortened example of the fields:
+          </p>
           <pre><code>{
   "schema_version": 1,
   "site": "pinterest",
@@ -146,42 +154,56 @@
         <section class="docs-section" id="wasm-abi">
           <h2>4. Guest WebAssembly ABI (<code>wasm-v1</code>)</h2>
           <ul>
-            <li><code>memory</code> — Bounded linear memory (max &le; 32 pages / 2 MiB).</li>
-            <li><code>st_alloc(size: i32) -&gt; i32</code> <em>(optional)</em> — Returns scratch offset for UTF-8 JSON input bytes.</li>
-            <li><code>st_evaluate(ptr: i32, len: i32) -&gt; i64</code> <em>(required)</em> — Returns integer score <code>0..100</code> in the lower 32 bits when upper 32 bits are <code>0</code>, or <code>(outPtr &lt;&lt; 32) | outLen</code> for structured JSON output.</li>
+            <li><code>memory</code> (required): exactly one memory, with a declared maximum of at most 32 pages (2 MiB).</li>
+            <li><code>st_alloc(size: i32) -&gt; i32</code> (optional): returns where to write the input. Without it, or if it returns 0, the input goes at offset 16384.</li>
+            <li><code>st_evaluate(ptr: i32, len: i32) -&gt; i64</code> (required): returns a score <code>0..100</code> when the upper 32 bits are 0, or <code>(outPtr &lt;&lt; 32) | outLen</code> pointing at at most 4096 bytes of UTF-8 JSON <code>{"score": 0..100 (integral), "confidence"?: (0,1], "reason"?: string ≤ 300}</code>.</li>
+            <li>No other exports. Every evaluation runs in a <strong>fresh instance</strong>, so no state survives between calls, under a CPU budget (fuel or deadline). A trap, an exhausted budget or bad output is a <em>rule error</em>: that rule is left out of the result and never aborts the others.</li>
+            <li>Ensemble: weight = <code>weight_milli / 1000 × confidence</code>; composite = weighted mean rounded, clamped to 0–100; <code>block</code> ≥ 68, <code>warn</code> ≥ 45.</li>
           </ul>
         </section>
 
         <section class="docs-section" id="strule-crypto">
-          <h2>5. <code>.strule</code> Envelope &amp; Cryptography</h2>
+          <h2>5. <code>.strule</code> Bundle v2 &amp; Signature</h2>
           <pre><code>{
-  "format": "sloptrap-bundle-v1",
+  "format": "sloptrap-bundle-v2",
   "manifest": {
     "rule_id": "pinterest-ai-pin-mill",
-    "target_site": "pinterest",
     "name": "Synthetic Image &amp; SEO Pin Mill",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "author": "@sloptrap-core",
-    "author_public_key": "33fee5d93b69abffb9d920da59d823a1c88a71119064a794ff6a8258bee2a472",
+    "author_public_key": "0540a396ece8ab0f9670a25e03b02e345450a1373b86a7d400dcad79ceec5cc1",
+    "target_site": "pinterest",
+    "description": "…",
+    "repo_url": "https://github.com/sloptrap/sloptrap",
     "interpreter": "wasm-v1",
     "inputs": ["metadata", "upload_cadence", "transcript", "thumbnails"],
-    "default_weight": 1.35,
-    "overhead": 4,
-    "encryption": "aes-256-gcm-hkdf",
-    "provenance": { "verified": true, "tier": "official" }
+    "weight_milli": 1350,
+    "overhead": 40,
+    "provenance": { "source_repo": "", "source_commit": "", "build_run_url": "", "submission_id": "" }
   },
-  "payload_b64": "&lt;12-byte GCM nonce || AES-256-GCM ciphertext || 16-byte tag&gt;",
+  "payload_b64": "&lt;base64 of the plain WASM module&gt;",
   "signature_b64": "&lt;64-byte Ed25519 signature&gt;"
 }</code></pre>
+          <ul>
+            <li>Every manifest field is required and unknown fields are rejected; integers must be JSON integers (<code>weight_milli</code> 1–10000, <code>overhead</code> 1–100); strings are bounded plain text.</li>
+            <li><code>digest = SHA256("sloptrap-sig-v2\n" ‖ canonical_manifest ‖ "\n" ‖ SHA256(wasm))</code>, signed with pure Ed25519 and verified strictly (RFC 8032). The signature covers <strong>every</strong> manifest field, including <code>target_site</code>, <code>description</code>, <code>repo_url</code> and <code>provenance</code>.</li>
+            <li>Any verification error rejects the bundle; there is no fallback.</li>
+            <li><strong>No encryption.</strong> v1's AES-GCM "encryption" used a key derived from a public seed, so it hid nothing; v2 ships the plain module.</li>
+            <li>Limits: bundle ≤ 512 KiB, WASM ≤ 256 KiB.</li>
+          </ul>
         </section>
 
         <section class="docs-section" id="security-audit">
-          <h2>6. Automated Malicious-Content Audit &amp; CI</h2>
+          <h2>6. Automated Audit &amp; CI</h2>
+          <p>Every bundle published on this site is re-checked by <code>scripts/audit_bundles.py</code> on every change and every sync:</p>
           <ol>
-            <li><strong>Cryptographic &amp; provenance check:</strong> Verifies Ed25519 signatures, HKDF-AES-256-GCM manifest AAD, SHA-256 parity across <code>leaderboard/*/leaderboard.json</code>, and blocks spoofed <code>official</code> or unattested <code>verified</code> claims.</li>
-            <li><strong>Binary section firewall:</strong> Rejects WASM Custom (<code>0</code>), Import (<code>2</code>), and Start (<code>8</code>) sections, unbounded or &gt; 32-page memory, and non-whitelisted exports.</li>
-            <li><strong>Fuel-metered sandbox &amp; anti-poisoning:</strong> Traps CPU bombs via instruction fuel limits, verifies determinism, and rejects rules scoring clean human profiles &ge; 50.</li>
+            <li><strong>Signature &amp; tier:</strong> strict v2 verification, tier from the key, the <code>community-</code> id rule, rule id = file name, and the tier each directory allows (<code>bundles/</code>: official; <code>bundles/community/</code>: community).</li>
+            <li><strong>Static WASM audit:</strong> full decode of every function body. Only the type, function, memory, global, export, code, data and datacount sections (plus ignored custom sections); no imports, tables, start or element sections; ≤ 1024 functions, ≤ 64 globals, ≤ 64 data segments; no <code>call_indirect</code>, tail calls, exceptions, reference types, SIMD, atomics, reinterpret ops or unknown opcodes.</li>
+            <li><strong>Sandboxed execution:</strong> wasmtime with a 10,000,000-unit fuel budget, a 32-page memory limit and a fresh instance per call; every output must satisfy the ABI above.</li>
           </ol>
+          <p>
+            Fixed public probe fingerprints cannot show that a rule is safe (a rule can recognise them), so they are reported for information only and never decide pass or fail. Behavioural acceptance of community rules uses a hidden holdout corpus in the private pipeline.
+          </p>
         </section>
       </article>
     </div>

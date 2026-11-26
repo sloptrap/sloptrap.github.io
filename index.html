@@ -3,16 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://sloptrap-worker.fablestre.am; base-uri 'none'; form-action 'none'; object-src 'none'" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>SlopTrap — Svelte 5 + Tauri Rule Studio, Cross-Site Rule Language &amp; WASM SDK</title>
   <link rel="stylesheet" href="./assets/gravity-uikit.css" />
   <link rel="stylesheet" href="./assets/style.css" />
 </head>
 <body class="g-root g-root_theme_dark">
-  <script>
-    if (localStorage.getItem('st-gravity-theme') === 'light') {
-      document.body.className = 'g-root g-root_theme_light';
-    }
-  </script>
+  <script src="./assets/theme-init.js"></script>
 
   <header class="g-app-header">
     <div class="g-app-header__inner">
@@ -22,7 +20,7 @@
             <svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2.5 4.5h11M4.5 8h7M6.5 11.5h3"/></svg>
           </span>
           <span>SlopTrap</span>
-          <span class="g-label g-label_theme_utility mono">wasm-v1</span>
+          <span class="g-label g-label_theme_utility mono">bundle v2</span>
         </a>
         <nav class="g-nav" aria-label="Primary">
           <a class="g-nav__item g-nav__item_active" href="./">Overview</a>
@@ -172,17 +170,17 @@ decide "Block high-suspicion accounts"
       </div>
       <div class="g-card">
         <div class="signal-head">
-          <h3>Verified WebAssembly bundles</h3>
-          <span class="g-label g-label_theme_positive mono">verified</span>
+          <h3>Signed WebAssembly bundles</h3>
+          <span class="g-label g-label_theme_positive mono">v2</span>
         </div>
-        <p>Exports zero-import WebAssembly 1.0 (<code>.strule</code>) bundles checked by a 4-layer capability &amp; anti-poisoning audit and signed with Ed25519.</p>
+        <p>Zero-import WebAssembly 1.0 rules in <code>sloptrap-bundle-v2</code> files: an Ed25519 signature over the whole manifest and the module hash, a static WASM audit, and a fuel- and memory-bounded sandbox. Only maintainer-signed <strong>Official</strong> rules count as verified.</p>
       </div>
     </div>
 
     <div class="section-bar">
       <div>
         <h2 class="section-title">Site-specific WASM rule leaderboards</h2>
-        <p class="section-sub">Switch target platform to inspect verified <code>.strule</code> bundles and live install metrics.</p>
+        <p class="section-sub">Switch target platform to inspect the <strong>Official</strong> <code>.strule</code> bundles and live install metrics. Community rules are listed on the full leaderboard (off by default).</p>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <div class="g-segmented" id="home-site-tabs" role="tablist" aria-label="Target site">
@@ -200,7 +198,7 @@ decide "Block high-suspicion accounts"
           <tr>
             <th style="width:44px;">#</th>
             <th>Rule</th>
-            <th>Provenance</th>
+            <th>Tier</th>
             <th>Band / F1</th>
             <th class="num" id="home-active-col">Active (30d)</th>
             <th class="num">All-Time</th>
@@ -243,7 +241,7 @@ decide "Block high-suspicion accounts"
             <div class="g-segmented" role="tablist" aria-label="Example YouTube TUI Views">
               <button class="g-segmented__btn shot-tab active" type="button"
                 data-src="./assets/screenshots/tui-overview.png"
-                data-caption="1:Overview — Example YouTube TUI combining channel extractors with Verified .strule WASM evaluation.">
+                data-caption="1:Overview — Example YouTube TUI combining channel extractors with signed .strule WASM evaluation.">
                 1: Overview
               </button>
               <button class="g-segmented__btn shot-tab" type="button"
@@ -271,7 +269,7 @@ decide "Block high-suspicion accounts"
           </div>
           <img id="tui-showcase-img" src="./assets/screenshots/tui-overview.png" alt="Example App: sloptrap-tube-tui Overview" />
           <div id="tui-showcase-caption" class="preview-panel__caption">
-            1:Overview — Example YouTube TUI combining channel extractors with Verified .strule WASM evaluation.
+            1:Overview — Example YouTube TUI combining channel extractors with signed .strule WASM evaluation.
           </div>
         </div>
       </div>
@@ -291,82 +289,7 @@ decide "Block high-suspicion accounts"
   </footer>
 
   <script src="./assets/site.js"></script>
-  <script>
-    let workerStats = null;
-
-    function esc(s) {
-      return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    }
-    function bandTheme(b) {
-      if (b === 'S') return 'positive';
-      if (b === 'A') return 'info';
-      if (b === 'B') return 'warning';
-      return 'normal';
-    }
-    function provBadge(e) {
-      if (e.verified) {
-        const label = e.verification_tier === 'official' ? 'Verified · Official' : 'Verified · Source';
-        return `<span class="g-label g-label_theme_positive">${label}</span>`;
-      }
-      return `<span class="g-label g-label_theme_normal">Community</span>`;
-    }
-
-    async function loadHomeSite(site) {
-      document.getElementById('home-full-lb-link').href = `./leaderboard/?site=${encodeURIComponent(site)}`;
-      try {
-        const data = await fetch(`./leaderboard/${encodeURIComponent(site)}/leaderboard.json`).then(r => r.json());
-        let winDays = Number(data.active_window_days || 30);
-        if (!workerStats) {
-          const ep = (data.rankings_endpoint || 'https://sloptrap-worker.fablestre.am').replace(/\/$/, '');
-          workerStats = await fetch(`${ep}/api/v1/rules/stats`).then(r => r.ok ? r.json() : {}).catch(() => ({}));
-        }
-        if (Number(workerStats?.window_days) > 0) winDays = Number(workerStats.window_days);
-        const col = document.getElementById('home-active-col');
-        if (col) col.textContent = `Active (${winDays}d)`;
-
-        const rows = (data.entries || []).slice(0, 5).map(e => {
-          const act = workerStats?.active_installs?.[e.rule_id] !== undefined
-            ? Number(workerStats.active_installs[e.rule_id])
-            : Number(e.active_installs || 0);
-          const rawAll = workerStats?.all_time_installs?.[e.rule_id] !== undefined
-            ? Number(workerStats.all_time_installs[e.rule_id])
-            : Number(e.all_time_installs || 0);
-          const allTime = Math.max(rawAll, act);
-          const dlHref = (e.bundle_url || '').startsWith('http') ? e.bundle_url : ('./' + e.bundle_url);
-          return `
-            <tr>
-              <td class="mono" style="color:var(--g-color-text-secondary);">${e.rank}</td>
-              <td>
-                <div class="rule-name">${esc(e.name)} <span class="mono" style="color:var(--g-color-text-hint);font-weight:400;">v${esc(e.version)}</span></div>
-                <div class="rule-desc">${esc(e.description)}</div>
-              </td>
-              <td>${provBadge(e)} <div class="mono" style="font-size:11px;color:var(--g-color-text-hint);margin-top:3px;">${esc(e.author)}</div></td>
-              <td>
-                <span class="g-label g-label_theme_${bandTheme(e.band)}">Band ${esc(e.band)}</span>
-                <span class="mono" style="margin-left:6px;">${Number(e.coarse_f1).toFixed(2)}</span>
-              </td>
-              <td class="num mono">${act}</td>
-              <td class="num mono">${allTime}</td>
-              <td class="num mono">${e.overhead}/10</td>
-              <td class="num"><a class="g-btn g-btn_view_outlined g-btn_size_s mono" href="${esc(dlHref)}">.strule</a></td>
-            </tr>
-          `;
-        }).join('');
-        document.getElementById('home-lb-rows').innerHTML = rows || '<tr><td colspan="8">No rules registered for this site.</td></tr>';
-      } catch (_) {
-        document.getElementById('home-lb-rows').innerHTML = '<tr><td colspan="8" style="color:var(--g-color-text-danger);">Failed to load site leaderboard</td></tr>';
-      }
-    }
-
-    document.querySelectorAll('#home-site-tabs button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#home-site-tabs button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        loadHomeSite(btn.dataset.site);
-      });
-    });
-
-    loadHomeSite('youtube');
-  </script>
+  <script src="./assets/registry-ui.js"></script>
+  <script src="./assets/home.js"></script>
 </body>
 </html>

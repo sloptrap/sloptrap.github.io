@@ -3,16 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://sloptrap-worker.fablestre.am; base-uri 'none'; form-action 'none'; object-src 'none'" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>Site Leaderboards — SlopTrap WASM Rules</title>
   <link rel="stylesheet" href="../assets/gravity-uikit.css" />
   <link rel="stylesheet" href="../assets/style.css" />
 </head>
 <body class="g-root g-root_theme_dark">
-  <script>
-    if (localStorage.getItem('st-gravity-theme') === 'light') {
-      document.body.className = 'g-root g-root_theme_light';
-    }
-  </script>
+  <script src="../assets/theme-init.js"></script>
 
   <header class="g-app-header">
     <div class="g-app-header__inner">
@@ -22,7 +20,7 @@
             <svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2.5 4.5h11M4.5 8h7M6.5 11.5h3"/></svg>
           </span>
           <span>SlopTrap</span>
-          <span class="g-label g-label_theme_utility mono">wasm-v1</span>
+          <span class="g-label g-label_theme_utility mono">bundle v2</span>
         </a>
         <nav class="g-nav" aria-label="Primary">
           <a class="g-nav__item" href="../">Overview</a>
@@ -54,7 +52,7 @@
           </div>
         </div>
         <p class="page-desc">
-          Site-specific WebAssembly <code>.strule</code> bundles ranked by holdout accuracy, execution overhead, opt-in <strong>Anonymous rule rankings</strong> installs (<span id="window-desc">rolling 30-day active window</span> + all-time unique installs), release downloads, and community upvotes.
+          Site-specific WebAssembly <code>.strule</code> bundles ranked by holdout accuracy, execution overhead, opt-in <strong>Anonymous rule rankings</strong> installs (<span id="window-desc">rolling 30-day active window</span> + all-time unique installs), release downloads, and upvotes. Only <strong>Official</strong> rules are shown unless you include community rules.
         </p>
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
@@ -69,7 +67,7 @@
         <div class="stat-cell__value" id="stat-site">YouTube</div>
       </div>
       <div class="stat-cell">
-        <div class="stat-cell__label">Rules (Verified)</div>
+        <div class="stat-cell__label">Rules</div>
         <div class="stat-cell__value" id="stat-rules">—</div>
       </div>
       <div class="stat-cell">
@@ -85,8 +83,8 @@
     <div class="toolbar">
       <input id="rule-filter" class="g-input" type="search" placeholder="Filter by rule ID, name, input, or author…" />
       <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--g-color-text-complementary);cursor:pointer;user-select:none;">
-        <input type="checkbox" id="verified-only-chk" />
-        Verified only
+        <input type="checkbox" id="community-chk" />
+        Include community rules
       </label>
       <div class="g-segmented" role="group" aria-label="Sort rules" style="margin-left:auto;">
         <button class="g-segmented__btn sort-btn active" type="button" data-sort="rank">Composite</button>
@@ -105,7 +103,7 @@
           <tr>
             <th style="width:40px;">#</th>
             <th>Rule &amp; Declared Inputs</th>
-            <th>Provenance &amp; Key</th>
+            <th>Tier &amp; Key</th>
             <th>Holdout Metrics</th>
             <th class="num" id="th-active">Active (30d)</th>
             <th class="num">All-Time</th>
@@ -121,8 +119,15 @@
       </table>
     </div>
 
+    <div class="g-alert" id="community-note" style="margin-top:12px;" hidden>
+      <strong>Community rules are not reviewed by maintainers.</strong> They are anonymous submissions that the private pipeline compiled from source, checked (static WASM audit, sandboxed execution and a hidden-holdout false-positive ceiling) and signed with the <em>community</em> key. Clients keep them disabled unless you turn on the "Community rules" setting, and verified-only mode never loads them.
+    </div>
+
     <div class="g-alert" style="margin-top:18px;">
-      <strong>Verified Provenance &amp; Security Auditing:</strong> Rules receive a <strong>Verified</strong> badge when either signed by an official SlopTrap maintainer key (<code>Verified · Official</code>) or submitted with maintainer read access to the source repository pinned to an immutable commit SHA and GitHub Actions build run (<code>Verified · Source</code>). Every <code>.strule</code> bundle must also pass automated CI WASM capability, fuel-metered sandbox, and anti-poisoning checks.
+      <strong>Trust tiers:</strong> the tier is computed from the bundle's signing key, never from fields inside the bundle or the feed.
+      <strong>Official</strong> rules are signed offline by a SlopTrap maintainer with the pinned key <code>0540a396…</code> and are the only rules shown as verified.
+      <strong>Community</strong> rules (ids start with <code>community-</code>) are signed by the automated community pipeline key <code>34c3c2ee…</code>.
+      Bundles signed by any other key are never listed. Every listed <code>.strule</code> passes the <code>sloptrap-bundle-v2</code> signature check, the static WASM audit and a fuel-metered sandbox run on every sync.
     </div>
   </main>
 
@@ -139,322 +144,7 @@
   </footer>
 
   <script src="../assets/site.js"></script>
-  <script>
-    let docData = null;
-    let currentSite = new URLSearchParams(window.location.search).get('site') || 'youtube';
-    let currentSort = 'rank';
-    let filterQuery = '';
-    let verifiedOnly = false;
-    let activeWindowDays = 30;
-    let cachedWorkerStats = null;
-    let cachedReleases = null;
-    let cachedIssues = null;
-
-    function esc(s) {
-      return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-    }
-
-    function bandTheme(b) {
-      if (b === 'S') return 'positive';
-      if (b === 'A') return 'info';
-      if (b === 'B') return 'warning';
-      return 'normal';
-    }
-
-    function overheadColor(oh) {
-      if (oh <= 3) return 'var(--g-color-text-positive)';
-      if (oh <= 6) return 'var(--g-color-text-warning)';
-      return 'var(--g-color-text-danger)';
-    }
-
-    function renderProvenance(e) {
-      const pubShort = (e.author_public_key || '').slice(0, 12);
-      const shield = `<svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 1.8 13 3.8v4c0 3.3-2.2 5.5-5 6.5-2.8-1-5-3.2-5-6.5v-4L8 1.8Z"/><path d="m5.7 8.1 1.6 1.6 3.1-3.2"/></svg>`;
-      let badge = `<span class="g-label g-label_theme_normal">Community</span>`;
-      let provenanceLink = '';
-      if (e.verified) {
-        if (e.verification_tier === 'official') {
-          badge = `<span class="g-label g-label_theme_positive" title="Signed by pinned SlopTrap maintainer Ed25519 key">${shield} Verified · Official</span>`;
-        } else {
-          const commitShort = (e.provenance?.source_commit || '').slice(0, 7);
-          badge = `<span class="g-label g-label_theme_positive" title="Source-inspected &amp; tied to GitHub Actions build (${esc(commitShort)})">${shield} Verified · Source</span>`;
-          if (e.provenance?.build_run_url) {
-            provenanceLink = `<div style="font-size:11px;margin-top:2px;"><a href="${esc(e.provenance.build_run_url)}" target="_blank" rel="noopener" class="mono">build@${esc(commitShort || 'run')}</a></div>`;
-          }
-        }
-      }
-      return `
-        <div>${badge}</div>
-        <div class="mono" style="font-size:12px;margin-top:4px;">${esc(e.author)}</div>
-        <div class="mono" style="font-size:11px;color:var(--g-color-text-hint);" title="${esc(e.author_public_key)}">${esc(pubShort)}…</div>
-        ${provenanceLink}
-      `;
-    }
-
-    function computeComposite(e) {
-      const f1 = Number(e.coarse_f1 || 0);
-      const rep = Number(e.author_reputation || 75);
-      const oh = Math.max(1, Math.min(10, Number(e.overhead || 5)));
-      const act = Number(e.active_installs || 0);
-      const allT = Math.max(Number(e.all_time_installs || 0), act);
-      const stars = Number(e.stars || 0);
-      const likes = Number(e.likes || 0);
-      const dv = Number(e.downloads_version || 0);
-      const dt = Number(e.downloads_total || 0);
-      const qGate = Math.max(0, Math.min(1, (f1 - 0.50) / 0.50));
-      const eff = (11 - oh) / 10.0;
-      const repN = Math.max(0, Math.min(1, rep / 100.0));
-      const popRaw = 1.40 * Math.log1p(act) + 0.45 * Math.log1p(allT) + 1.35 * Math.log1p(likes + stars * 0.75) + 0.55 * Math.log1p(dv * 0.70 + dt * 0.30);
-      const popB = Math.tanh(popRaw / 6.5);
-      return Math.round(1000 * (0.62 * f1 + 0.10 * eff + 0.08 * repN + 0.20 * qGate * popB)) / 10;
-    }
-
-    function resolveHref(u) {
-      if (!u) return '#';
-      if (u.startsWith('http://') || u.startsWith('https://')) return u;
-      return '../' + u.replace(/^\.?\//, '');
-    }
-
-    function syncWindowLabels(days) {
-      activeWindowDays = days;
-      const wDesc = document.getElementById('window-desc');
-      if (wDesc) wDesc.textContent = `rolling ${days}-day active window`;
-      const stWin = document.getElementById('stat-window');
-      if (stWin) stWin.textContent = `${days} days`;
-      const thAct = document.getElementById('th-active');
-      if (thAct) thAct.textContent = `Active (${days}d)`;
-      const sortBtn = document.getElementById('sort-active-btn');
-      if (sortBtn) sortBtn.textContent = `Active (${days}d)`;
-    }
-
-    function render() {
-      if (!docData || !Array.isArray(docData.entries)) return;
-      const q = filterQuery.trim().toLowerCase();
-      let list = docData.entries.filter(e => {
-        if (verifiedOnly && !e.verified) return false;
-        if (!q) return true;
-        const hay = [e.name, e.rule_id, e.description, e.author, e.verification_tier, ...(e.inputs || [])].join(' ').toLowerCase();
-        return hay.includes(q);
-      });
-
-      if (currentSort === 'active') list.sort((a, b) => (b.active_installs || 0) - (a.active_installs || 0) || b.composite_score - a.composite_score);
-      else if (currentSort === 'alltime') list.sort((a, b) => (b.all_time_installs || 0) - (a.all_time_installs || 0) || b.composite_score - a.composite_score);
-      else if (currentSort === 'likes') list.sort((a, b) => (b.likes || 0) - (a.likes || 0) || b.composite_score - a.composite_score);
-      else if (currentSort === 'downloads') list.sort((a, b) => (b.downloads_total || 0) - (a.downloads_total || 0) || b.composite_score - a.composite_score);
-      else if (currentSort === 'f1') list.sort((a, b) => b.coarse_f1 - a.coarse_f1 || a.overhead - b.overhead);
-      else if (currentSort === 'overhead') list.sort((a, b) => a.overhead - b.overhead || b.coarse_f1 - a.coarse_f1);
-      else list.sort((a, b) => b.composite_score - a.composite_score || (b.active_installs || 0) - (a.active_installs || 0) || a.overhead - b.overhead);
-
-      const tbody = document.getElementById('rows');
-      if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="color:var(--g-color-text-secondary);">No matching rules for this filter.</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = list.map((e, idx) => {
-        const shaShort = (e.bundle_sha256 || '').slice(0, 10);
-        const inputs = (e.inputs || []).map(i => `<span class="g-label g-label_theme_normal mono">${esc(i)}</span>`).join('');
-        const ohPct = Math.min(100, Math.max(10, e.overhead * 10));
-        const allTime = Math.max(Number(e.all_time_installs || 0), Number(e.active_installs || 0));
-        const upvoteCell = e.issue_url
-          ? `<a class="g-btn g-btn_view_outlined g-btn_size_s tabular" href="${esc(e.issue_url)}" target="_blank" rel="noopener" title="Upvote on GitHub Issue #${e.issue_number || ''}">
-               <svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5.5 7.5V14H3a1 1 0 0 1-1-1V8.5a1 1 0 0 1 1-1h2.5Zm0 0 2.6-4.7A1.4 1.4 0 0 1 10.6 4v2.5h2.6a1.3 1.3 0 0 1 1.3 1.5l-.8 4.8a1.3 1.3 0 0 1-1.3 1.2H5.5"/></svg>
-               ${e.likes || 0}
-             </a>`
-          : `<span class="mono">${e.likes || 0}</span>`;
-
-        const targetRule = (new URLSearchParams(window.location.search).get('rule') || window.location.hash.replace(/^#rule-/, '')).trim().toLowerCase();
-        const isHighlighted = targetRule && e.rule_id.toLowerCase() === targetRule;
-
-        return `
-          <tr id="rule-${esc(e.rule_id)}" style="${isHighlighted ? 'background:rgba(255,190,92,0.12);outline:1px solid var(--g-color-line-brand);' : ''}">
-            <td class="mono" style="color:var(--g-color-text-secondary);">${e.rank || (idx + 1)}</td>
-            <td>
-              <div class="rule-name">${esc(e.name)} <span class="mono" style="color:var(--g-color-text-hint);font-weight:400;">v${esc(e.version)}</span></div>
-              <div class="rule-desc">${esc(e.description)}</div>
-              <div class="tag-row">${inputs}</div>
-            </td>
-            <td>${renderProvenance(e)}</td>
-            <td>
-              <div style="display:flex;align-items:center;gap:6px;">
-                <span class="g-label g-label_theme_${bandTheme(e.band)}">Band ${esc(e.band)}</span>
-                <span class="mono" style="font-weight:600;">F1 ${Number(e.coarse_f1).toFixed(2)}</span>
-              </div>
-              <div class="mono" style="font-size:11px;color:var(--g-color-text-secondary);margin-top:4px;">
-                P ${Number(e.coarse_precision).toFixed(2)} · R ${Number(e.coarse_recall).toFixed(2)} · Score ${Number(e.composite_score || 0).toFixed(1)}
-              </div>
-            </td>
-            <td class="num mono" title="Unique installs active in last ${activeWindowDays} days"><strong>${e.active_installs || 0}</strong></td>
-            <td class="num mono" title="Cumulative unique installs">${allTime}</td>
-            <td class="num mono" title="GitHub Release .strule downloads">${e.downloads_total || 0}</td>
-            <td class="num">${upvoteCell}</td>
-            <td class="num">
-              <div class="mono">${e.overhead}/10</div>
-              <div class="meter"><div class="meter__fill" style="width:${ohPct}%;background:${overheadColor(e.overhead)};"></div></div>
-            </td>
-            <td class="num">
-              <div style="display:flex;gap:6px;justify-content:flex-end;">
-                <a class="g-btn g-btn_view_action g-btn_size_s mono" href="${esc(resolveHref(e.bundle_url))}">.strule</a>
-                <a class="g-btn g-btn_view_flat g-btn_size_s" href="${esc(e.repo_url)}" target="_blank" rel="noopener">Repo</a>
-              </div>
-              <div class="mono" style="font-size:11px;color:var(--g-color-text-hint);margin-top:4px;" title="${esc(e.bundle_sha256)}">sha256:${esc(shaShort)}</div>
-            </td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    async function overlayLiveMetrics(data) {
-      const ep = (data.rankings_endpoint || 'https://sloptrap-worker.fablestre.am').replace(/\/$/, '');
-      const repo = data.registry_repo || 'sloptrap/sloptrap.github.io';
-
-      if (!cachedWorkerStats || !cachedReleases || !cachedIssues) {
-        const [stRes, relRes, issRes] = await Promise.allSettled([
-          cachedWorkerStats ? Promise.resolve(cachedWorkerStats) : fetch(`${ep}/api/v1/rules/stats`).then(r => r.ok ? r.json() : null),
-          cachedReleases ? Promise.resolve(cachedReleases) : fetch(`https://api.github.com/repos/${repo}/releases?per_page=100`).then(r => r.ok ? r.json() : null),
-          cachedIssues ? Promise.resolve(cachedIssues) : fetch(`https://api.github.com/repos/${repo}/issues?labels=leaderboard-rule&state=open&per_page=100`).then(r => r.ok ? r.json() : null),
-        ]);
-        if (stRes.status === 'fulfilled' && stRes.value) cachedWorkerStats = stRes.value;
-        if (relRes.status === 'fulfilled' && relRes.value) cachedReleases = relRes.value;
-        if (issRes.status === 'fulfilled' && issRes.value) cachedIssues = issRes.value;
-      }
-
-      if (cachedWorkerStats) {
-        if (Number(cachedWorkerStats.window_days) > 0) {
-          syncWindowLabels(Number(cachedWorkerStats.window_days));
-        }
-        for (const e of data.entries || []) {
-          if (cachedWorkerStats.active_installs?.[e.rule_id] !== undefined) {
-            e.active_installs = Number(cachedWorkerStats.active_installs[e.rule_id]);
-          }
-          if (cachedWorkerStats.all_time_installs?.[e.rule_id] !== undefined) {
-            e.all_time_installs = Math.max(Number(cachedWorkerStats.all_time_installs[e.rule_id]), Number(e.active_installs || 0));
-          } else {
-            e.all_time_installs = Math.max(Number(e.all_time_installs || 0), Number(e.active_installs || 0));
-          }
-        }
-      }
-
-      if (Array.isArray(cachedReleases)) {
-        const tot = {}, ver = {};
-        for (const rel of cachedReleases) {
-          if (rel.draft) continue;
-          const tag = rel.tag_name || '';
-          for (const a of rel.assets || []) {
-            if (!a.name || !a.name.endsWith('.strule')) continue;
-            const rid = a.name.slice(0, -7);
-            tot[rid] = (tot[rid] || 0) + Number(a.download_count || 0);
-            const pref = `rule-${rid}-v`;
-            if (tag.startsWith(pref)) {
-              ver[`${rid}@${tag.slice(pref.length)}`] = Number(a.download_count || 0);
-            }
-          }
-        }
-        for (const e of data.entries || []) {
-          if (tot[e.rule_id] !== undefined) e.downloads_total = tot[e.rule_id];
-          if (ver[`${e.rule_id}@${e.version}`] !== undefined) e.downloads_version = ver[`${e.rule_id}@${e.version}`];
-        }
-      }
-
-      if (Array.isArray(cachedIssues)) {
-        for (const iss of cachedIssues) {
-          if (iss.pull_request) continue;
-          const m = `${iss.title || ''}\n${iss.body || ''}`.match(/\[rule:([^\]]+)\]/);
-          if (!m) continue;
-          const rid = m[1].trim();
-          const likes = Number(iss.reactions?.['+1'] || 0) + Number(iss.reactions?.heart || 0);
-          for (const e of data.entries || []) {
-            if (e.rule_id === rid) {
-              e.likes = likes;
-              e.issue_url = iss.html_url || e.issue_url;
-              e.issue_number = iss.number || e.issue_number;
-            }
-          }
-        }
-      }
-
-      const entries = data.entries || [];
-      entries.forEach(e => { e.composite_score = computeComposite(e); });
-      entries.sort((a, b) => b.composite_score - a.composite_score || (b.active_installs || 0) - (a.active_installs || 0) || a.overhead - b.overhead);
-      entries.forEach((e, i) => { e.rank = i + 1; });
-    }
-
-    async function loadSiteLeaderboard(site, pushUrl = false) {
-      currentSite = String(site || 'youtube').toLowerCase();
-      document.querySelectorAll('#site-switcher button').forEach(b => {
-        b.classList.toggle('active', b.dataset.site === currentSite);
-      });
-      if (pushUrl) {
-        const u = new URL(window.location.href);
-        u.searchParams.set('site', currentSite);
-        history.replaceState(null, '', u);
-      }
-
-      const feedRel = `./${encodeURIComponent(currentSite)}/leaderboard.json`;
-      const rawLink = document.getElementById('raw-feed-link');
-      rawLink.href = feedRel;
-      rawLink.textContent = `${currentSite}/leaderboard.json`;
-
-      try {
-        const data = await fetch(feedRel).then(r => {
-          if (!r.ok) throw new Error(`HTTP ${r.status}`);
-          return r.json();
-        });
-        docData = data;
-        const disp = data.site_display_name || currentSite;
-        document.getElementById('lb-heading').textContent = `${disp} Rule Leaderboard`;
-        document.getElementById('stat-site').textContent = disp;
-        const totalCnt = (data.entries || []).length;
-        const verCnt = (data.entries || []).filter(e => e.verified).length;
-        document.getElementById('stat-rules').textContent = `${totalCnt} (${verCnt} verified)`;
-        document.getElementById('stat-epoch').textContent = `${data.corpus_count || 0} holdout · ${data.epoch_id || ''}`;
-        if (Number(data.active_window_days) > 0) syncWindowLabels(Number(data.active_window_days));
-        render();
-        const targetRule = (new URLSearchParams(window.location.search).get('rule') || window.location.hash.replace(/^#rule-/, '')).trim();
-        if (targetRule) {
-          document.getElementById(`rule-${targetRule}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        await overlayLiveMetrics(docData);
-        render();
-      } catch (err) {
-        document.getElementById('rows').innerHTML = `<tr><td colspan="10" style="color:var(--g-color-text-danger);">Failed to load ${esc(feedRel)}: ${esc(err)}</td></tr>`;
-      }
-    }
-
-    document.querySelectorAll('#site-switcher button').forEach(btn => {
-      btn.addEventListener('click', () => loadSiteLeaderboard(btn.dataset.site, true));
-    });
-
-    document.querySelectorAll('.sort-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentSort = btn.dataset.sort;
-        render();
-      });
-    });
-
-    document.getElementById('rule-filter').addEventListener('input', ev => {
-      filterQuery = ev.target.value || '';
-      render();
-    });
-
-    document.getElementById('verified-only-chk').addEventListener('change', ev => {
-      verifiedOnly = ev.target.checked;
-      render();
-    });
-
-    document.getElementById('copy-feed-btn').addEventListener('click', ev => {
-      const feedUrl = new URL(`./${encodeURIComponent(currentSite)}/leaderboard.json`, window.location.href).href;
-      navigator.clipboard.writeText(feedUrl).then(() => {
-        const b = ev.currentTarget;
-        const prev = b.textContent;
-        b.textContent = 'Copied URL';
-        setTimeout(() => { b.textContent = prev; }, 1400);
-      });
-    });
-
-    loadSiteLeaderboard(currentSite, false);
-  </script>
+  <script src="../assets/registry-ui.js"></script>
+  <script src="../assets/leaderboard.js"></script>
 </body>
 </html>

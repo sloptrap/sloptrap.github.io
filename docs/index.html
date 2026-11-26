@@ -3,16 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://sloptrap-worker.fablestre.am; base-uri 'none'; form-action 'none'; object-src 'none'" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>Documentation &amp; SDK — SlopTrap</title>
   <link rel="stylesheet" href="../assets/gravity-uikit.css" />
   <link rel="stylesheet" href="../assets/style.css" />
 </head>
 <body class="g-root g-root_theme_dark">
-  <script>
-    if (localStorage.getItem('st-gravity-theme') === 'light') {
-      document.body.className = 'g-root g-root_theme_light';
-    }
-  </script>
+  <script src="../assets/theme-init.js"></script>
 
   <header class="g-app-header">
     <div class="g-app-header__inner">
@@ -22,7 +20,7 @@
             <svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2.5 4.5h11M4.5 8h7M6.5 11.5h3"/></svg>
           </span>
           <span>SlopTrap</span>
-          <span class="g-label g-label_theme_utility mono">wasm-v1</span>
+          <span class="g-label g-label_theme_utility mono">bundle v2</span>
         </a>
         <nav class="g-nav" aria-label="Primary">
           <a class="g-nav__item" href="../">Overview</a>
@@ -52,6 +50,7 @@
             <li><a href="#sdk">2. Library &amp; UI Integration</a></li>
             <li><a href="#adapters">3. Pluggable Site Adapters</a></li>
             <li><a href="#examples">4. Example Apps (YouTube TUI &amp; Extension)</a></li>
+            <li><a href="#trust">5. Bundle v2, Tiers &amp; Community Rules</a></li>
           </ul>
         </div>
       </aside>
@@ -64,10 +63,10 @@
           </p>
           <ul>
             <li><strong>Known Slop &amp; Known-Good Channel Sets (<code>AiSList</code> &amp; Extension):</strong> Load specified lists of Known Slop and Known Good channels/accounts (import channels flagged directly in <code>sloptrap-extension</code>, load YouTube slop channels from <a href="https://github.com/Override92/AiSList" target="_blank" rel="noopener"><code>Override92/AiSList</code></a>, or paste <code>@handles</code>/URLs) to measure live rule effectiveness (<code>Recall</code>, <code>Known Good Safe %</code>, <code>False Positives</code>, and <code>F1</code>) against their content.</li>
-            <li><strong>One-Click Publish → Cloudflare Worker Deduplication → GitHub Signing:</strong> Clicking <strong>Publish to Leaderboard</strong> sends the rule definition to the Cloudflare Worker (<code>POST /api/v1/rules/publish</code>), which compares its rename-invariant canonical AST against existing rules and, when no match exists, dispatches it to GitHub Actions (<code>compile-submitted-rule.yml</code>) to be compiled from source and signed as a <code>Verified · Source</code> <code>.strule</code> bundle.</li>
+            <li><strong>Publish → private review pipeline → Community tier:</strong> <strong>Publish to Leaderboard</strong> sends the rule project to the Cloudflare Worker (<code>POST /api/v1/rules/publish</code>, Turnstile-protected, exact-origin check), which validates it, rejects duplicates and stores it as <em>pending</em>. A private pipeline then compiles it with the trusted compiler, runs the static WASM audit and a hidden-holdout behavioural audit with a false-positive ceiling, and only then signs it with the <strong>community</strong> key as <code>community-&lt;slug&gt;</code>. Community rules are <strong>not reviewed or endorsed by maintainers and are never shown as verified</strong>; clients keep them disabled until the user turns on "Community rules". Nothing is compiled or signed in this public repository.</li>
             <li><strong>Common Cross-Site Rule Syntax:</strong> Switch freely between the clean sentence-style Visual Builder and a readable cross-site DSL sharing signals such as <code>post.frequency</code>, <code>account.dormancy_days</code>, <code>post.title_reuse</code>, <code>text.formal_prose</code>, <code>voice.pacing_variance</code>, and <code>media.synthetic_ratio</code>.</li>
             <li><strong>Shared Variables &amp; Threshold Actions:</strong> Rules can add or set values on shared variables (e.g. <code>suspicion</code>, <code>script_risk</code>, <code>voice_risk</code>) accumulated across multiple rules and checked against thresholds (<code>block</code>, <code>hide</code>, <code>dim</code>, <code>warn</code>).</li>
-            <li><strong>Token Sliders &amp; <code>.strule</code> Export:</strong> Tune <code>$token</code> sliders with live microsecond WebAssembly recompilation, verify the 4-layer capability and anti-poisoning security audit, and export Ed25519-signed <code>.strule</code> bundles.</li>
+            <li><strong>Token Sliders &amp; <code>.strule</code> Export:</strong> Tune <code>$token</code> sliders with live microsecond WebAssembly recompilation, run the static WASM audit locally, and export <code>sloptrap-bundle-v2</code> <code>.strule</code> files signed with your own key. A self-signed bundle is tier <em>unverified</em>: it can be loaded only by explicit local import, never from the registry.</li>
           </ul>
           <pre><code># Example Common Cross-Site Syntax
 token high_post_rate = 0.9
@@ -128,7 +127,7 @@ verdict, err := eng.Evaluate(ctx, fingerprint)</code></pre>
 
           <h3>Mode C — Pre-matched public rule lists (<code>lists/&lt;site&gt;/&lt;rule_id&gt;.txt</code>)</h3>
           <p>
-            Every public rule has an associated matched-account list indexed by <code>lists/manifest.json</code> (with SHA-256 digests for delta sync). Browser extensions and SDK clients (<code>SlopTrapClient</code> in JS and <code>ManagedClient</code> in Go) check enabled rule lists in <code>O(1)</code> before spinning up WASM, and users can opt in (<code>contributeMatchedAccounts: true</code>) to automatically submit newly matched unlisted accounts while duplicates are silently dropped.
+            Every <strong>official</strong> rule has a matched-account list indexed by <code>lists/manifest.json</code> (with SHA-256 digests for delta sync). An account is listed only after reports from at least five distinct networks, and every row is re-validated when the site syncs (known site, official rule id for that site, well-formed account key). Clients check enabled official lists before running WASM; community rules never get lists and never use this fast path. Users can opt in (<code>contributeMatchedAccounts: true</code>) to report newly matched accounts.
           </p>
         </section>
 
@@ -156,7 +155,7 @@ registerSiteAdapter({
             </li>
             <li>
               <strong><a href="https://github.com/sloptrap/sloptrap-extension" target="_blank" rel="noopener"><code>sloptrap/sloptrap-extension</code></a> (Chromium &amp; Firefox Extension):</strong>
-              Single-monorepo Manifest V3 extension filtering YouTube, TikTok, and Pinterest feeds in real time using static and registry-synced Verified <code>.strule</code> bundles.
+              Single-monorepo Manifest V3 extension filtering YouTube, TikTok, and Pinterest feeds in real time using static and registry-synced <strong>Official</strong> <code>.strule</code> bundles (plus <strong>Community</strong> bundles when the user enables them).
             </li>
           </ul>
           <pre><code># Build &amp; run the example YouTube TUI application
@@ -164,6 +163,21 @@ git clone git@github.com:sloptrap/sloptrap-tube-tui.git
 cd sloptrap-tube-tui
 go build -o sloptrap-tube-tui ./cmd/sloptrap
 ./sloptrap-tube-tui --listen 0.0.0.0:8787</code></pre>
+        </section>
+        <section class="docs-section" id="trust">
+          <h2>5. Bundle format v2, trust tiers &amp; community rules</h2>
+          <p>
+            All clients (Studio, the JS SDK and extension, the Go runtime and this site's auditor) read only <code>sloptrap-bundle-v2</code>. <strong>v1 support has been removed</strong> and the old v1 signing keys (<code>eb85cbf5…</code>, <code>33fee5d9…</code>) are revoked; a v1 bundle no longer loads anywhere.
+          </p>
+          <ul>
+            <li><strong>Official</strong>: signed offline by a SlopTrap maintainer with the pinned official key <code>0540a396ece8ab0f9670a25e03b02e345450a1373b86a7d400dcad79ceec5cc1</code>. The official key is not in any CI system. Official is the only tier shown as verified, and enabled by default.</li>
+            <li><strong>Community</strong>: anonymous submissions that passed the private pipeline's automated checks, signed with the community key <code>34c3c2ee0d51ae18fbf669dc441a51faa06bbfcbf5efa6adf73702d644c5c69e</code>. Their ids start with <code>community-</code>. They are not reviewed by maintainers, are off by default, and verified-only mode never loads them.</li>
+            <li><strong>Unverified</strong>: any other key. Never loaded from the registry; only by explicit local import, and always labelled unverified.</li>
+          </ul>
+          <p>
+            The tier is computed from the signing key alone. Fields inside a bundle or a leaderboard feed (such as <code>verified</code> or <code>provenance</code>) carry no trust.
+            Bundles are <strong>not encrypted</strong>: the v1 "encryption" used a key derived from a public seed, so it was only obfuscation, and v2 ships the plain WASM module. See the <a href="../rules/#strule-crypto">WASM spec</a> for the signed fields and the audit rules.
+          </p>
         </section>
       </article>
     </div>

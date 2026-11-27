@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" fill="none">
+  <defs>
+    <!-- Shield dark-slate left/right subtle split gradients -->
+    <linearGradient id="shield-left" x1="112" y1="64" x2="256" y2="448" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#27313F"/>
+      <stop offset="100%" stop-color="#171E28"/>
+    </linearGradient>
+    <linearGradient id="shield-right" x1="256" y1="64" x2="400" y2="448" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1D2531"/>
+      <stop offset="100%" stop-color="#121720"/>
+    </linearGradient>
+    <linearGradient id="rim-emerald" x1="256" y1="56" x2="256" y2="456" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4ADE9B"/>
+      <stop offset="55%" stop-color="#1DB981"/>
+      <stop offset="100%" stop-color="#138E63"/>
+    </linearGradient>
+    <linearGradient id="funnel-fill" x1="256" y1="196" x2="256" y2="338" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#18B981"/>
+      <stop offset="100%" stop-color="#119E6E"/>
+    </linearGradient>
+    <linearGradient id="drop-amber" x1="226" y1="120" x2="226" y2="180" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FBBF24"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+    <linearGradient id="drop-coral" x1="284" y1="108" x2="284" y2="172" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FDA4AF"/>
+      <stop offset="100%" stop-color="#F43F5E"/>
+    </linearGradient>
+
+    <!-- Soft glow filters for blocked synthetic droplets -->
+    <filter id="glow-amber" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="glow-coral" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Clip half-shield for crisp vertical crease -->
+    <clipPath id="right-half">
+      <rect x="256" y="0" width="256" height="512"/>
+    </clipPath>
+  </defs>
+
+  <!-- Outer dark-slate shield shell -->
+  <path
+    d="M256 44C205 44 139 67 104 84C85 93 74 111 74 132V226C74 335 147 419 243 463C251 467 261 467 269 463C365 419 438 335 438 226V132C438 111 427 93 408 84C373 67 307 44 256 44Z"
+    fill="#1A222D"
+  />
+
+  <!-- Inner shield body (left tone + right tone) -->
+  <path
+    d="M256 64C209 64 148 85 116 101C102 108 94 121 94 137V225C94 323 160 399 248 441C253 443 259 443 264 441C352 399 418 323 418 225V137C418 121 410 108 396 101C364 85 303 64 256 64Z"
+    fill="url(#shield-left)"
+  />
+  <path
+    d="M256 64C209 64 148 85 116 101C102 108 94 121 94 137V225C94 323 160 399 248 441C253 443 259 443 264 441C352 399 418 323 418 225V137C418 121 410 108 396 101C364 85 303 64 256 64Z"
+    fill="url(#shield-right)"
+    clip-path="url(#right-half)"
+  />
+
+  <!-- Crisp emerald inner shield rim -->
+  <path
+    d="M256 61C208 61 146 82 113 98C98 105 90 119 90 136V225C90 326 158 404 247 446C253 449 259 449 265 446C354 404 422 326 422 225V136C422 119 414 105 399 98C366 82 304 61 256 61Z"
+    stroke="url(#rim-emerald)"
+    stroke-width="9"
+    stroke-linejoin="round"
+  />
+
+  <!-- Trapped synthetic "slop" droplets above top filter bar -->
+  <g filter="url(#glow-amber)">
+    <path
+      d="M226 118C226 118 206 147 206 161C206 172.046 214.954 181 226 181C237.046 181 246 172.046 246 161C246 147 226 118 226 118Z"
+      fill="url(#drop-amber)"
+      stroke="#FCD34D"
+      stroke-width="3"
+      stroke-linejoin="round"
+    />
+  </g>
+  <g filter="url(#glow-coral)">
+    <path
+      d="M284 107C284 107 263 138 263 152.5C263 164.098 272.402 173.5 284 173.5C295.598 173.5 305 164.098 305 152.5C305 138 284 107 284 107Z"
+      fill="url(#drop-coral)"
+      stroke="#FDA4AF"
+      stroke-width="3"
+      stroke-linejoin="round"
+    />
+  </g>
+
+  <!-- 3-Bar Emerald Filter Funnel -->
+  <g fill="url(#funnel-fill)" stroke="#4ADE9B" stroke-width="3.5" stroke-linejoin="round">
+    <!-- Top bar -->
+    <polygon points="148,198 364,198 343,234 169,234"/>
+    <!-- Middle bar -->
+    <polygon points="178,250 334,250 313,286 199,286"/>
+    <!-- Bottom bar -->
+    <polygon points="208,302 304,302 284,336 228,336"/>
+  </g>
+  <!-- Subtle right-half shadow overlay across funnel bars for depth -->
+  <g fill="#0A1219" fill-opacity="0.14" clip-path="url(#right-half)">
+    <polygon points="148,198 364,198 343,234 169,234"/>
+    <polygon points="178,250 334,250 313,286 199,286"/>
+    <polygon points="208,302 304,302 284,336 228,336"/>
+  </g>
+
+  <!-- Clean verified signal chevron exiting bottom -->
+  <polygon
+    points="199,362 225,362 256,393 287,362 313,362 256,419"
+    fill="#2CE59B"
+  />
+  <polygon
+    points="256,393 287,362 313,362 256,419"
+    fill="#1BC480"
+  />
+</svg>

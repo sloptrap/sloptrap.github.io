@@ -39,7 +39,7 @@ jobs:
           rm -rf _site
           mkdir -p _site/rules
           cp index.html google9e3a3389e5a7fa84.html .nojekyll leaderboard.json _site/
-          for d in assets docs sdk studio leaderboard bundles lists; do
+          for d in assets docs privacy sdk studio leaderboard bundles lists; do
             cp -R "$d" _site/
           done
           cp rules/index.html _site/rules/

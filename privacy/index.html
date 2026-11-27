@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <title>Privacy Policy &amp; Support — SlopTrap</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icon.svg" />
+  <link rel="stylesheet" href="../assets/gravity-uikit.css" />
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body class="g-root g-root_theme_dark">
+  <script src="../assets/theme-init.js"></script>
+
+  <header class="g-app-header">
+    <div class="g-app-header__inner">
+      <div style="display:flex;align-items:center;gap:20px;height:100%;">
+        <a class="g-brand" href="../">
+          <span class="g-brand__mark">
+            <svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2.5 4.5h11M4.5 8h7M6.5 11.5h3"/></svg>
+          </span>
+          <span>SlopTrap</span>
+          <span class="g-label g-label_theme_utility mono">bundle v2</span>
+        </a>
+        <nav class="g-nav" aria-label="Primary">
+          <a class="g-nav__item" href="../">Overview</a>
+          <a class="g-nav__item" href="../studio/">Rule Studio</a>
+          <a class="g-nav__item" href="../docs/">Documentation &amp; SDK</a>
+          <a class="g-nav__item" href="../rules/">WASM Spec</a>
+          <a class="g-nav__item" href="../leaderboard/">Leaderboards</a>
+          <a class="g-nav__item g-nav__item_active" href="./">Privacy</a>
+        </nav>
+      </div>
+      <div class="g-header-actions">
+        <button id="theme-toggle" class="g-btn g-btn_view_flat g-btn_icon" type="button" aria-label="Toggle theme"></button>
+        <a class="g-btn g-btn_view_outlined g-btn_size_s" href="https://github.com/sloptrap" target="_blank" rel="noopener">
+          GitHub
+          <svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 11L11 5M6 5h5v5"/></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="g-container">
+    <article class="docs-article" style="max-width:860px;margin:28px auto 44px;">
+      <section class="docs-section" id="privacy">
+        <h1>SlopTrap Privacy Policy</h1>
+        <p style="color:var(--g-color-text-secondary);"><strong>Last updated:</strong> November 27, 2026 · Applies to the SlopTrap Browser Extension (Chrome / Chromium &amp; Firefox), SlopTrap Rule Studio, and SlopTrap TUI.</p>
+        <p>
+          SlopTrap is a free, open-source content filter designed to evaluate feed items locally on your device without tracking your browsing activity.
+        </p>
+      </section>
+
+      <section class="docs-section" id="default-operation">
+        <h2>1. Default Operation — Zero Personal Data Collection</h2>
+        <p>Out of the box, SlopTrap operates locally inside your browser with all optional contribution features disabled:</p>
+        <ul>
+          <li><strong>Local Sandboxed Evaluation:</strong> Feed card metadata on YouTube, TikTok, and Pinterest is evaluated locally inside a zero-import, fuel-metered WebAssembly (<code>.strule</code>) sandbox and against locally cached channel lists.</li>
+          <li><strong>No Browsing or Watch History Collected:</strong> SlopTrap never collects, logs, or transmits the pages you visit, videos or pins you view, search terms, personal profile details, or browser cookies.</li>
+          <li><strong>Credential-Free Static Sync:</strong> Official rule bundles (<code>bundles/*.strule</code>), Ed25519-signed pre-matched rule lists (<code>lists/&lt;site&gt;/&lt;rule_id&gt;.txt</code>), and enabled external community lists (such as AiSList) are fetched over HTTPS with cookies omitted (<code>credentials: "omit"</code>).</li>
+          <li><strong>Local Storage Only:</strong> Your filter preferences, rule toggles, 1-click channel whitelist overrides, and channels queued via the right-click menu for testing in <a href="../studio/">Rule Studio</a> remain in your browser's local extension storage.</li>
+        </ul>
+      </section>
+
+      <section class="docs-section" id="optional-features">
+        <h2>2. Strictly Opt-In Features</h2>
+        <ul>
+          <li>
+            <strong>Anonymous Rule Rankings (Optional):</strong> When enabled, periodic rule update checks include a randomly generated local installation UUID so the public leaderboard can count active installs per rule over a rolling 30-day window. No user identity, account information, or browsing history is attached, and stale install rows expire automatically.
+          </li>
+          <li>
+            <strong>Contributor Sign-In &amp; Public Rule List Reporting (Off by Default):</strong> If you explicitly choose to sign in via Google, GitHub, or Discord and enable <em>"Share new matches to lists"</em> (and grant Firefox's optional data collection consent prompt on Firefox):
+            <ul>
+              <li><strong>Zero PII Stored:</strong> SlopTrap verifies account age/verification status during OAuth callback solely to prevent automated Sybil abuse, computes a one-way keyed HMAC-SHA256 digest of your provider subject ID, and immediately discards the OAuth response. SlopTrap never stores your email address, username, display name, avatar, or OAuth provider access token.</li>
+              <li><strong>Keyed Abuse-Prevention Hashes:</strong> Rate-limiting and quorum diversity checks use one-way HMAC-hashed network subnet/ASN identifiers rather than raw client IP addresses.</li>
+              <li><strong>Minimal Match Payload:</strong> Only public channel identifiers (<code>@handle</code> or YouTube <code>UC...</code> channel ID) that triggered a verified blocking rule (<code>{site, rule_id, rule_version, account_key}</code>) are submitted, deduplicated to at most one vote per contributor per channel and rule.</li>
+              <li><strong>Logout &amp; Cascading Revocation:</strong> Clicking <strong>Logout</strong> revokes your contributor bearer token immediately and clears it from your local IndexedDB vault. Revoking an account cascades to remove its votes from public list counts.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Optional GitHub Personal Access Token:</strong> If you manually paste a GitHub token in Settings to automate external blocklist issue creation (e.g., AiSList), that token is stored solely in your local IndexedDB vault and transmitted only directly to <code>https://api.github.com</code> when you submit a report.
+          </li>
+          <li>
+            <strong>Optional Local Companion Daemon:</strong> Connecting to <code>http://127.0.0.1</code> / <code>http://localhost</code> occurs only if you explicitly configure a local <code>sloptrap</code> TUI daemon URL on your own machine.
+          </li>
+        </ul>
+      </section>
+
+      <section class="docs-section" id="limited-use">
+        <h2>3. Data Sharing &amp; Chrome Web Store Limited Use Disclosure</h2>
+        <ul>
+          <li>SlopTrap <strong>never sells, rents, or transfers</strong> user data to third parties, advertisers, or data brokers.</li>
+          <li>SlopTrap does not use or transfer data for personalized advertising, profiling, creditworthiness, or any purpose unrelated to filtering synthetic/low-effort content feeds.</li>
+          <li>SlopTrap's use and transfer of any information received from Google APIs adheres to the Chrome Web Store User Data Policy, including the Limited Use requirements.</li>
+        </ul>
+      </section>
+
+      <section class="docs-section" id="support">
+        <h2>4. Support, Data Deletion &amp; Contact</h2>
+        <ul>
+          <li><strong>Clear Local Data:</strong> Disable toggles, click <strong>Logout</strong> in SlopTrap Settings, or uninstall the extension to erase all locally stored extension state and tokens immediately.</li>
+          <li><strong>Documentation &amp; Troubleshooting:</strong> Visit the <a href="../docs/">SlopTrap Documentation &amp; SDK Guide</a> and the <a href="../rules/">Bundle v2 &amp; WASM Sandbox Specification</a>.</li>
+          <li><strong>Bug Reports &amp; Support:</strong> Open an issue or contact the SlopTrap maintainers via <a href="https://github.com/sloptrap" target="_blank" rel="noopener">github.com/sloptrap</a> (including public registry issues on <a href="https://github.com/sloptrap/sloptrap.github.io/issues" target="_blank" rel="noopener">sloptrap/sloptrap.github.io</a>).</li>
+        </ul>
+      </section>
+    </article>
+  </main>
+
+  <footer class="g-footer">
+    <div class="g-footer__inner">
+      <div>SlopTrap Privacy Policy &amp; Support</div>
+      <div class="g-footer__links">
+        <a href="../">Overview</a>
+        <a href="../studio/">Rule Studio</a>
+        <a href="../docs/">Documentation &amp; SDK</a>
+        <a href="../rules/">WASM Spec</a>
+        <a href="../leaderboard/">Leaderboards</a>
+        <a href="./">Privacy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../assets/site.js"></script>
+</body>
+</html>

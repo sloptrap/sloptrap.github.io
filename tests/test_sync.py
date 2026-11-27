@@ -385,9 +385,11 @@ class EndToEndTests(unittest.TestCase):
                                      stats={"window_days": 30, "active_installs": {}, "all_time_installs": {}})
             # Within 6 hours -> warns and keeps existing list files (returns 0)
             self.assertEqual(S.run(root, down_worker, lambda: ({}, {}, {}), "https://w.example", "2026-11-26T06:00:00Z"), 0)
-            # Past 24 hours (e.g. 26 hours later) -> raises SyncError!
+            # Past 24 hours (e.g. 26 hours later) -> writes leaderboards first (V5-L4), then raises SyncError!
+            (root / "leaderboard.json").unlink()
             with self.assertRaisesRegex(S.SyncError, "failing for >24h"):
                 S.run(root, down_worker, lambda: ({}, {}, {}), "https://w.example", "2026-11-27T02:00:00Z")
+            self.assertTrue((root / "leaderboard.json").exists(), "V5-L4: leaderboards still written before raising stale-list alert")
 
     def test_offline_regeneration_makes_no_requests(self):
         with test_keys(), tempfile.TemporaryDirectory() as td:

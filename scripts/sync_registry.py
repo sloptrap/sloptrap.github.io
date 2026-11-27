@@ -652,11 +652,12 @@ def run(root: Path, get, gh_fetch, endpoint: str, now_iso: str, offline: bool = 
     community = sync_community(root, get, official_ids)
 
     audited_all = [*official, *community]
+    list_sync_alert: SyncError | None = None
     try:
         sync_lists(root, get, audited_all, now_iso)
     except Exception as e:  # noqa: BLE001
         print(f"::warning::list sync failed, keeping existing list files: {e}", file=sys.stderr)
-        # V4-L4 + INFO-P: fail CI loudly if list sync has been broken for >24h (well before the 14d client expiry).
+        # V4-L4 + INFO-P + V5-L4: record >24h list-sync failure, write leaderboards first, then raise to alert CI.
         man_path = root / "lists" / "manifest.json"
         if man_path.exists():
             try:
@@ -665,14 +666,14 @@ def run(root: Path, get, gh_fetch, endpoint: str, now_iso: str, offline: bool = 
                     json.loads(man_path.read_text(encoding="utf-8")).get("generated_at", "")
                 )
                 if now_ts - prev_ts > 86400:
-                    raise SyncError(f"list sync failing for >24h (manifest age {now_ts - prev_ts}s): {e}") from e
-            except SyncError:
-                raise
+                    list_sync_alert = SyncError(f"list sync failing for >24h (manifest age {now_ts - prev_ts}s): {e}")
             except Exception as parse_err:  # noqa: BLE001
-                raise SyncError(f"list sync failed and existing manifest is unreadable ({parse_err}): {e}") from e
+                list_sync_alert = SyncError(f"list sync failed and existing manifest is unreadable ({parse_err}): {e}")
 
     write_leaderboards(root, official, community, fetch_stats(get), gh_fetch(), now_iso, endpoint)
     print(f"synced {len(official)} official and {len(community)} community rule(s)")
+    if list_sync_alert is not None:
+        raise list_sync_alert
     return 0
 
 

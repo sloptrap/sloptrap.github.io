@@ -54,7 +54,8 @@ class FakeWorker:
         nxt = f"{chunk[-1]['updated_at']}|{chunk[-1]['site']}|{chunk[-1]['rule_id']}|{chunk[-1]['account_key']}" if has_more and chunk else None
         return {"ok": True, "entries": chunk, "has_more": has_more, "next_cursor": nxt}
 
-    def _attestations(self, include_bodies=False, generated_at="2026-11-26T00:00:00Z"):
+    def _attestations(self, include_bodies=False, generated_at="2026-11-26T00:00:00Z", exclude_csv=""):
+        excluded = {x.strip() for x in (exclude_csv or "").split(",") if x.strip()}
         rule_sites = dict(self.official_rules)
         for b in self.bundles:
             man = b.get("bundle", {}).get("manifest") if isinstance(b.get("bundle"), dict) else None
@@ -65,11 +66,13 @@ class FakeWorker:
         raw_lists = {}
         bodies = {}
         for (site, rid) in sorted(lists):
+            key = f"{site}/{rid}"
+            if key in excluded:
+                continue
             counts = lists[(site, rid)]
             if rid.startswith(strule_v2.COMMUNITY_PREFIX) and not counts:
                 continue
             txt, cnt, sha = S.format_list_text(site, rid, counts)
-            key = f"{site}/{rid}"
             raw_lists[key] = {
                 "site": site, "rule_id": rid, "path": f"lists/{site}/{rid}.txt", "count": cnt, "sha256": sha,
             }
@@ -97,7 +100,10 @@ class FakeWorker:
                 return self._cursor_entries(since, after)
             return {"ok": True, "entries": self._page(self.entries, "first_seen", since)}
         if route == "/api/v1/lists/attestations":
-            return self._attestations(include_bodies=(qs.get("include_bodies", ["0"])[0] == "1"))
+            return self._attestations(
+                include_bodies=(qs.get("include_bodies", ["0"])[0] == "1"),
+                exclude_csv=qs.get("exclude", [""])[0],
+            )
         if route == "/api/v1/rules/stats":
             if self.stats is None:
                 raise OSError("down")
@@ -336,6 +342,52 @@ class EndToEndTests(unittest.TestCase):
 
             with self.assertRaises(S.SyncError):
                 S.sync_lists(root, rollback_get, official, "2026-11-26T00:00:00Z")
+
+    def test_v4_l3_l4_count_priority_per_list_isolation_and_24h_stale_alert(self):
+        with test_keys(), tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            (root / "bundles").mkdir()
+            (root / "bundles" / "yt-rule.strule").write_bytes(bundle_bytes("yt-rule", WASM, OFFICIAL_TEST_SEED))
+            official = S.audit_official(root)
+
+            # V4-L3: high-count entry survives even when MAX_LIST_ENTRIES_PER_RULE is reached first by count-1 entries
+            with unittest.mock.patch.object(S, "MAX_LIST_ENTRIES_PER_RULE", 3):
+                lists, rej = S.build_lists([
+                    {"site": "youtube", "rule_id": "yt-rule", "account_key": "@noise1", "count": 1},
+                    {"site": "youtube", "rule_id": "yt-rule", "account_key": "@noise2", "count": 1},
+                    {"site": "youtube", "rule_id": "yt-rule", "account_key": "@noise3", "count": 1},
+                    {"site": "youtube", "rule_id": "yt-rule", "account_key": "@real_slop", "count": 9},
+                ], {"yt-rule": "youtube"})
+                self.assertEqual(rej, 1)
+                self.assertEqual(lists[("youtube", "yt-rule")]["@real_slop"], 9)
+
+            # V4-L4 PoC E4: Worker attests a community rule (`community-hostile`) that fails local WASM audit ->
+            # sync_lists isolates ONLY `youtube/community-hostile` via `?exclude=` and keeps publishing `youtube/yt-rule`!
+            hostile_bundle = bundle("community-hostile", module(body=[0x03, 0x40, 0x0C, 0x00, 0x0B, 0x42, 0x00]),
+                                    COMMUNITY_TEST_SEED)
+            w = FakeWorker(
+                bundles=[{"rule_id": "community-hostile", "version": "1.0.0", "accepted_at": 10, "bundle": hostile_bundle}],
+                entries=[
+                    {"site": "youtube", "rule_id": "yt-rule", "account_key": "@healthy_hit", "count": 7, "first_seen": 1},
+                    {"site": "youtube", "rule_id": "community-hostile", "account_key": "@bad_hit", "count": 5, "first_seen": 2},
+                ],
+                stats={"window_days": 30, "active_installs": {}, "all_time_installs": {}},
+            )
+            self.assertEqual(S.run(root, w, lambda: ({}, {}, {}), "https://w.example", "2026-11-26T00:00:00Z"), 0)
+            self.assertIn("@healthy_hit\t7", (root / "lists" / "youtube" / "yt-rule.txt").read_text(encoding="utf-8"))
+            self.assertFalse((root / "lists" / "youtube" / "community-hostile.txt").exists())
+            self.assertTrue(any("exclude=youtube/community-hostile" in c for c in w.calls))
+            import audit_bundles as A
+            self.assertEqual(A.main(["--root", str(root)]), 0)
+
+            # V4-L4 + INFO-P: if list sync is completely down for >24h, `run()` raises SyncError to alert CI!
+            down_worker = FakeWorker(bundles=[], entries=[], tamper_attestation=True,
+                                     stats={"window_days": 30, "active_installs": {}, "all_time_installs": {}})
+            # Within 6 hours -> warns and keeps existing list files (returns 0)
+            self.assertEqual(S.run(root, down_worker, lambda: ({}, {}, {}), "https://w.example", "2026-11-26T06:00:00Z"), 0)
+            # Past 24 hours (e.g. 26 hours later) -> raises SyncError!
+            with self.assertRaisesRegex(S.SyncError, "failing for >24h"):
+                S.run(root, down_worker, lambda: ({}, {}, {}), "https://w.example", "2026-11-27T02:00:00Z")
 
     def test_offline_regeneration_makes_no_requests(self):
         with test_keys(), tempfile.TemporaryDirectory() as td:

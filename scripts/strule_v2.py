@@ -305,7 +305,7 @@ def verify_list_manifest(
     if now_sec is not None:
         if max_age_seconds > 0 and (now_sec - gen_ts) > max_age_seconds:
             raise BundleError(f"list manifest: stale manifest rejected (age {now_sec - gen_ts}s > {max_age_seconds}s)")
-        if gen_ts > now_sec + 86400:
+        if gen_ts > now_sec + 3600:
             raise BundleError("list manifest: future-dated manifest rejected")
     for k, it in lists_obj.items():
         if "signature_b64" in it:

@@ -1117,7 +1117,7 @@ export async function verifyListManifest(manifestDoc, allowedKeys = PINNED_KEYRI
     if (maxAge > 0 && (nowSec - genSec) > maxAge) {
       throw new BundleError(`list manifest: stale manifest rejected (age ${nowSec - genSec}s > ${maxAge}s)`);
     }
-    if (genSec > nowSec + 86400) {
+    if (genSec > nowSec + 3600) {
       throw new BundleError("list manifest: future-dated manifest rejected");
     }
   }

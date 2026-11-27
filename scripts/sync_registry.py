@@ -264,6 +264,7 @@ def build_lists(rows: list[dict], rule_sites: dict[str, str]) -> tuple[dict[tupl
         for s in (SITES if tsite == "*" else (tsite,)):
             out[(s, rid)] = {}
     rejected = 0
+    valid_rows: list[tuple[int, str, str, str]] = []
     for row in rows:
         site, rid = row.get("site"), row.get("rule_id")
         key = normalize_account_key(site, row.get("account_key")) if site in SITES else None
@@ -272,6 +273,10 @@ def build_lists(rows: list[dict], rule_sites: dict[str, str]) -> tuple[dict[tupl
         if key is None or cnt is None or not isinstance(rid, str) or (site, rid) not in out:
             rejected += 1
             continue
+        valid_rows.append((cnt, key, site, rid))
+    # V4-L3: prioritize higher-quorum entries before applying MAX_LIST_ENTRIES_PER_RULE so count-1 noise cannot crowd out real hits.
+    valid_rows.sort(key=lambda item: (-item[0], item[1]))
+    for cnt, key, site, rid in valid_rows:
         bucket = out[(site, rid)]
         if key not in bucket and len(bucket) >= MAX_LIST_ENTRIES_PER_RULE:
             rejected += 1
@@ -293,21 +298,48 @@ def format_list_text(site: str, rid: str, counts: dict[str, int]) -> tuple[str, 
     return text, len(lines), hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def write_lists(root: Path, lists: dict[tuple[str, str], dict[str, int]], _names: dict[str, str],
-                now_iso: str, signed_manifest: dict | None = None) -> None:
-    ldir = root / "lists"
-    manifest: dict = {"schema_version": 2, "generated_at": now_iso, "lists": {}}
+def _render_candidate_lists(
+    lists: dict[tuple[str, str], dict[str, int]],
+    ldir: Path,
+    excluded_keys: set[str] | None = None,
+) -> dict[str, tuple[Path, str, dict]]:
+    excl = excluded_keys or set()
     rendered: dict[str, tuple[Path, str, dict]] = {}
     for (site, rid) in sorted(lists):
+        key = f"{site}/{rid}"
+        if key in excl:
+            continue
         counts = lists[(site, rid)]
         if rid.startswith(strule_v2.COMMUNITY_PREFIX) and not counts:
             continue
         text, count, sha = format_list_text(site, rid, counts)
         path = ldir / site / f"{rid}.txt"
-        key = f"{site}/{rid}"
         rendered[key] = (path, text, {
             "site": site, "rule_id": rid, "path": f"lists/{site}/{rid}.txt", "count": count, "sha256": sha,
         })
+    return rendered
+
+
+def _find_problem_list_keys(rendered: dict[str, tuple[Path, str, dict]], att_lists: dict) -> set[str]:
+    """Identify individual list keys that cannot be published (unaudited Worker rule or digest mismatch, V4-L4)."""
+    bad: set[str] = set()
+    for k in att_lists:
+        if k not in rendered:
+            bad.add(k)
+            continue
+        local_item = rendered[k][2]
+        att_item = att_lists[k]
+        if att_item.get("sha256") != local_item["sha256"] or att_item.get("count") != local_item["count"]:
+            bad.add(k)
+    return bad
+
+
+def write_lists(root: Path, lists: dict[tuple[str, str], dict[str, int]], _names: dict[str, str],
+                now_iso: str, signed_manifest: dict | None = None,
+                excluded_keys: set[str] | None = None) -> None:
+    ldir = root / "lists"
+    manifest: dict = {"schema_version": 2, "generated_at": now_iso, "lists": {}}
+    rendered = _render_candidate_lists(lists, ldir, excluded_keys=excluded_keys)
 
     if signed_manifest is not None:
         prev_gen = 0
@@ -324,6 +356,12 @@ def write_lists(root: Path, lists: dict[tuple[str, str], dict[str, int]], _names
         except Exception as e:  # noqa: BLE001
             raise SyncError(f"invalid list attestation signature: {e}") from e
         att_lists = signed_manifest.get("lists") or {}
+        # V4-L4: if an audited zero-count rule is not yet attested by the Worker, omit only that rule with a warning.
+        for key in list(rendered.keys()):
+            if key not in att_lists and rendered[key][2]["count"] == 0:
+                print(f"::warning::audited list {key} is not yet attested by Worker; skipping until Worker config updates",
+                      file=sys.stderr)
+                del rendered[key]
         if set(rendered.keys()) != set(att_lists.keys()):
             raise SyncError(
                 f"list attestation keys {sorted(att_lists.keys())} do not match audited lists {sorted(rendered.keys())}"
@@ -367,13 +405,28 @@ def sync_lists(root: Path, get, audited_all: list[audit.AuditResult], now_iso: s
             att = get("/api/v1/lists/attestations?include_bodies=1")
             if not isinstance(att, dict) or att.get("ok") is not True:
                 raise SyncError("missing /api/v1/lists/attestations payload")
+            strule_v2.verify_list_manifest(att)
             if isinstance(att.get("bodies"), dict):
                 rows = rows_from_attested_bodies(att["bodies"])
             else:
                 rows = fetch_paged(get, "/api/v1/lists/entries", "entries", "updated_at",
                                    lambda r: (r.get("site"), r.get("rule_id"), r.get("account_key")))
             lists, rejected = build_lists(rows, rule_sites)
-            write_lists(root, lists, names, now_iso, signed_manifest=att)
+            rendered = _render_candidate_lists(lists, root / "lists")
+            bad_keys = _find_problem_list_keys(rendered, att.get("lists") or {})
+            excluded: set[str] = set()
+            if bad_keys:
+                # V4-L4: isolate per-list failures by requesting a signed attestation excluding ONLY the problem key(s).
+                excl_csv = ",".join(sorted(bad_keys))
+                print(f"::warning::excluding problem list(s) from publication: {excl_csv}", file=sys.stderr)
+                att = get(f"/api/v1/lists/attestations?include_bodies=1&exclude={urllib.parse.quote(excl_csv, safe=',/')}")
+                if not isinstance(att, dict) or att.get("ok") is not True:
+                    raise SyncError("missing /api/v1/lists/attestations?exclude payload")
+                if isinstance(att.get("bodies"), dict):
+                    rows = rows_from_attested_bodies(att["bodies"])
+                    lists, rejected = build_lists(rows, rule_sites)
+                excluded = bad_keys
+            write_lists(root, lists, names, now_iso, signed_manifest=att, excluded_keys=excluded)
             if rejected:
                 print(f"rejected {rejected} list row(s) (unknown site, unaudited rule, bad count, or bad account key)")
             return
@@ -602,7 +655,21 @@ def run(root: Path, get, gh_fetch, endpoint: str, now_iso: str, offline: bool = 
     try:
         sync_lists(root, get, audited_all, now_iso)
     except Exception as e:  # noqa: BLE001
-        print(f"list sync failed, keeping existing list files: {e}", file=sys.stderr)
+        print(f"::warning::list sync failed, keeping existing list files: {e}", file=sys.stderr)
+        # V4-L4 + INFO-P: fail CI loudly if list sync has been broken for >24h (well before the 14d client expiry).
+        man_path = root / "lists" / "manifest.json"
+        if man_path.exists():
+            try:
+                now_ts = strule_v2.parse_list_generated_at(now_iso)
+                prev_ts = strule_v2.parse_list_generated_at(
+                    json.loads(man_path.read_text(encoding="utf-8")).get("generated_at", "")
+                )
+                if now_ts - prev_ts > 86400:
+                    raise SyncError(f"list sync failing for >24h (manifest age {now_ts - prev_ts}s): {e}") from e
+            except SyncError:
+                raise
+            except Exception as parse_err:  # noqa: BLE001
+                raise SyncError(f"list sync failed and existing manifest is unreadable ({parse_err}): {e}") from e
 
     write_leaderboards(root, official, community, fetch_stats(get), gh_fetch(), now_iso, endpoint)
     print(f"synced {len(official)} official and {len(community)} community rule(s)")

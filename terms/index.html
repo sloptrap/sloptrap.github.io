@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <title>Terms of Service — SlopTrap</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/icon.svg" />
+  <link rel="stylesheet" href="../assets/gravity-uikit.css" />
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body class="g-root g-root_theme_dark">
+  <script src="../assets/theme-init.js"></script>
+
+  <header class="g-app-header">
+    <div class="g-app-header__inner">
+      <div style="display:flex;align-items:center;gap:20px;height:100%;">
+        <a class="g-brand" href="../">
+          <span class="g-brand__mark">
+            <svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2.5 4.5h11M4.5 8h7M6.5 11.5h3"/></svg>
+          </span>
+          <span>SlopTrap</span>
+          <span class="g-label g-label_theme_utility mono">bundle v2</span>
+        </a>
+        <nav class="g-nav" aria-label="Primary">
+          <a class="g-nav__item" href="../">Overview</a>
+          <a class="g-nav__item" href="../studio/">Rule Studio</a>
+          <a class="g-nav__item" href="../docs/">Documentation &amp; SDK</a>
+          <a class="g-nav__item" href="../rules/">WASM Spec</a>
+          <a class="g-nav__item" href="../leaderboard/">Leaderboards</a>
+          <a class="g-nav__item" href="../privacy/">Privacy</a>
+          <a class="g-nav__item g-nav__item_active" href="./">Terms</a>
+        </nav>
+      </div>
+      <div class="g-header-actions">
+        <button id="theme-toggle" class="g-btn g-btn_view_flat g-btn_icon" type="button" aria-label="Toggle theme"></button>
+        <a class="g-btn g-btn_view_outlined g-btn_size_s" href="https://github.com/sloptrap" target="_blank" rel="noopener">
+          GitHub
+          <svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 11L11 5M6 5h5v5"/></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="g-container">
+    <article class="docs-article" style="max-width:860px;margin:28px auto 44px;">
+      <section class="docs-section" id="terms">
+        <h1>SlopTrap Terms of Service</h1>
+        <p style="color:var(--g-color-text-secondary);"><strong>Last updated:</strong> November 27, 2026 · Applies to the SlopTrap Browser Extension, SlopTrap Rule Studio, SlopTrap CLI/TUI, and Public Rule &amp; Match List Services.</p>
+        <p>
+          By installing or using SlopTrap software or interacting with SlopTrap's public rule registry and optional contributor services, you agree to these Terms of Service.
+        </p>
+      </section>
+
+      <section class="docs-section" id="license-and-purpose">
+        <h2>1. Open-Source Software &amp; Intended Use</h2>
+        <ul>
+          <li>SlopTrap provides local client tools, WebAssembly (<code>.strule</code>) detection modules, and public match lists to help users filter automated, synthetic, or low-effort content feeds on supported platforms.</li>
+          <li>Rule evaluations and community match counts represent automated heuristic signals, not statements of fact regarding any creator or account. Users may override or whitelist any channel locally at any time.</li>
+        </ul>
+      </section>
+
+      <section class="docs-section" id="community-submissions">
+        <h2>2. Rule Submissions &amp; Optional Contributor Reporting</h2>
+        <ul>
+          <li><strong>Acceptable Use:</strong> If you submit community rules via Rule Studio or opt in to Contributor Sign-In to report rule matches, you agree not to submit fabricated matches, target legitimate creators maliciously, operate coordinated fake or Sybil accounts, or attempt to disrupt or exhaust SlopTrap's infrastructure.</li>
+          <li><strong>Automated Auditing &amp; Revocation:</strong> SlopTrap reserves the right to reject, rate-limit, remove, or revoke any community rule submission or contributor account at any time without notice—including cascading removal of all match counts associated with a revoked contributor account.</li>
+          <li><strong>Public Contribution License:</strong> Rule definitions and public channel match counts submitted to the SlopTrap registry are published openly as part of SlopTrap's signed public datasets.</li>
+        </ul>
+      </section>
+
+      <section class="docs-section" id="disclaimer">
+        <h2>3. Disclaimer of Warranties &amp; Limitation of Liability</h2>
+        <p>
+          SLOPTRAP SOFTWARE, RULES, AND LISTS ARE PROVIDED <strong>"AS IS"</strong> AND <strong>"AS AVAILABLE"</strong>, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF ACCURACY, MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. IN NO EVENT SHALL THE SLOPTRAP MAINTAINERS OR CONTRIBUTORS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM THE USE OF OR INABILITY TO USE THE SOFTWARE OR SERVICES.
+        </p>
+      </section>
+
+      <section class="docs-section" id="privacy-and-changes">
+        <h2>4. Privacy &amp; Updates</h2>
+        <p>
+          Data handling practices are governed by the <a href="../privacy/">SlopTrap Privacy Policy</a>. We may update these Terms periodically by posting the revised date at the top of this page. Questions may be directed via <a href="../privacy/#support">SlopTrap Support</a>.
+        </p>
+      </section>
+    </article>
+  </main>
+
+  <footer class="g-footer">
+    <div class="g-footer__inner">
+      <div>SlopTrap Terms of Service</div>
+      <div class="g-footer__links">
+        <a href="../">Overview</a>
+        <a href="../studio/">Rule Studio</a>
+        <a href="../docs/">Documentation &amp; SDK</a>
+        <a href="../rules/">WASM Spec</a>
+        <a href="../leaderboard/">Leaderboards</a>
+        <a href="../privacy/">Privacy</a>
+        <a href="./">Terms</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../assets/site.js"></script>
+</body>
+</html>

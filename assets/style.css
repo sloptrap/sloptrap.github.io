@@ -476,13 +476,54 @@ pre code {
   border-bottom: 1px solid var(--g-color-line-generic);
 }
 
-.overview-split h1 {
+.overview-split h1,
+.overview-split h3 {
   margin: 8px 0 10px;
   font-size: var(--g-text-display-1-font-size);
   line-height: var(--g-text-display-1-line-height);
   font-weight: 600;
   letter-spacing: -0.02em;
 }
+
+/* Homepage: readable first steps, with the engineering material in Advanced. */
+.home-page .g-app-header { height: 64px; }
+.home-page .g-brand { font-size: 20px; }
+.home-page #theme-toggle { width: auto; min-width: 112px; height: 40px; padding: 0 10px; font-size: 14px; }
+.home-page .g-nav__item { font-size: 16px; padding: 0 14px; white-space: nowrap; }
+.home-page .g-container { padding-top: 40px; }
+.simple-home { max-width: 840px; margin: 0 auto; }
+.simple-hero,
+.simple-section { margin-bottom: 48px; }
+.simple-hero { padding: 32px; border: 1px solid var(--g-color-line-generic); border-radius: 16px; background: var(--st-card-bg); }
+.simple-eyebrow { margin: 0 0 8px; font-size: 16px; font-weight: 700; color: var(--g-color-text-link); }
+.simple-home h1 { max-width: 700px; margin: 0 0 20px; font-size: clamp(36px, 5vw, 52px); line-height: 1.13; letter-spacing: -0.025em; }
+.simple-home h2 { margin: 0 0 18px; font-size: clamp(27px, 3vw, 34px); line-height: 1.2; }
+.simple-home h3 { margin: 0 0 7px; font-size: 22px; line-height: 1.25; }
+.simple-home p,
+.simple-home li { font-size: 19px; line-height: 1.6; }
+.simple-home p { margin: 0 0 18px; }
+.simple-home a { text-decoration: underline; text-underline-offset: 3px; }
+.simple-action { display: inline-flex; align-items: center; justify-content: center; min-height: 54px; padding: 10px 22px; border-radius: 8px; background: var(--g-color-base-brand); color: var(--g-color-text-brand-contrast) !important; font-size: 19px; font-weight: 700; text-align: center; text-decoration: none !important; }
+.simple-action:hover { background: var(--g-color-base-brand-hover); }
+.simple-home .simple-small { margin: 12px 0 0; font-size: 16px; color: var(--g-color-text-secondary); }
+.simple-steps { margin: 0; padding-left: 30px; }
+.simple-steps li { padding: 12px 12px 12px 6px; border-bottom: 1px solid var(--g-color-line-generic); }
+.simple-steps li::marker { font-weight: 700; color: var(--g-color-text-link); }
+.simple-steps li:last-child { border-bottom: 0; }
+.simple-home .simple-note { margin: 22px 0 0; padding: 14px 18px; border-left: 4px solid var(--g-color-line-brand); border-radius: 4px; background: var(--st-card-bg); font-size: 17px; }
+.simple-choice-grid { display: grid; gap: 12px; }
+.simple-choice { padding: 18px 20px; border: 1px solid var(--g-color-line-generic); border-radius: 10px; background: var(--st-card-bg); }
+.simple-choice p { margin: 0; }
+.advanced-section { border-top: 2px solid var(--g-color-line-generic); padding-top: 32px; scroll-margin-top: 84px; }
+.advanced-section > h2 { margin: 0 0 8px; font-size: 30px; }
+.advanced-section > p { margin: 0 0 18px; font-size: 17px; line-height: 1.5; }
+.advanced-details > summary { padding: 16px 18px; border: 1px solid var(--g-color-line-generic); border-radius: 8px; background: var(--st-card-bg); font-size: 19px; font-weight: 700; cursor: pointer; }
+.advanced-details[open] > summary { margin-bottom: 24px; }
+.advanced-details > p { font-size: 16px; line-height: 1.5; }
+.advanced-links { display: flex; flex-wrap: wrap; gap: 10px 20px; margin-bottom: 18px; font-size: 17px; }
+.advanced-links a { text-decoration: underline; text-underline-offset: 3px; }
+.home-page :is(a, button, summary):focus-visible { outline: 3px solid var(--g-color-text-link); outline-offset: 3px; }
+.simple-section { scroll-margin-top: 84px; }
 
 .overview-lead {
   margin: 0 0 18px;
@@ -821,6 +862,7 @@ svg.icon-14 {
 }
 
 @media (max-width: 920px) {
+  .home-page .g-app-header { height: auto; }
   .overview-split,
   .grid-3,
   .grid-2,
@@ -849,6 +891,16 @@ svg.icon-14 {
   .g-nav__item {
     height: 32px;
   }
+}
+
+@media (max-width: 600px) {
+  .home-page .g-container { padding: 24px 16px 48px; }
+  .home-page .g-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); height: auto; overflow: visible; gap: 2px; padding: 4px 0; }
+  .home-page .g-nav__item { width: 100%; height: 40px; justify-content: center; padding: 0 4px; }
+  .simple-hero { padding: 22px; }
+  .simple-home p,
+  .simple-home li { font-size: 18px; }
+  .simple-action { width: 100%; }
 }
 
 [hidden] {

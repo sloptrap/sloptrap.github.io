@@ -11,9 +11,10 @@
       const isLight = theme === 'light';
       btn.setAttribute('title', isLight ? 'Switch to dark theme' : 'Switch to light theme');
       btn.setAttribute('aria-label', isLight ? 'Switch to dark theme' : 'Switch to light theme');
-      btn.innerHTML = isLight
+      const icon = isLight
         ? '<svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13.5 9.8A5.8 5.8 0 0 1 6.2 2.5a5.8 5.8 0 1 0 7.3 7.3Z"/></svg>'
         : '<svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="3.2"/><path d="M8 1.5v1.8M8 12.7v1.8M1.5 8h1.8M12.7 8h1.8M3.4 3.4l1.3 1.3M11.3 11.3l1.3 1.3M12.6 3.4l-1.3 1.3M4.7 11.3l-1.3 1.3"/></svg>';
+      btn.innerHTML = icon + (btn.dataset.showLabel === 'true' ? `<span>${isLight ? 'Dark mode' : 'Light mode'}</span>` : '');
     }
   }
 

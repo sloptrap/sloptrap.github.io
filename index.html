@@ -5,43 +5,85 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://sloptrap-worker.fablestre.am; base-uri 'none'; form-action 'none'; object-src 'none'" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
-  <title>SlopTrap — Svelte 5 + Tauri Rule Studio, Cross-Site Rule Language &amp; WASM SDK</title>
+  <title>SlopTrap — Help block misleading and spam content</title>
   <link rel="icon" type="image/svg+xml" href="./assets/icon.svg" />
   <link rel="stylesheet" href="./assets/gravity-uikit.css" />
   <link rel="stylesheet" href="./assets/style.css" />
 </head>
-<body class="g-root g-root_theme_dark">
+<body class="g-root g-root_theme_dark home-page">
   <script src="./assets/theme-init.js"></script>
 
   <header class="g-app-header">
     <div class="g-app-header__inner">
-      <div style="display:flex;align-items:center;gap:20px;height:100%;">
-        <a class="g-brand" href="./">
-          <span class="g-brand__mark">
-            <svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2.5 4.5h11M4.5 8h7M6.5 11.5h3"/></svg>
-          </span>
-          <span>SlopTrap</span>
-          <span class="g-label g-label_theme_utility mono">bundle v2</span>
-        </a>
-        <nav class="g-nav" aria-label="Primary">
-          <a class="g-nav__item g-nav__item_active" href="./">Overview</a>
-          <a class="g-nav__item" href="./studio/">Rule Studio</a>
-          <a class="g-nav__item" href="./docs/">Documentation &amp; SDK</a>
-          <a class="g-nav__item" href="./rules/">WASM Spec</a>
-          <a class="g-nav__item" href="./leaderboard/">Leaderboards</a>
-        </nav>
-      </div>
+      <a class="g-brand" href="./">
+        <span class="g-brand__mark">
+          <svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2.5 4.5h11M4.5 8h7M6.5 11.5h3"/></svg>
+        </span>
+        <span>SlopTrap</span>
+      </a>
+      <nav class="g-nav" aria-label="Primary">
+        <a class="g-nav__item g-nav__item_active" href="./">Home</a>
+        <a class="g-nav__item" href="#how-to-use">How to use it</a>
+        <a class="g-nav__item" href="#advanced">Advanced</a>
+        <a class="g-nav__item" href="./privacy/#support">Get help</a>
+      </nav>
       <div class="g-header-actions">
-        <button id="theme-toggle" class="g-btn g-btn_view_flat g-btn_icon" type="button" aria-label="Toggle theme"></button>
-        <a class="g-btn g-btn_view_outlined g-btn_size_s" href="https://github.com/FableStream/sloptrap" target="_blank" rel="noopener">
-          GitHub
-          <svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 11L11 5M6 5h5v5"/></svg>
-        </a>
+        <button id="theme-toggle" class="g-btn g-btn_view_flat g-btn_icon" data-show-label="true" type="button" aria-label="Toggle theme"></button>
       </div>
     </div>
   </header>
 
   <main class="g-container">
+    <div class="simple-home">
+      <section class="simple-hero" aria-labelledby="home-title">
+        <p class="simple-eyebrow">A calmer way to browse</p>
+        <h1 id="home-title">Help block misleading videos and spam.</h1>
+        <p>SlopTrap is a browser add-on for YouTube, TikTok, and Pinterest. It looks for signs of misleading, repetitive, or mass-produced content and helps keep it out of your way.</p>
+        <p>By default, SlopTrap fades posts it flags so you can still see them. You can choose to hide them instead.</p>
+        <a class="simple-action" href="https://github.com/FableStream/sloptrap-extension/releases/latest" target="_blank" rel="noopener">Get the browser add-on</a>
+        <p class="simple-small">The download opens on GitHub. Setup currently takes a few manual steps; the guide is below.</p>
+      </section>
+
+      <section class="simple-section" id="how-to-use" aria-labelledby="use-title">
+        <h2 id="use-title">How to get started</h2>
+        <ol class="simple-steps">
+          <li><strong>Download it.</strong> Open the <a href="https://github.com/FableStream/sloptrap-extension/releases/latest" target="_blank" rel="noopener">latest SlopTrap release</a> and choose <strong>sloptrap-extension-chromium.zip</strong> for Chrome, Edge, or Brave.</li>
+          <li><strong>Unzip the file.</strong> Open the downloaded ZIP file and extract all files into a folder you can find again.</li>
+          <li><strong>Add it to your browser.</strong> Open your browser’s <strong>Extensions</strong> page. Turn on <strong>Developer mode</strong>, choose <strong>Load unpacked</strong>, and select the folder you just extracted.</li>
+          <li><strong>Browse normally.</strong> Visit YouTube, TikTok, or Pinterest. SlopTrap starts checking posts as you browse.</li>
+        </ol>
+        <p class="simple-note">The browser store version is not available yet. If you use Firefox, see the <a href="#advanced">Advanced section</a> for its current test installation method.</p>
+      </section>
+
+      <section class="simple-section" aria-labelledby="choices-title">
+        <h2 id="choices-title">You are in control</h2>
+        <div class="simple-choice-grid">
+          <div class="simple-choice"><h3>See less spam</h3><p>SlopTrap fades posts it flags. Open the SlopTrap button in your browser to choose <strong>Hide</strong> if you do not want to see them at all.</p></div>
+          <div class="simple-choice"><h3>Keep a favorite creator</h3><p>If SlopTrap makes a mistake, click <strong>Allow</strong> on the post, or open <strong>SlopTrap lists</strong> on the website and add the creator to <strong>Always allow</strong>.</p></div>
+          <div class="simple-choice"><h3>Make your own choices</h3><p>Use <strong>SlopTrap lists</strong> to always allow or block an account, or mark it <strong>Creative AI</strong>. Your choices stay on this device and remain after extension updates.</p></div>
+        </div>
+        <p class="simple-note">SlopTrap does not block all AI-made work. Creative AI content can stay visible with a small label. No filter is perfect, so you can correct its choices at any time.</p>
+      </section>
+
+      <section class="simple-section" aria-labelledby="help-title">
+        <h2 id="help-title">Need help?</h2>
+        <p>Ask someone you trust to help with the first installation, or visit <a href="./privacy/#support">Support and contact</a>. Once installed, SlopTrap works as you browse.</p>
+      </section>
+    </div>
+
+    <section id="advanced" class="advanced-section" aria-labelledby="advanced-title">
+      <h2 id="advanced-title">Advanced</h2>
+      <p>For people who want to make rules, explore the results, or use SlopTrap in another app.</p>
+      <details class="advanced-details">
+        <summary>Show technical tools and details</summary>
+        <div class="advanced-links">
+          <a href="./studio/">Rule Studio</a>
+          <a href="./docs/">Documentation and SDK</a>
+          <a href="./rules/">Rule format</a>
+          <a href="./leaderboard/">Leaderboards</a>
+          <a href="https://github.com/FableStream/sloptrap" target="_blank" rel="noopener">Source code</a>
+        </div>
+        <p>Firefox testing: download <strong>sloptrap-extension-firefox.xpi</strong> from the <a href="https://github.com/FableStream/sloptrap-extension/releases/latest" target="_blank" rel="noopener">latest release</a>. Open <strong>about:debugging#/runtime/this-firefox</strong>, choose <strong>Load Temporary Add-on</strong>, and select the file. Firefox removes temporary add-ons when it closes.</p>
     <section class="overview-split" style="border-bottom:0;padding-bottom:8px;">
       <div class="text-card" style="padding:22px 24px;">
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
@@ -49,7 +91,7 @@
           <span class="g-label g-label_theme_positive">Creative AI &amp; Slop Channel Tags</span>
           <span class="g-label g-label_theme_normal">Browser &amp; Desktop</span>
         </div>
-        <h1>Build, test, and share cross-site slop rules in a clean visual studio</h1>
+        <h3>Build, test, and share cross-site slop rules in a clean visual studio</h3>
         <p class="overview-lead">
           <strong>SlopTrap</strong> is a <strong>Svelte 5 + Tauri v2</strong> rule definition app (runnable in any browser or as a native desktop app) paired with a sandboxed WebAssembly (<code>.strule</code>) runtime. Its signed rules distinguish human creators, transparent creative AI, and low-effort slop, with channel-type tags shown on thumbnails and lists. Write or click together rules using a <strong>common cross-site language</strong> (<code>post.frequency</code>, <code>account.dormancy_days</code>, <code>text.formal_prose</code>), accumulate shared variables across rules, check them against thresholds, and export signed WASM bundles for <strong>YouTube</strong>, <strong>TikTok</strong>, <strong>Pinterest</strong>, and custom sites.
         </p>
@@ -275,17 +317,17 @@ decide "Block high-suspicion accounts"
         </div>
       </div>
     </section>
+      </details>
+    </section>
   </main>
 
   <footer class="g-footer">
     <div class="g-footer__inner">
-      <div>SlopTrap — Svelte 5 + Tauri Rule Studio, common cross-site rule language &amp; WASM SDK</div>
+      <div>SlopTrap helps block misleading and spam content.</div>
       <div class="g-footer__links">
-        <a href="./studio/">Rule Studio</a>
-        <a href="./docs/">Documentation &amp; SDK</a>
-        <a href="./rules/">WASM Spec</a>
-        <a href="./leaderboard/">Leaderboards</a>
-        <a href="./privacy/">Privacy &amp; Support</a>
+        <a href="#how-to-use">How to use it</a>
+        <a href="#advanced">Advanced</a>
+        <a href="./privacy/#support">Get help</a>
         <a href="./terms/">Terms</a>
       </div>
     </div>

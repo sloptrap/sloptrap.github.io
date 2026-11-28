@@ -62,5 +62,14 @@
     });
   });
 
-  loadHomeSite('youtube');
+  const advanced = document.querySelector('.advanced-details');
+  let loaded = false;
+  function loadWhenOpened() {
+    if (!loaded && (!advanced || advanced.open)) {
+      loaded = true;
+      loadHomeSite('youtube');
+    }
+  }
+  advanced?.addEventListener('toggle', loadWhenOpened);
+  loadWhenOpened();
 })();

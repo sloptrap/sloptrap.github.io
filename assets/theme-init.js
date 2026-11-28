@@ -2,6 +2,7 @@
 // use a strict Content-Security-Policy (script-src 'self').
 try {
   if (localStorage.getItem('st-gravity-theme') === 'light') {
-    document.body.className = 'g-root g-root_theme_light';
+    document.body.classList.remove('g-root_theme_dark');
+    document.body.classList.add('g-root_theme_light');
   }
 } catch (_) { /* storage unavailable: keep the dark default */ }

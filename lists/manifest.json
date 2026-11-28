@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-11-28T18:03:11Z",
+  "generated_at": "2026-11-28T20:10:52Z",
   "public_key": "303607bb2fc5bdebbb50021d3480d59da127d5c40122785ff4b6e228be54b3e1",
-  "signature_b64": "OYfbmuUo5G56LtY+rybRhUM743TS1XB3TzZR82A1bqWXqA4teOYJsArsvY+01wNrs58JPwvumnHhoPFHvL2zBw==",
+  "signature_b64": "JJDbkWHp2wDTCwooVRrRxtDOnEobs0PAwkBeONJLFbUKB75x1GWJmovzeJ0cy7jV62EY2GBvYhM1g5T8jHtIDQ==",
   "lists": {
     "pinterest/creative-ai-storytelling": {
       "site": "pinterest",
@@ -10,7 +10,7 @@
       "path": "lists/pinterest/creative-ai-storytelling.txt",
       "count": 0,
       "sha256": "7360474cb8ea53472cb659bc69d60670a2173a2b6b27546d11699827ed5543dc",
-      "signature_b64": "O7UBq5Jbu6ZDkH03tFsSbYE7r4yhpkjI2BHwVl5i8cMffZbgus/dbmyFTuRFtkMlPOIppJpBrLXTLEPh6U+yBQ==",
+      "signature_b64": "ZKRwk4c9W/6baOYkalmqbcOOksreisZTw6i02OkfwH8r1JhMRZaR+lDXmz/UhjfItOz9HMaL4a/Y2aipUdk8Dw==",
       "classification": "creative_ai",
       "channel_tag": "creative-content"
     },
@@ -20,7 +20,7 @@
       "path": "lists/pinterest/pinterest-affiliate-domain-ring.txt",
       "count": 0,
       "sha256": "a2ce0cda0464ad4f72cfb61739a10a63506e0ac4febad86df3ed66c833f7159a",
-      "signature_b64": "2mRMv4jPUK0n+6IWrDiKkjcr0MDkFNHP9xrSgP4MrHau09TtDjOV6DTIjYavlPFxtvTnsCn0E5hzym3kA0iEBQ==",
+      "signature_b64": "LfHX7LoXgoolIVBWFvDw15P8Tbaj0z1K73AK8nX7TbSsarhsueXPG8+AAePwVZ6dIgN3HOATY1r1S2LEq2kzDg==",
       "classification": "slop",
       "channel_tag": "slop-funnel-spam"
     },
@@ -30,7 +30,7 @@
       "path": "lists/pinterest/pinterest-ai-pin-mill.txt",
       "count": 0,
       "sha256": "20313562ba45ae2d4b813f731c198c5178f7892d7f75547770f403582c571c5c",
-      "signature_b64": "E9gOrXJWXjAOmxMSuJoRxBnoqpkSqHirQ9l1RtIGpH38VGfyOvHGvH6cb0lpUdI22qIdhV4TDcA7ivQovWh1Cw==",
+      "signature_b64": "E4iZwxXfCM8TriHyOR06jwXpj1atNLumzHLPMMIWcK6KwDHU1IqN9IYjcGxk8oz8JOkImhMNu5hT3N8xNGklCA==",
       "classification": "slop",
       "channel_tag": "slop-image-mill"
     },
@@ -40,7 +40,7 @@
       "path": "lists/tiktok/creative-ai-storytelling.txt",
       "count": 0,
       "sha256": "9afa8ed6f55bca252635b527dd73c4ec337042ef460d1f4b8eb60219d38303cf",
-      "signature_b64": "P+xO79iINGBQUyTq+twbwf0gspye/uJCMciMfzFiqOm8D2gUdhphINaPEclydC7cUpcDWdCxfqRlXUcPaQ6BCw==",
+      "signature_b64": "oaOQ6+Tt+5xDamZ7T0YuPO84E8qPwIuosqShciifcPUvHWQ+MkAiJgLsIMMefw+hRMD86+CbXXLS9kOmjSsECg==",
       "classification": "creative_ai",
       "channel_tag": "creative-content"
     },
@@ -50,7 +50,7 @@
       "path": "lists/tiktok/tiktok-dormant-repost-ring.txt",
       "count": 0,
       "sha256": "2666dbb43c3be290ff4bd6de6803724371728f7dff7cecc68feb12cc799f8452",
-      "signature_b64": "3CworGFEbm7RhX8JhM0iZuthaV0JhH5yq2jkIBOWj32WPdxbfUNCvZ392mBM0YRFostYwEqShdN9ISdpFDGPAg==",
+      "signature_b64": "gYfh+gRgscx0eEye5IS8xQwN/s7ZClRtknKjfrB3sKgEvY3vVzJW1OXklvQMxIl4/QSwIEpfZUEojdrSlMOhAA==",
       "classification": "slop",
       "channel_tag": "slop-hijacked-necro"
     },
@@ -60,7 +60,7 @@
       "path": "lists/tiktok/tiktok-tts-clip-farm.txt",
       "count": 0,
       "sha256": "9a0822ade9e8479d5952afe6982d3085f2be25a76f3fc05fe0d2cab820fa6408",
-      "signature_b64": "Es/OVA63AY7A0FCuXcosSk0UbmgPIcClzBjBNEpyZW+Yh4xmZoB4f5yJZISs4cx80X2RlJ6zN50j3WgA8axYAQ==",
+      "signature_b64": "vv1o4g85fWzQMVqtSqWJD3Du5DlCsrng8Uggp3oZm36QwG/S3FyJEV07wtyn5Pb3HMGR6yscLTBGByo8ydN0Bg==",
       "classification": "slop",
       "channel_tag": "slop-clip-mill"
     },
@@ -70,7 +70,7 @@
       "path": "lists/youtube/clone-farm-sentinel.txt",
       "count": 0,
       "sha256": "aa6644f644dbdc3fb726e3622fa4849231fae33845787ec10de5297aafe793a6",
-      "signature_b64": "llF2MQdK50rP2OaQHWzTUikd/T22ekz4CGB2t/OutpZlICZhMC4YjVdFMNYl9Ev1YY0a9dtloFeACSB6ArpQAw==",
+      "signature_b64": "0ip4ya118Mu5OuvPSEXLF6jFfz+ywmvz1gSbLYvQqdOgfW6oHaJ3eXmcYnM09N0jiWxyiRm48lRb3CennvjBBA==",
       "classification": "slop",
       "channel_tag": "slop-clone-farm"
     },
@@ -80,7 +80,7 @@
       "path": "lists/youtube/creative-ai-storytelling.txt",
       "count": 0,
       "sha256": "d863698250c303a09410f564f0956e562353c373c743f7cd940a4f8208b51129",
-      "signature_b64": "vfRYTBA6EODSwBTY1UpC87vpN2sRSg5VCCNYd6aNHqazDgW6ITuZ/cGdQk+8Y9p8XkIiV9XNS9mf9ckAdXv+CQ==",
+      "signature_b64": "YnMYfT0fhQxIm7NfmBEttEvb0JzWa6dFNk0jX7DfR02kFxm5sLmV7V1EtQgxLIYhMvIS1aBBGPBLBgiQabA6Aw==",
       "classification": "creative_ai",
       "channel_tag": "creative-content"
     },
@@ -90,7 +90,7 @@
       "path": "lists/youtube/llm-prosody-deep.txt",
       "count": 0,
       "sha256": "efecce310b4550aed1ed27899e6ec23c95564d4e2869752dc0ad33a51edc15ff",
-      "signature_b64": "1760MuXgnBih/b2tHEjXn+ZLh37NlJVKxX+IH6UQ/MFdoqpdU6D+vh4uYeFIPa2sruEe7vLOYvZmgadRuGanCg==",
+      "signature_b64": "7al3v6/c4h+euQsqHhck03OupHrK+nKcjRl6PXdaEt/Nzdwkz5yusWcGDjqp6SAN8NUBRN1L2PsVAGqydDBMCg==",
       "classification": "slop",
       "channel_tag": "slop-info-channel"
     },
@@ -100,7 +100,7 @@
       "path": "lists/youtube/necro-hijack-guard.txt",
       "count": 0,
       "sha256": "809728bff64852cc635692aa12b07743573c83cd838f677c6e2fdb541d2a8dc2",
-      "signature_b64": "bNNwh2GGFvo1e6jhGRM77ilwlR+A8E0t7HLpmqRITMUzNkQ5nl0ch5223daL2IJDlrrsMq2/gCUee6gjeSzTDw==",
+      "signature_b64": "0UsijZ/C4uSJfjfcYRxcE+999Xq/wJDYKX+NIBNuKEryq2is7MhjGclWxJJzohgVabAvCx5mWbcSIOfAl+7BCQ==",
       "classification": "slop",
       "channel_tag": "slop-hijacked-necro"
     },
@@ -110,7 +110,7 @@
       "path": "lists/youtube/slop-cable-news-outrage.txt",
       "count": 0,
       "sha256": "1285de98bc1bedc51db288c1d123b2f768df449e19fe94c3e3272a47397da479",
-      "signature_b64": "SksmKGwMFEOaArvtp0m5zDC6rV1g5cPdEw1m1M8LQtxJz+vm3TnfGoRiNKuJbLfqIwuLpOfXuJtXMqPjLO/IAw==",
+      "signature_b64": "iyMwIy9A3wW1Brawb/bqWHjPd3HDRd6sKRTbwdl/Lw/gmLMuXXNgXfC+CBai3AiuofHCTAM46VVWn4bWSUh/DA==",
       "classification": "slop",
       "channel_tag": "slop-news-chyron"
     },
@@ -120,7 +120,7 @@
       "path": "lists/youtube/slop-docu-essay-mill.txt",
       "count": 0,
       "sha256": "fe90084c3428b65e8b82da3fde2f705bf22b0127311078121386e1dbf4fffb3b",
-      "signature_b64": "qb4jGw6gX/suCQXT+sUEILiE/xtYWZfmqMns3Vc/kIzVapgEu82e1xZH+YERjalxmpkAN1er8KQomwRcw3cUDw==",
+      "signature_b64": "du9Ljj4cBKXCe2FO10snCtrgDMGJOU66wn2gYe6Q94ssG/HEh72EmUqtp77Q62sdiyIhraHqMESX7L7H9ui5BQ==",
       "classification": "slop",
       "channel_tag": "slop-documentary"
     }

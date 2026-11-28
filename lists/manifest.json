@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-11-27T21:22:37Z",
+  "generated_at": "2026-11-28T07:55:01Z",
   "public_key": "303607bb2fc5bdebbb50021d3480d59da127d5c40122785ff4b6e228be54b3e1",
-  "signature_b64": "6dxIKpsvN+vsT3/2cyk0/72Au5sehEQvs0pZ9tErv3iqKuNKIm/c88NbTKR4CJ7E5v3d62RbVzvfCq0qAW+iAw==",
+  "signature_b64": "PgScjy9FAdglK642pogICSKtS8qPCYBR5ogjp1Rft5uiYL82at9WhJjXMJ/GMnTTQKrUoouvpZ5UhIpY/y6BDg==",
   "lists": {
     "pinterest/pinterest-affiliate-domain-ring": {
       "site": "pinterest",
@@ -10,7 +10,7 @@
       "path": "lists/pinterest/pinterest-affiliate-domain-ring.txt",
       "count": 0,
       "sha256": "baf7e205f4055a21c4ca02ac658635c1a3490df62d88050d92154be782211ed1",
-      "signature_b64": "alK2xKFyxU8YfQ4PH42UmeoOXpk2SC3ek8urueFQ7svY8jffy2XzSFXo2565eAb85vxz//5xSjg4KiR8huwxAw=="
+      "signature_b64": "hph/1FshIavshbjXvE8JKQ4Rm/NnzBFaVmxYdvdC0ttACfuskaw+u+5oO9xMlpQjbfU7JsOL0u+tjTmv3WFzAg=="
     },
     "pinterest/pinterest-ai-pin-mill": {
       "site": "pinterest",
@@ -18,7 +18,7 @@
       "path": "lists/pinterest/pinterest-ai-pin-mill.txt",
       "count": 0,
       "sha256": "5e3bddb950ff19b3bbd7bb21dede735f707e961aef9da294300bb71e25ed256c",
-      "signature_b64": "zdKrfPMEmR5WuAg9cvdhCzTpFWW9zgFavfwesTuqC9E9ojhzs0lGwWn0NM5mms9xCzs0boXz8AjmvqZjhfo2Cw=="
+      "signature_b64": "bPUQfpsmEKoDz9gOjYe77Z/7nIQF6ocMrofbIazImk4xy77KFW7Ey0p+aMR0hOtkvZ5cfKftFe+y4jnEobhMAw=="
     },
     "tiktok/tiktok-dormant-repost-ring": {
       "site": "tiktok",
@@ -26,7 +26,7 @@
       "path": "lists/tiktok/tiktok-dormant-repost-ring.txt",
       "count": 0,
       "sha256": "69a788b0b7175d1ed7dc0057cf47cb560f4571c0ebdf04383dfaf1f4b6548a69",
-      "signature_b64": "RNwJyB9NgISQn9CWtedP+2i7oZxgdybW8Yc2m0oaJ2JRKgxN84an89QlkDgf84qYFcEzTno6blO93aFIEFjGDw=="
+      "signature_b64": "30GBV6SlJKFyGGnhq3YTnweonjomPXjg7AvFlNB4RWR0TEq0NFAwwYqYOhwNAuKP8vV4TyVVg1GpGPuRIqgZCQ=="
     },
     "tiktok/tiktok-tts-clip-farm": {
       "site": "tiktok",
@@ -34,7 +34,7 @@
       "path": "lists/tiktok/tiktok-tts-clip-farm.txt",
       "count": 0,
       "sha256": "5df3d40f16dab7bb5b6f586f93dede6bda8d55759fe79c16a1057d1cd1dfbc69",
-      "signature_b64": "hY82aNHcrevzKVujXCfCM2GiaQShotc4mKpTeULRds7OFcXuGCL81sC6iiKmoAC2KRpobKB2Ik99S2raaYdIBw=="
+      "signature_b64": "iSBCr8JBZuHBnTloELoNQ+JIR3/ogR1UkSr75wa/feNr9CK9Dy51lK7/RQ4ZWjpZ8LD3HJtd1MITPOCtV1EqBg=="
     },
     "youtube/clone-farm-sentinel": {
       "site": "youtube",
@@ -42,7 +42,7 @@
       "path": "lists/youtube/clone-farm-sentinel.txt",
       "count": 0,
       "sha256": "366bc6179f8e566aab7de3ef5bc0a14de14cb5eda78db563c099546a8d2b98dd",
-      "signature_b64": "oOHKY+7CdZx0z+u4sc295x6pCD8tCTcV1I9zI2dYhCaRKfTD5/d5Zm2fkrYB5wwdADGyyDNWVwDgVttzF/7sCQ=="
+      "signature_b64": "02KxONCm2T5dZh3wKj3ZT8Np2RVitsrvQpODKknCRJt2HhN0+hocWdfBzUE9qq1ZADR06gh+fvfdTz0SchqnCw=="
     },
     "youtube/llm-prosody-deep": {
       "site": "youtube",
@@ -50,7 +50,7 @@
       "path": "lists/youtube/llm-prosody-deep.txt",
       "count": 0,
       "sha256": "d0b250a2b6021ba3bc6bea83408951f71f236496ef5293eae46ce0b090ba4982",
-      "signature_b64": "vkjP+coxAzhfYsfpQEgi6AnUXetX82jQA/5vcTEHGBqOtlp/jDcb9z8i8QCry7XaKdLVTB9xTyUeSdz+KGyNBw=="
+      "signature_b64": "hsAvYewm16EYJDf5or9BsobM4601+mnwq15wm7FjWa891MInkeFCo+vMKmG2co60ATCF1KhHgcFYpp0IU2UyCw=="
     },
     "youtube/necro-hijack-guard": {
       "site": "youtube",
@@ -58,7 +58,7 @@
       "path": "lists/youtube/necro-hijack-guard.txt",
       "count": 0,
       "sha256": "cb74c18c1590d9e386eb70cd995013f7e631c7bc2f00a9698eb68bb9680a83c4",
-      "signature_b64": "M33/pTcng8vO/Cefg93uEAocot0qp5llOaHQBU0dIwjEjVloWu5w1nYi1dN9wtDIeIQifVBR8eXeylDPjgF6CQ=="
+      "signature_b64": "FyxvQJe1sjlSZ4+t5s4TVD188MrdlQqf55mTqFYaU0bxRbjJve+TO/qtp/KotPP27YCNUzTXo1JsM14qN3SYDw=="
     }
   }
 }

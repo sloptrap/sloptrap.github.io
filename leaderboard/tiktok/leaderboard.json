@@ -5,7 +5,7 @@
   "registry_repo": "sloptrap/sloptrap.github.io",
   "rankings_endpoint": "https://sloptrap-worker.fablestre.am",
   "active_window_days": 30,
-  "generated_at": "2026-11-28T07:55:00Z",
+  "generated_at": "2026-11-28T18:03:11Z",
   "epoch_id": "2026-Q4",
   "corpus_count": 4,
   "corpus_hashes": [
@@ -22,11 +22,11 @@
       "verification_tier": "official",
       "verified": true,
       "name": "Bought-Account & Handle-Stem Repost Ring",
-      "description": "Flags aged TikTok accounts that pivot after dormancy with batch-generated handle stems and uniform clip durations.",
-      "version": "1.0.1",
+      "description": "Flags aged accounts pivoting after dormancy with batch-generated handle stems and uniform clip durations.",
+      "version": "1.1.0",
       "author": "@sloptrap-core",
       "author_public_key": "0540a396ece8ab0f9670a25e03b02e345450a1373b86a7d400dcad79ceec5cc1",
-      "repo_url": "https://github.com/sloptrap/sloptrap",
+      "repo_url": "https://github.com/FableStream/sloptrap",
       "provenance": {
         "source_repo": "",
         "source_commit": "",
@@ -39,6 +39,8 @@
       ],
       "overhead": 2,
       "weight_milli": 1100,
+      "classification": "slop",
+      "channel_tag": "slop-hijacked-necro",
       "band": "S",
       "coarse_f1": 1,
       "coarse_precision": 1,
@@ -52,8 +54,8 @@
       "downloads_version": 0,
       "composite_score": 79.3,
       "local_bundle_path": "bundles/tiktok-dormant-repost-ring.strule",
-      "bundle_sha256": "f27a984321c3a7638f537604440e48b7a8b0a8c70914791964bcbfe4ccdc77e4",
-      "updated_at": "2026-11-26"
+      "bundle_sha256": "02e651330a63f33b54590f4076903609eeb6851a2bfdd15b5b08c1c5daedf907",
+      "updated_at": "2026-11-28"
     },
     {
       "rank": 2,
@@ -62,11 +64,11 @@
       "verification_tier": "official",
       "verified": true,
       "name": "TTS Voiceover & Split-Screen Clip Mill",
-      "description": "Detects automated short-video clip farms combining synthetic TTS pacing lock, cropped repost watermarks, hook stuffing, and multi-daily bursts.",
-      "version": "1.0.1",
+      "description": "Detects automated short-video clip farms combining synthetic TTS pacing, repost watermarks, and multi-daily bursts.",
+      "version": "1.1.0",
       "author": "@sloptrap-core",
       "author_public_key": "0540a396ece8ab0f9670a25e03b02e345450a1373b86a7d400dcad79ceec5cc1",
-      "repo_url": "https://github.com/sloptrap/sloptrap",
+      "repo_url": "https://github.com/FableStream/sloptrap",
       "provenance": {
         "source_repo": "",
         "source_commit": "",
@@ -81,6 +83,8 @@
       ],
       "overhead": 4,
       "weight_milli": 1300,
+      "classification": "slop",
+      "channel_tag": "slop-clip-mill",
       "band": "S",
       "coarse_f1": 1,
       "coarse_precision": 1,
@@ -94,8 +98,47 @@
       "downloads_version": 0,
       "composite_score": 79.1,
       "local_bundle_path": "bundles/tiktok-tts-clip-farm.strule",
-      "bundle_sha256": "7363178cd809f9988960804686b98414553070121d2fb102e8494ebfd1a5f0de",
-      "updated_at": "2026-11-26"
+      "bundle_sha256": "1daced60e8d2064a5485ad5f2b5f41c7bd6b7790fefe3a841b7424a54f6559ae",
+      "updated_at": "2026-11-28"
+    },
+    {
+      "rank": 3,
+      "rule_id": "creative-ai-storytelling",
+      "target_site": "*",
+      "verification_tier": "official",
+      "verified": true,
+      "name": "Creative AI Storytelling & Worldbuilding Tagger",
+      "description": "Identifies disclosed/transparent creative AI filmmakers, comedy worldbuilders, and animators who publish original non-templated episodes at a crafted human pace.",
+      "version": "1.0.0",
+      "author": "@sloptrap-core",
+      "author_public_key": "0540a396ece8ab0f9670a25e03b02e345450a1373b86a7d400dcad79ceec5cc1",
+      "repo_url": "https://github.com/FableStream/sloptrap",
+      "provenance": {
+        "source_repo": "",
+        "source_commit": "",
+        "build_run_url": "",
+        "submission_id": ""
+      },
+      "inputs": [
+        "metadata",
+        "upload_cadence",
+        "transcript",
+        "thumbnails",
+        "audio_video_stats"
+      ],
+      "overhead": 2,
+      "weight_milli": 1200,
+      "classification": "creative_ai",
+      "channel_tag": "creative-content",
+      "likes": 0,
+      "active_installs": 0,
+      "all_time_installs": 0,
+      "downloads_total": 0,
+      "downloads_version": 0,
+      "composite_score": 13.9,
+      "local_bundle_path": "bundles/creative-ai-storytelling.strule",
+      "bundle_sha256": "635a80f446924de04a627528437dd29d3983a47da1377b37eb02a9a960f89cc4",
+      "updated_at": "2026-11-28"
     }
   ]
 }

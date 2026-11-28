@@ -195,7 +195,7 @@ class ListTests(unittest.TestCase):
             self.assertTrue((root / "lists" / "youtube" / "community-active.txt").exists())
             text = old.read_text(encoding="utf-8")
             self.assertNotIn("victim", text)
-            self.assertIn("@top.slop\t9\n@a.b.c\t2\n", text)
+            self.assertIn("@top.slop\t9\tslop\tslop-general\n@a.b.c\t2\tslop\tslop-general\n", text)
             man = json.loads((root / "lists" / "manifest.json").read_text(encoding="utf-8"))
             self.assertEqual(man["schema_version"], 2)
             self.assertEqual(man["lists"]["youtube/yt-rule"]["count"], 2)

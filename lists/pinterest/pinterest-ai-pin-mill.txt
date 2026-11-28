@@ -1,4 +1,6 @@
 ! SlopTrap Public Rule Matched Accounts (v2: account_key<TAB>count)
 ! Rule: pinterest-ai-pin-mill
 ! Site: pinterest
+! Classification: slop
+! Tag: slop-image-mill
 ! Entries: 0

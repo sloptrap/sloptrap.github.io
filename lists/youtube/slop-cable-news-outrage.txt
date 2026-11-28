@@ -1,0 +1,6 @@
+! SlopTrap Public Rule Matched Accounts (v2: account_key<TAB>count)
+! Rule: slop-cable-news-outrage
+! Site: youtube
+! Classification: slop
+! Tag: slop-news-chyron
+! Entries: 0

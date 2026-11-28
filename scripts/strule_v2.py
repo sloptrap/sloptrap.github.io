@@ -33,7 +33,29 @@ _RE = {
 MANIFEST_KEYS = frozenset({"rule_id", "name", "version", "author", "author_public_key", "target_site",
                            "description", "repo_url", "interpreter", "inputs", "weight_milli",
                            "overhead", "provenance"})
+OPTIONAL_MANIFEST_KEYS = frozenset({"classification", "channel_tag"})
+ALL_MANIFEST_KEYS = MANIFEST_KEYS | OPTIONAL_MANIFEST_KEYS
 PROVENANCE_KEYS = frozenset({"source_repo", "source_commit", "build_run_url", "submission_id"})
+
+RULE_CLASSIFICATIONS = ("slop", "creative_ai")
+CHANNEL_CLASSIFICATIONS = ("clean", "creative_ai", "slop")
+CHANNEL_TAG_CLASSIFICATIONS = {
+    "creative-content": "creative_ai",
+    "creative-animation": "creative_ai",
+    "ai-assisted-creator": "creative_ai",
+    "slop-documentary": "slop",
+    "slop-info-channel": "slop",
+    "slop-news-chyron": "slop",
+    "slop-hijacked-necro": "slop",
+    "slop-clone-farm": "slop",
+    "slop-clip-mill": "slop",
+    "slop-image-mill": "slop",
+    "slop-funnel-spam": "slop",
+    "slop-deceptive-fake": "slop",
+    "slop-general": "slop",
+    "human-creator": "clean",
+}
+RULE_CHANNEL_TAGS = frozenset(k for k, v in CHANNEL_TAG_CLASSIFICATIONS.items() if v != "clean")
 
 
 class BundleError(ValueError):
@@ -70,8 +92,11 @@ def _match(v, field, rx, allow_empty=False):
 
 
 def validate_manifest(m) -> dict:
-    if not isinstance(m, dict) or set(m.keys()) != MANIFEST_KEYS:
-        raise BundleError(f"manifest: keys must be exactly {sorted(MANIFEST_KEYS)}")
+    if not isinstance(m, dict):
+        raise BundleError("manifest: must be an object")
+    keys = set(m.keys())
+    if not MANIFEST_KEYS.issubset(keys) or not keys.issubset(ALL_MANIFEST_KEYS):
+        raise BundleError(f"manifest: keys must include {sorted(MANIFEST_KEYS)} (optional: {sorted(OPTIONAL_MANIFEST_KEYS)})")
     _match(m["rule_id"], "rule_id", _RE["rule_id"])
     _clean_str(m["name"], "name", 1, 80)
     _match(m["version"], "version", _RE["version"])
@@ -88,6 +113,17 @@ def validate_manifest(m) -> dict:
         raise BundleError("inputs: invalid")
     _int(m["weight_milli"], "weight_milli", 1, 10000)
     _int(m["overhead"], "overhead", 1, 100)
+    if "classification" in m:
+        if m["classification"] not in RULE_CLASSIFICATIONS:
+            raise BundleError("classification: must be slop or creative_ai")
+    if "channel_tag" in m:
+        tag = m["channel_tag"]
+        if not isinstance(tag, str) or tag not in RULE_CHANNEL_TAGS:
+            raise BundleError("channel_tag: unknown rule channel_tag")
+        expected_cls = CHANNEL_TAG_CLASSIFICATIONS[tag]
+        actual_cls = m.get("classification", "slop")
+        if actual_cls != expected_cls:
+            raise BundleError(f"channel_tag: {tag!r} requires classification={expected_cls!r}")
     p = m["provenance"]
     if not isinstance(p, dict) or set(p.keys()) != PROVENANCE_KEYS:
         raise BundleError("provenance: keys must be exactly source_repo, source_commit, build_run_url, submission_id")
@@ -339,7 +375,8 @@ FP_SCHEMA = [
                     ("mean_wpm", _F), ("cross_video_wpm_stddev", _F), ("intra_video_wpm_cv", _F),
                     ("pause_cv", _F), ("earliest_has_speech", _B)]),
     ("thumbnails", [("title_skeleton_reuse", _F), ("raw_camera_earliest_title", _B),
-                    ("synthetic_image_ratio", _F), ("aspect_uniformity", _F), ("repost_watermark_ratio", _F)]),
+                    ("synthetic_image_ratio", _F), ("aspect_uniformity", _F), ("repost_watermark_ratio", _F),
+                    ("cable_news_chyron_ratio", _F), ("visual_clone_similarity", _F), ("era_visual_pivot", _F)]),
     ("audio_video_stats", [("earliest_vertical", _B), ("earliest_max_dim", _I), ("recent_widescreen_hd_ratio", _F),
                            ("altered_content_flag", _B), ("dead_air_floor", _B), ("loudness_range_lu", _F),
                            ("silence_cv", _F)]),

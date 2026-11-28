@@ -1,0 +1,6 @@
+! SlopTrap Public Rule Matched Accounts (v2: account_key<TAB>count)
+! Rule: slop-docu-essay-mill
+! Site: youtube
+! Classification: slop
+! Tag: slop-documentary
+! Entries: 0

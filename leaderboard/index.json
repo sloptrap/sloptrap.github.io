@@ -4,14 +4,14 @@
   "registry_repo": "sloptrap/sloptrap.github.io",
   "rankings_endpoint": "https://sloptrap-worker.fablestre.am",
   "active_window_days": 30,
-  "generated_at": "2026-11-28T07:55:00Z",
+  "generated_at": "2026-11-28T18:03:11Z",
   "sites": [
     {
       "site_id": "youtube",
       "display_name": "YouTube",
       "feed_path": "leaderboard/youtube/leaderboard.json",
-      "rule_count": 3,
-      "official_count": 3,
+      "rule_count": 6,
+      "official_count": 6,
       "community_count": 0,
       "corpus_count": 6
     },
@@ -19,8 +19,8 @@
       "site_id": "tiktok",
       "display_name": "TikTok",
       "feed_path": "leaderboard/tiktok/leaderboard.json",
-      "rule_count": 2,
-      "official_count": 2,
+      "rule_count": 3,
+      "official_count": 3,
       "community_count": 0,
       "corpus_count": 4
     },
@@ -28,8 +28,8 @@
       "site_id": "pinterest",
       "display_name": "Pinterest",
       "feed_path": "leaderboard/pinterest/leaderboard.json",
-      "rule_count": 2,
-      "official_count": 2,
+      "rule_count": 3,
+      "official_count": 3,
       "community_count": 0,
       "corpus_count": 4
     }

@@ -250,9 +250,11 @@ def rows_from_attested_bodies(bodies: dict) -> list[dict]:
             if not line or line.startswith("!") or line.startswith("#"):
                 continue
             parts = line.split("\t")
-            if len(parts) != 2 or not parts[1].isdigit():
+            if len(parts) not in (2, 4) or not parts[1].isdigit():
                 raise SyncError(f"malformed attested list line in {list_key!r}")
-            rows.append({"site": site, "rule_id": rid, "account_key": parts[0], "count": int(parts[1])})
+            rows.append({"site": site, "rule_id": rid, "account_key": parts[0], "count": int(parts[1]),
+                         "classification": parts[2] if len(parts) == 4 else "slop",
+                         "channel_tag": parts[3] if len(parts) == 4 else "slop-general"})
     return rows
 
 
@@ -285,13 +287,17 @@ def build_lists(rows: list[dict], rule_sites: dict[str, str]) -> tuple[dict[tupl
     return out, rejected
 
 
-def format_list_text(site: str, rid: str, counts: dict[str, int]) -> tuple[str, int, str]:
+def format_list_text(site: str, rid: str, counts: dict[str, int],
+                     meta: tuple[str, str] = ("slop", "slop-general")) -> tuple[str, int, str]:
     ordered = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
-    lines = [f"{k}\t{c}" for k, c in ordered]
+    classification, channel_tag = meta
+    lines = [f"{k}\t{c}\t{classification}\t{channel_tag}" for k, c in ordered]
     text = "\n".join([
         "! SlopTrap Public Rule Matched Accounts (v2: account_key<TAB>count)",
         f"! Rule: {rid}",
         f"! Site: {site}",
+        f"! Classification: {classification}",
+        f"! Tag: {channel_tag}",
         f"! Entries: {len(lines)}",
         *lines,
     ]) + "\n"
@@ -302,6 +308,7 @@ def _render_candidate_lists(
     lists: dict[tuple[str, str], dict[str, int]],
     ldir: Path,
     excluded_keys: set[str] | None = None,
+    rule_meta: dict[str, tuple[str, str]] | None = None,
 ) -> dict[str, tuple[Path, str, dict]]:
     excl = excluded_keys or set()
     rendered: dict[str, tuple[Path, str, dict]] = {}
@@ -312,10 +319,12 @@ def _render_candidate_lists(
         counts = lists[(site, rid)]
         if rid.startswith(strule_v2.COMMUNITY_PREFIX) and not counts:
             continue
-        text, count, sha = format_list_text(site, rid, counts)
+        meta = (rule_meta or {}).get(rid, ("slop", "slop-general"))
+        text, count, sha = format_list_text(site, rid, counts, meta)
         path = ldir / site / f"{rid}.txt"
         rendered[key] = (path, text, {
             "site": site, "rule_id": rid, "path": f"lists/{site}/{rid}.txt", "count": count, "sha256": sha,
+            "classification": meta[0], "channel_tag": meta[1],
         })
     return rendered
 
@@ -336,10 +345,11 @@ def _find_problem_list_keys(rendered: dict[str, tuple[Path, str, dict]], att_lis
 
 def write_lists(root: Path, lists: dict[tuple[str, str], dict[str, int]], _names: dict[str, str],
                 now_iso: str, signed_manifest: dict | None = None,
-                excluded_keys: set[str] | None = None) -> None:
+                excluded_keys: set[str] | None = None,
+                rule_meta: dict[str, tuple[str, str]] | None = None) -> None:
     ldir = root / "lists"
     manifest: dict = {"schema_version": 2, "generated_at": now_iso, "lists": {}}
-    rendered = _render_candidate_lists(lists, ldir, excluded_keys=excluded_keys)
+    rendered = _render_candidate_lists(lists, ldir, excluded_keys=excluded_keys, rule_meta=rule_meta)
 
     if signed_manifest is not None:
         prev_gen = 0
@@ -398,6 +408,8 @@ def write_lists(root: Path, lists: dict[tuple[str, str], dict[str, int]], _names
 
 def sync_lists(root: Path, get, audited_all: list[audit.AuditResult], now_iso: str) -> None:
     rule_sites = {r.rule_id: r.target_site for r in audited_all}
+    rule_meta = {r.rule_id: (r.manifest.get("classification", "slop"),
+                             r.manifest.get("channel_tag", "slop-general")) for r in audited_all}
     names = {r.rule_id: r.manifest["name"] for r in audited_all}
     last_err: Exception | None = None
     for _attempt in range(2):
@@ -412,7 +424,7 @@ def sync_lists(root: Path, get, audited_all: list[audit.AuditResult], now_iso: s
                 rows = fetch_paged(get, "/api/v1/lists/entries", "entries", "updated_at",
                                    lambda r: (r.get("site"), r.get("rule_id"), r.get("account_key")))
             lists, rejected = build_lists(rows, rule_sites)
-            rendered = _render_candidate_lists(lists, root / "lists")
+            rendered = _render_candidate_lists(lists, root / "lists", rule_meta=rule_meta)
             bad_keys = _find_problem_list_keys(rendered, att.get("lists") or {})
             excluded: set[str] = set()
             if bad_keys:
@@ -426,7 +438,8 @@ def sync_lists(root: Path, get, audited_all: list[audit.AuditResult], now_iso: s
                     rows = rows_from_attested_bodies(att["bodies"])
                     lists, rejected = build_lists(rows, rule_sites)
                 excluded = bad_keys
-            write_lists(root, lists, names, now_iso, signed_manifest=att, excluded_keys=excluded)
+            write_lists(root, lists, names, now_iso, signed_manifest=att, excluded_keys=excluded,
+                        rule_meta=rule_meta)
             if rejected:
                 print(f"rejected {rejected} list row(s) (unknown site, unaudited rule, bad count, or bad account key)")
             return
@@ -546,6 +559,8 @@ def make_entry(res: audit.AuditResult, local_path: str, prev: dict, today: str, 
         "inputs": list(m["inputs"]),
         "overhead": m["overhead"],
         "weight_milli": m["weight_milli"],
+        "classification": m.get("classification", "slop"),
+        "channel_tag": m.get("channel_tag", "slop-general"),
     }
     if res.tier == "official":  # holdout metrics are maintained by maintainers for official rules
         for k in METRIC_KEYS:

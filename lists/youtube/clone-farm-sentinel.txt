@@ -1,4 +1,6 @@
 ! SlopTrap Public Rule Matched Accounts (v2: account_key<TAB>count)
 ! Rule: clone-farm-sentinel
 ! Site: youtube
+! Classification: slop
+! Tag: slop-clone-farm
 ! Entries: 0

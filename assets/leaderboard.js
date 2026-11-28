@@ -83,6 +83,20 @@
     const oh = Math.max(1, Math.min(100, U.count(e.overhead)));
     const inputs = (Array.isArray(e.inputs) ? e.inputs : []).map(i =>
       el('span', { className: 'g-label g-label_theme_normal mono', text: U.str(i) }));
+    const tagLabels = {
+      'creative-content': 'Creative Content', 'creative-animation': 'AI Film & Animation', 'ai-assisted-creator': 'AI-Assisted Creator',
+      'slop-documentary': 'Slop Documentary', 'slop-info-channel': 'Slop Info Channel', 'slop-news-chyron': 'Slop News / Chyron',
+      'slop-hijacked-necro': 'Hijacked / Necro Account', 'slop-clone-farm': 'Clone Farm', 'slop-clip-mill': 'TTS Clip Mill',
+      'slop-image-mill': 'Synthetic Image Mill', 'slop-funnel-spam': 'Spam / Affiliate Funnel',
+      'slop-deceptive-fake': 'Deceptive Synthetic', 'slop-general': 'AI Slop',
+    };
+    const classification = e.classification === 'creative_ai' ? 'creative_ai' : 'slop';
+    const channelTag = U.str(e.channel_tag || (classification === 'creative_ai' ? 'creative-content' : 'slop-general'));
+    inputs.unshift(el('span', {
+      className: `g-label g-label_theme_${classification === 'creative_ai' ? 'positive' : 'danger'}`,
+      text: `${classification === 'creative_ai' ? 'AI' : 'Slop'} · ${tagLabels[channelTag] || channelTag}`,
+      title: `${classification} · ${channelTag}`,
+    }));
 
     const issue = U.githubHref(e.issue_url);
     const likes = String(U.count(e.likes));
@@ -140,7 +154,8 @@
     const q = filterQuery.trim().toLowerCase();
     const list = currentEntries().filter(e => {
       if (!q) return true;
-      const hay = [e.name, e.rule_id, e.description, e.author, U.tierOf(e), ...(Array.isArray(e.inputs) ? e.inputs : [])]
+      const hay = [e.name, e.rule_id, e.description, e.author, e.classification, e.channel_tag,
+        U.tierOf(e), ...(Array.isArray(e.inputs) ? e.inputs : [])]
         .map(U.str).join(' ').toLowerCase();
       return hay.includes(q);
     });

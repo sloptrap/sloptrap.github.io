@@ -5,7 +5,7 @@
   "registry_repo": "sloptrap/sloptrap.github.io",
   "rankings_endpoint": "https://sloptrap-worker.fablestre.am",
   "active_window_days": 30,
-  "generated_at": "2026-11-28T07:55:00Z",
+  "generated_at": "2026-11-28T18:03:11Z",
   "epoch_id": "2026-Q4",
   "corpus_count": 4,
   "corpus_hashes": [
@@ -22,11 +22,11 @@
       "verification_tier": "official",
       "verified": true,
       "name": "Affiliate Domain Funnel & Board Hijack Guard",
-      "description": "Detects automated ad-farm accounts funneling outbound pin links to a single domain with templated titles and dormant account pivots.",
-      "version": "1.0.1",
+      "description": "Detects automated ad-farm accounts funneling outbound links to one domain with templated titles.",
+      "version": "1.1.0",
       "author": "@sloptrap-core",
       "author_public_key": "0540a396ece8ab0f9670a25e03b02e345450a1373b86a7d400dcad79ceec5cc1",
-      "repo_url": "https://github.com/sloptrap/sloptrap",
+      "repo_url": "https://github.com/FableStream/sloptrap",
       "provenance": {
         "source_repo": "",
         "source_commit": "",
@@ -40,6 +40,8 @@
       ],
       "overhead": 2,
       "weight_milli": 1150,
+      "classification": "slop",
+      "channel_tag": "slop-funnel-spam",
       "band": "S",
       "coarse_f1": 1,
       "coarse_precision": 1,
@@ -53,8 +55,8 @@
       "downloads_version": 0,
       "composite_score": 79.3,
       "local_bundle_path": "bundles/pinterest-affiliate-domain-ring.strule",
-      "bundle_sha256": "197279c1c4041922cef31cd9e401e5d362234a1c1947c9d7d619b3fa1c77429f",
-      "updated_at": "2026-11-26"
+      "bundle_sha256": "e01ba72c4095e83c38e2c9a9b103baf2cd6e047d7ac6af7d587fa6715a1f1428",
+      "updated_at": "2026-11-28"
     },
     {
       "rank": 2,
@@ -63,11 +65,11 @@
       "verification_tier": "official",
       "verified": true,
       "name": "Synthetic Image & SEO Pin Mill",
-      "description": "Scores diffusion/upscaler image artifacts, batch aspect-ratio lock, keyword-stuffed pin descriptions, and automated daily pin floods.",
-      "version": "1.0.1",
+      "description": "Scores AI visual artifacts, batch aspect-ratio lock, keyword-stuffed descriptions, and daily pin floods.",
+      "version": "1.1.0",
       "author": "@sloptrap-core",
       "author_public_key": "0540a396ece8ab0f9670a25e03b02e345450a1373b86a7d400dcad79ceec5cc1",
-      "repo_url": "https://github.com/sloptrap/sloptrap",
+      "repo_url": "https://github.com/FableStream/sloptrap",
       "provenance": {
         "source_repo": "",
         "source_commit": "",
@@ -78,10 +80,13 @@
         "metadata",
         "upload_cadence",
         "transcript",
-        "thumbnails"
+        "thumbnails",
+        "audio_video_stats"
       ],
       "overhead": 4,
       "weight_milli": 1350,
+      "classification": "slop",
+      "channel_tag": "slop-image-mill",
       "band": "S",
       "coarse_f1": 1,
       "coarse_precision": 1,
@@ -95,8 +100,47 @@
       "downloads_version": 0,
       "composite_score": 79.1,
       "local_bundle_path": "bundles/pinterest-ai-pin-mill.strule",
-      "bundle_sha256": "ae9408f866c4237503d7295654743c90c37c0ce42a544df12350eb139ba16fec",
-      "updated_at": "2026-11-26"
+      "bundle_sha256": "089185eaa5c4dca2c13e876b86f020df73de1d77a139569769d1289d78ce8ceb",
+      "updated_at": "2026-11-28"
+    },
+    {
+      "rank": 3,
+      "rule_id": "creative-ai-storytelling",
+      "target_site": "*",
+      "verification_tier": "official",
+      "verified": true,
+      "name": "Creative AI Storytelling & Worldbuilding Tagger",
+      "description": "Identifies disclosed/transparent creative AI filmmakers, comedy worldbuilders, and animators who publish original non-templated episodes at a crafted human pace.",
+      "version": "1.0.0",
+      "author": "@sloptrap-core",
+      "author_public_key": "0540a396ece8ab0f9670a25e03b02e345450a1373b86a7d400dcad79ceec5cc1",
+      "repo_url": "https://github.com/FableStream/sloptrap",
+      "provenance": {
+        "source_repo": "",
+        "source_commit": "",
+        "build_run_url": "",
+        "submission_id": ""
+      },
+      "inputs": [
+        "metadata",
+        "upload_cadence",
+        "transcript",
+        "thumbnails",
+        "audio_video_stats"
+      ],
+      "overhead": 2,
+      "weight_milli": 1200,
+      "classification": "creative_ai",
+      "channel_tag": "creative-content",
+      "likes": 0,
+      "active_installs": 0,
+      "all_time_installs": 0,
+      "downloads_total": 0,
+      "downloads_version": 0,
+      "composite_score": 13.9,
+      "local_bundle_path": "bundles/creative-ai-storytelling.strule",
+      "bundle_sha256": "635a80f446924de04a627528437dd29d3983a47da1377b37eb02a9a960f89cc4",
+      "updated_at": "2026-11-28"
     }
   ]
 }

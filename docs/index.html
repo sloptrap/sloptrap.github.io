@@ -32,7 +32,7 @@
       </div>
       <div class="g-header-actions">
         <button id="theme-toggle" class="g-btn g-btn_view_flat g-btn_icon" type="button" aria-label="Toggle theme"></button>
-        <a class="g-btn g-btn_view_outlined g-btn_size_s" href="https://github.com/sloptrap/sloptrap" target="_blank" rel="noopener">
+        <a class="g-btn g-btn_view_outlined g-btn_size_s" href="https://github.com/FableStream/sloptrap" target="_blank" rel="noopener">
           GitHub
           <svg class="icon-14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 11L11 5M6 5h5v5"/></svg>
         </a>
@@ -59,7 +59,7 @@
         <section class="docs-section" id="studio">
           <h1>1. Rule Definition Studio (<code>sloptrap</code>)</h1>
           <p>
-            The core <a href="https://github.com/sloptrap/sloptrap" target="_blank" rel="noopener"><code>sloptrap/sloptrap</code></a> repository provides the <strong>Svelte 5 + Tauri v2 Rule Definition Studio</strong>, which runs either directly in the browser (<a href="../studio/">launch hosted Studio</a>) or as a native desktop app:
+            The core <a href="https://github.com/FableStream/sloptrap" target="_blank" rel="noopener"><code>FableStream/sloptrap</code></a> repository provides the <strong>Svelte 5 + Tauri v2 Rule Definition Studio</strong>, which runs either directly in the browser (<a href="../studio/">launch hosted Studio</a>) or as a native desktop app:
           </p>
           <ul>
             <li><strong>Known Slop &amp; Known-Good Channel Sets (<code>AiSList</code> &amp; Extension):</strong> Load specified lists of Known Slop and Known Good channels/accounts (import channels flagged directly in <code>sloptrap-extension</code>, load YouTube slop channels from <a href="https://github.com/Override92/AiSList" target="_blank" rel="noopener"><code>Override92/AiSList</code></a>, or paste <code>@handles</code>/URLs) to measure live rule effectiveness (<code>Recall</code>, <code>Known Good Safe %</code>, <code>False Positives</code>, and <code>F1</code>) against their content.</li>
@@ -107,7 +107,7 @@ await engine.loadBundles([myStaticStruleJson]);
 const fp = normalizeAccountSnapshot("pinterest", { handle: "@decor-mill-z4k", recentUploadsPerDay: 12 });
 const verdict = await engine.evaluate(fp); // { score, action: "allow" | "warn" | "block" }</code></pre>
 
-          <pre><code>// Go — pkg/sloptrap (in sloptrap/sloptrap-tube-tui)
+          <pre><code>// Go — pkg/sloptrap (in FableStream/sloptrap-tube-tui)
 eng, err := sloptrap.NewStaticEngine(sloptrap.StaticConfig{
     Site:            sloptrap.SitePinterest,
     BuiltinVerified: true, // or BundlesFS: embeddedRulesFS / BundlesDir: "./rules"
@@ -150,11 +150,11 @@ registerSiteAdapter({
           <h2>4. Example Applications</h2>
           <ul>
             <li>
-              <strong><a href="https://github.com/sloptrap/sloptrap-tube-tui" target="_blank" rel="noopener"><code>sloptrap/sloptrap-tube-tui</code></a> (Example YouTube Forensic TUI &amp; Server):</strong>
+              <strong><a href="https://github.com/FableStream/sloptrap-tube-tui" target="_blank" rel="noopener"><code>FableStream/sloptrap-tube-tui</code></a> (Example YouTube Forensic TUI &amp; Server):</strong>
               Reference Go terminal application combining YouTube upload-history dormancy analysis, <code>json3</code> caption prosody, optional 45-second <code>ffmpeg</code> EBU R128 dead-air probing, autonomous crawling, and local HTTP verification APIs with SlopTrap's <code>.strule</code> WebAssembly runtime.
             </li>
             <li>
-              <strong><a href="https://github.com/sloptrap/sloptrap-extension" target="_blank" rel="noopener"><code>sloptrap/sloptrap-extension</code></a> (Chromium &amp; Firefox Extension):</strong>
+              <strong><a href="https://github.com/FableStream/sloptrap-extension" target="_blank" rel="noopener"><code>FableStream/sloptrap-extension</code></a> (Chromium &amp; Firefox Extension):</strong>
               Single-monorepo Manifest V3 extension filtering YouTube, TikTok, and Pinterest feeds in real time using static and registry-synced <strong>Official</strong> <code>.strule</code> bundles (plus <strong>Community</strong> bundles when the user enables them).
             </li>
           </ul>

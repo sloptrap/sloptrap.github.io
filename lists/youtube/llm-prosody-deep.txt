@@ -1,4 +1,6 @@
 ! SlopTrap Public Rule Matched Accounts (v2: account_key<TAB>count)
 ! Rule: llm-prosody-deep
 ! Site: youtube
+! Classification: slop
+! Tag: slop-info-channel
 ! Entries: 0

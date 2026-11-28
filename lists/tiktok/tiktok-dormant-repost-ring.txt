@@ -1,4 +1,6 @@
 ! SlopTrap Public Rule Matched Accounts (v2: account_key<TAB>count)
 ! Rule: tiktok-dormant-repost-ring
 ! Site: tiktok
+! Classification: slop
+! Tag: slop-hijacked-necro
 ! Entries: 0

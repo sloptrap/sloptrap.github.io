@@ -35,6 +35,30 @@ export const LIST_SIGNING_KEYS = Object.freeze([
   "303607bb2fc5bdebbb50021d3480d59da127d5c40122785ff4b6e228be54b3e1",
 ]);
 export const COMMUNITY_PREFIX = "community-";
+export const CHANNEL_CLASSIFICATIONS = Object.freeze(["clean", "creative_ai", "slop"]);
+export const RULE_CLASSIFICATIONS = Object.freeze(["slop", "creative_ai"]);
+export const CHANNEL_TAG_CATALOG = Object.freeze([
+  ["creative-content", "creative_ai", "Creative Content", "AI · Creative Content"],
+  ["creative-animation", "creative_ai", "AI Film & Animation", "AI · Film & Art"],
+  ["ai-assisted-creator", "creative_ai", "AI-Assisted Creator", "AI · Assisted"],
+  ["slop-documentary", "slop", "Slop Documentary", "Slop · Documentary"],
+  ["slop-info-channel", "slop", "Slop Info Channel", "Slop · Info Channel"],
+  ["slop-news-chyron", "slop", "Slop News / Chyron", "Slop · News Chyron"],
+  ["slop-hijacked-necro", "slop", "Hijacked / Necro Account", "Slop · Necro Hijack"],
+  ["slop-clone-farm", "slop", "Clone Farm", "Slop · Clone Farm"],
+  ["slop-clip-mill", "slop", "TTS Clip Mill", "Slop · Clip Mill"],
+  ["slop-image-mill", "slop", "Synthetic Image Mill", "Slop · Image Mill"],
+  ["slop-funnel-spam", "slop", "Spam / Affiliate Funnel", "Slop · Funnel Spam"],
+  ["slop-deceptive-fake", "slop", "Deceptive Synthetic", "Slop · Deceptive AI"],
+  ["slop-general", "slop", "AI Slop", "Slop · AI Mill"],
+  ["human-creator", "clean", "Human Creator", "Human Creator"],
+].map(([id, classification, label, badgeLabel]) => Object.freeze({ id, classification, label, badgeLabel })));
+const CHANNEL_TAGS = new Map(CHANNEL_TAG_CATALOG.map(t => [t.id, t]));
+export function getChannelTagMeta(tag, classification = "slop") {
+  const meta = CHANNEL_TAGS.get(tag);
+  if (meta?.classification === classification) return meta;
+  return CHANNEL_TAGS.get(classification === "creative_ai" ? "creative-content" : classification === "clean" ? "human-creator" : "slop-general");
+}
 
 export const MAX_BUNDLE_BYTES = 512 * 1024;
 export const MAX_WASM_BYTES = 256 * 1024;
@@ -87,6 +111,7 @@ export const INPUT_KINDS = Object.freeze(["metadata", "upload_cadence", "transcr
 export const TARGET_SITES = Object.freeze(["youtube", "tiktok", "pinterest", "*"]);
 const MANIFEST_KEYS = ["rule_id", "name", "version", "author", "author_public_key", "target_site", "description",
   "repo_url", "interpreter", "inputs", "weight_milli", "overhead", "provenance"];
+const OPTIONAL_MANIFEST_KEYS = new Set(["classification", "channel_tag"]);
 const PROVENANCE_KEYS = ["source_repo", "source_commit", "build_run_url", "submission_id"];
 
 function sameKeySet(obj, keys) {
@@ -131,9 +156,14 @@ function checkMatch(v, field, rx, allowEmpty = false) {
 
 /** Throws BundleError unless `m` is a valid v2 manifest. Returns `m`. */
 export function validateManifest(m) {
-  if (!isPlainObject(m) || !sameKeySet(m, MANIFEST_KEYS)) {
-    throw new BundleError(`manifest: keys must be exactly ${[...MANIFEST_KEYS].sort().join(", ")}`);
+  if (!isPlainObject(m) || MANIFEST_KEYS.some(k => !hasOwn(m, k)) ||
+      Object.keys(m).some(k => !MANIFEST_KEYS.includes(k) && !OPTIONAL_MANIFEST_KEYS.has(k))) {
+    throw new BundleError("manifest: invalid keys");
   }
+  if (m.classification !== undefined && !RULE_CLASSIFICATIONS.includes(m.classification))
+    throw new BundleError("manifest.classification: invalid");
+  if (m.channel_tag !== undefined && getChannelTagMeta(m.channel_tag, m.classification || "slop").id !== m.channel_tag)
+    throw new BundleError("manifest.channel_tag: invalid for classification");
   checkMatch(m.rule_id, "rule_id", RULE_ID_RE);
   cleanStr(m.name, "name", 1, 80);
   checkMatch(m.version, "version", RE.version);
@@ -875,7 +905,8 @@ const FP_SCHEMA = [
     ["keyword_stuffing_ratio", F], ["mean_wpm", F], ["cross_video_wpm_stddev", F], ["intra_video_wpm_cv", F],
     ["pause_cv", F], ["earliest_has_speech", B]]],
   ["thumbnails", [["title_skeleton_reuse", F], ["raw_camera_earliest_title", B], ["synthetic_image_ratio", F],
-    ["aspect_uniformity", F], ["repost_watermark_ratio", F]]],
+    ["aspect_uniformity", F], ["repost_watermark_ratio", F], ["cable_news_chyron_ratio", F],
+    ["visual_clone_similarity", F], ["era_visual_pivot", F]]],
   ["audio_video_stats", [["earliest_vertical", B], ["earliest_max_dim", I], ["recent_widescreen_hd_ratio", F],
     ["altered_content_flag", B], ["dead_air_floor", B], ["loudness_range_lu", F], ["silence_cv", F]]],
   ["sample_text", S],
@@ -1037,6 +1068,26 @@ export function parseAccountListCounts(txt) {
     if (map.size >= MAX_LIST_ENTRIES) break;
   }
   return map;
+}
+
+/** Read signed list rows with their channel classification and type tag. */
+export function parseAccountListEntries(txt) {
+  const counts = parseAccountListCounts(txt);
+  const entries = new Map();
+  for (const [accountKey, count] of counts) {
+    entries.set(accountKey, { count, classification: "slop", channel_tag: "slop-general" });
+  }
+  for (const rawLine of String(txt ?? "").split(/\r?\n/)) {
+    const parts = rawLine.trim().split(/\s+/);
+    if (parts.length < 4) continue;
+    const key = normalizeAccountKey(parts[0]);
+    const entry = entries.get(key);
+    if (!entry || !CHANNEL_CLASSIFICATIONS.includes(parts[2])) continue;
+    if (getChannelTagMeta(parts[3], parts[2]).id !== parts[3]) continue;
+    entry.classification = parts[2];
+    entry.channel_tag = parts[3];
+  }
+  return entries;
 }
 
 const LIST_MANIFEST_SITES = new Set(["youtube", "tiktok", "pinterest"]);
@@ -1248,6 +1299,9 @@ export function normalizeAccountSnapshot(site, snap = {}) {
       synthetic_image_ratio: posts.length > 0 ? synthHits / n : sn.syntheticImageRatio,
       aspect_uniformity: sn.aspectUniformity,
       repost_watermark_ratio: posts.length > 0 ? watermarkHits / n : sn.repostWatermarkRatio,
+      cable_news_chyron_ratio: sn.cableNewsChyronRatio,
+      visual_clone_similarity: sn.visualCloneSimilarity,
+      era_visual_pivot: sn.eraVisualPivot,
     },
     audio_video_stats: {
       earliest_vertical: sn.earliestVertical === true,
@@ -1362,6 +1416,18 @@ export class SlopTrapStaticEngine {
     this.listBlockThreshold = clampListThreshold(options.listBlockThreshold, DEFAULT_LIST_BLOCK_THRESHOLD);
     this.listSaturationCap = Math.max(1, clampListThreshold(options.listSaturationCap, DEFAULT_LIST_SATURATION_CAP));
     let keyring = PINNED_KEYRING;
+    // @sloptrap-test-hook-begin (stripped from extension builds by scripts/build.mjs)
+    if (options.testKeys !== undefined) {
+      if (globalThis.__SLOPTRAP_TEST__ !== true) throw new Error("testKeys is only accepted in test builds");
+      const tk = options.testKeys || {};
+      keyring = Object.freeze({
+        official: new Set([...OFFICIAL_KEYS, ...(tk.official || [])]),
+        community: new Set([...COMMUNITY_KEYS, ...(tk.community || [])]),
+        listSigning: new Set([...LIST_SIGNING_KEYS, ...(tk.listSigning || [])]),
+        test: true,
+      });
+    }
+    // @sloptrap-test-hook-end
     if (options.testKeys !== undefined && keyring === PINNED_KEYRING) {
       throw new Error("testKeys is only accepted in test builds");
     }
@@ -1538,6 +1604,7 @@ export class SlopTrapStaticEngine {
     const active = [...this.rules.values()].filter(r => this._isActive(r));
 
     let listVerdict = null;
+    const creativeListHits = [];
     let allListRulesSaturated = true;
     if (this.usePreMatchedLists && accountKey) {
       const blockHits = [];
@@ -1547,6 +1614,10 @@ export class SlopTrapStaticEngine {
       for (const r of active) {
         if (r.tier !== "official" && r.tier !== "community") continue;
         const cnt = this.ruleMatchedCounts.get(r.manifest.rule_id)?.get(accountKey) || 0;
+        if (r.manifest.classification === "creative_ai") {
+          if (this.listWarnThreshold > 0 && cnt >= this.listWarnThreshold) creativeListHits.push(r);
+          continue;
+        }
         if (cnt < this.listSaturationCap) allListRulesSaturated = false;
         if (cnt > maxCount) maxCount = cnt;
         if (this.listBlockThreshold > 0 && cnt >= this.listBlockThreshold) {
@@ -1562,6 +1633,8 @@ export class SlopTrapStaticEngine {
           site: this.site,
           score: LIST_FAST_PATH_SCORE,
           action: "block",
+          classification: "slop",
+          channel_tag: getChannelTagMeta(active.find(r => r.manifest.rule_id === blockHits[0])?.manifest.channel_tag, "slop").id,
           fast_path_list: true,
           list_forced: true,
           max_list_count: maxCount,
@@ -1578,6 +1651,8 @@ export class SlopTrapStaticEngine {
           site: this.site,
           score: LIST_FAST_PATH_WARN_SCORE,
           action: "warn",
+          classification: "slop",
+          channel_tag: getChannelTagMeta(active.find(r => r.manifest.rule_id === warnHits[0])?.manifest.channel_tag, "slop").id,
           fast_path_list: true,
           list_forced: true,
           max_list_count: maxCount,
@@ -1604,6 +1679,10 @@ export class SlopTrapStaticEngine {
     let totalMicros = 0;
     let verifiedRules = 0;
     let verifiedBlockingRules = 0;
+    let creativeSW = 0;
+    let creativeW = 0;
+    let topSlop = null;
+    let topCreative = creativeListHits[0] ? { score: LIST_FAST_PATH_SCORE, tag: creativeListHits[0].manifest.channel_tag } : null;
 
     for (const r of active) {
       const m = r.manifest;
@@ -1618,19 +1697,27 @@ export class SlopTrapStaticEngine {
       const execMicros = Math.round((nowMs() - t0) * 1000);
       totalMicros += execMicros;
       const w = (m.weight_milli / 1000) * res.confidence;
-      sumSW += res.score * w;
-      sumW += w;
+      if (m.classification === "creative_ai") {
+        creativeSW += res.score * w;
+        creativeW += w;
+        if (!topCreative || res.score > topCreative.score) topCreative = { score: res.score, tag: m.channel_tag };
+      } else {
+        sumSW += res.score * w;
+        sumW += w;
+        if (!topSlop || res.score > topSlop.score) topSlop = { score: res.score, tag: m.channel_tag };
+      }
       if (r.verified) {
         verifiedRules++;
-        if (res.score >= this.blockThreshold) verifiedBlockingRules++;
+        if (m.classification !== "creative_ai" && res.score >= this.blockThreshold) verifiedBlockingRules++;
       }
       outputs.push({
         rule_id: m.rule_id, rule_name: m.name, version: m.version, target_site: m.target_site,
         tier: r.tier, verified: r.verified, score: res.score, confidence: res.confidence,
+        classification: m.classification || "slop", channel_tag: getChannelTagMeta(m.channel_tag, m.classification || "slop").id,
         weight: m.weight_milli / 1000, weight_milli: m.weight_milli, overhead: m.overhead,
         reason: res.reason, exec_micros: execMicros,
       });
-      if (accountKey && (r.tier === "official" || r.tier === "community") && res.score >= this.warnThreshold) {
+      if (accountKey && (r.tier === "official" || r.tier === "community") && res.score >= this.blockThreshold) {
         const existingCnt = this.ruleMatchedCounts.get(m.rule_id)?.get(accountKey) || 0;
         if (existingCnt < this.listSaturationCap) {
           newly.push({
@@ -1638,7 +1725,9 @@ export class SlopTrapStaticEngine {
             rule_id: m.rule_id,
             rule_version: m.version,
             account_key: accountKey,
-            action: res.score >= this.blockThreshold ? "block" : "warn",
+            action: m.classification === "creative_ai" ? "tag" : "block",
+            classification: m.classification || "slop",
+            channel_tag: getChannelTagMeta(m.channel_tag, m.classification || "slop").id,
           });
         }
       }
@@ -1647,6 +1736,7 @@ export class SlopTrapStaticEngine {
     let score = sumW > 0 ? Math.floor(sumSW / sumW + 0.5) : 0;
     if (!(score >= 0)) score = 0;
     if (score > 100) score = 100;
+    const creativeScore = creativeW > 0 ? Math.min(100, Math.max(0, Math.floor(creativeSW / creativeW + 0.5))) : 0;
     let action = score >= this.blockThreshold ? "block" : score >= this.warnThreshold ? "warn" : "allow";
     let listForced = false;
     if (listVerdict) {
@@ -1660,10 +1750,16 @@ export class SlopTrapStaticEngine {
         listForced = true;
       }
     }
+    const slopRuleTriggered = outputs.some(o => o.classification !== "creative_ai" && o.score >= this.warnThreshold);
+    const classification = action !== "allow" ? "slop" :
+      (!slopRuleTriggered && (creativeListHits.length > 0 || creativeScore >= this.blockThreshold) ? "creative_ai" : "clean");
+    const channelTag = classification === "slop" ? getChannelTagMeta(topSlop?.tag || listVerdict?.channel_tag, "slop").id :
+      getChannelTagMeta(topCreative?.tag, classification).id;
     return {
       site: this.site, score, action, fast_path_list: false, list_forced: listForced,
+      classification, channel_tag: channelTag, creative_score: creativeScore,
       ...(listVerdict ? { matched_rule_ids: listVerdict.matched_rule_ids, max_list_count: listVerdict.max_list_count } : {}),
-      newly_matched_rules: newly,
+      newly_matched_rules: newly.filter(item => item.classification !== "creative_ai" || classification === "creative_ai"),
       verified_rules: verifiedRules, verified_blocking_rules: verifiedBlockingRules,
       outputs, errors, total_micros: totalMicros,
     };

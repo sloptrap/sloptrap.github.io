@@ -1,4 +1,6 @@
 ! SlopTrap Public Rule Matched Accounts (v2: account_key<TAB>count)
 ! Rule: necro-hijack-guard
 ! Site: youtube
+! Classification: slop
+! Tag: slop-hijacked-necro
 ! Entries: 0

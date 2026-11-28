@@ -1,4 +1,6 @@
 ! SlopTrap Public Rule Matched Accounts (v2: account_key<TAB>count)
 ! Rule: pinterest-affiliate-domain-ring
 ! Site: pinterest
+! Classification: slop
+! Tag: slop-funnel-spam
 ! Entries: 0

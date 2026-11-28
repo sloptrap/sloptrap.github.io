@@ -1,0 +1,6 @@
+! SlopTrap Public Rule Matched Accounts (v2: account_key<TAB>count)
+! Rule: creative-ai-storytelling
+! Site: youtube
+! Classification: creative_ai
+! Tag: creative-content
+! Entries: 0
